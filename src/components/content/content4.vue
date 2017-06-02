@@ -107,6 +107,10 @@
           <el-form-item label="方法主体" prop="methodCode">
             <el-input type="textarea" v-model="methodForm.methodCode" placeholder="SQL代码"></el-input>
           </el-form-item>
+          <el-form-item label="上传审计底稿模板">
+            <input type="file" accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+            <small>只能上传word 2007及以上版本</small>
+          </el-form-item>
           <el-form-item label="参数配置" prop="methodCode">
           </el-form-item>
           <div class="params-setting">
@@ -285,9 +289,13 @@ export default {
             params: []
           }
         } else if (this.currentState == 'update') {
-          this.currentModel.params.forEach(param => {
-            param.isNull = param.isNull == 1
-          })
+          if(this.currentModel.params && this.currentModel.params.length){
+            console.log(this.currentModel.params)
+            this.currentModel.params.forEach(param => {
+              param.isNull = param.isNull == 1
+            })
+          }
+          
           this.methodForm = {
             id: this.currentModel.id,
             title: this.currentModel.title || null,
@@ -433,9 +441,17 @@ export default {
           newMethod.params = JSON.stringify(newMethod.params)
           if (this.methodForm.id === undefined) {
             newMethod.itemId = this.$store.getters.currentId
-            this.$http.post(urlStore.addAuditMethodModel, newMethod, {
-              emulateJSON: true
-            }).then(res => {
+            /* 增加文件上传，将发送的数据改为FormData */
+            let formData = new FormData()
+            Object.keys(newMethod).forEach((item) => {
+              formData.append(item, newMethod[item])
+            })
+            let fileInput = this.$el.querySelector('input[type="file"]')
+            if(fileInput.files.length){
+              formData.append('manuscript', fileInput.files[0])
+            }
+            /* end */
+            this.$http.post(urlStore.addAuditMethodModel, formData).then(res => {
               if (res.ok && res.body.status == 'success') {
                 newMethod.id = res.body.id
                 this.$store.commit('insertMethod', newMethod)
@@ -448,9 +464,17 @@ export default {
           } else {
             newMethod.itemId = this.$store.getters.parentId
             newMethod.id = this.methodForm.id
-            this.$http.post(urlStore.updateAuditMethodModel, newMethod, {
-              emulateJSON: true
-            }).then(res => {
+            /* 增加文件上传，将发送的数据改为FormData */
+            let formData = new FormData()
+            Object.keys(newMethod).forEach((item) => {
+              formData.append(item, newMethod[item])
+            })
+            let fileInput = this.$el.querySelector('input[type="file"]')
+            if(fileInput.files.length){
+              formData.append('manuscript', fileInput.files[0])
+            }
+            /* end */
+            this.$http.post(urlStore.updateAuditMethodModel, formData).then(res => {
               if (res.ok && res.body.status == 'success') {
                 newMethod.id = res.body.id
                 this.$store.commit('updateMethod', newMethod)
@@ -487,6 +511,11 @@ export default {
   }
   .current-title {
     color: #1abc9c;
+  }
+  small {
+    display: block;
+    line-height: 1;
+    color: #888;
   }
   .params-setting {
     padding-left: 50px;
