@@ -1,4 +1,4 @@
-const devMode = true
+const devMode = false
 const ip = devMode ? 'http://localhost:3000/' : ''
 
 const urls = {

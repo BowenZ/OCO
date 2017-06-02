@@ -467,7 +467,9 @@ export default {
             /* 增加文件上传，将发送的数据改为FormData */
             let formData = new FormData()
             Object.keys(newMethod).forEach((item) => {
-              formData.append(item, newMethod[item])
+              if(newMethod[item]){
+                formData.append(item, newMethod[item])
+              }
             })
             let fileInput = this.$el.querySelector('input[type="file"]')
             if(fileInput.files.length){
