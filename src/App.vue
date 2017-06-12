@@ -84,6 +84,9 @@ body.put-top {
 }
 
 body.theme-default {
+  .el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
+    background-color: rgb(197, 200, 206);
+  }
   .el-button--primary {
     background-color: #20a0ff;
     border-color: #20a0ff;
@@ -209,11 +212,11 @@ body.theme-default {
     background-color: #fbfdff;
     border-bottom: 1px solid #dfe6ec;
   }
-  .el-loading-spinner .el-loading-text{
+  .el-loading-spinner .el-loading-text {
     color: #20a0ff;
   }
-  .el-loading-spinner .path{
-        stroke: #20a0ff;
+  .el-loading-spinner .path {
+    stroke: #20a0ff;
   }
   .main-container {
     background-color: #f4f6f9;
@@ -389,6 +392,9 @@ body.theme-blue {
   .drawer6 .el-tree.el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
     background-color: #0589bf;
   }
+  .el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
+    background-color: rgb(5, 137, 191);
+  }
 }
 
 body.theme-dark {
@@ -473,6 +479,9 @@ body.theme-dark {
   }
   .drawer6 .el-tree.el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
     background-color: #2b3245;
+  }
+  .el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
+    background-color: rgb(45, 50, 64);
   }
 }
 

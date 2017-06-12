@@ -68,26 +68,67 @@ export default {
       popVisiable: false
     }
   },
-  methods: {
-    renderContent(h, {
-      node,
-      data,
-      store
-    }) {
-      if ($.trim(data.description)) {
-        return (
-          <el-popover
-            placement="right"
-            // title="标题"
-            width="600"
-            trigger="hover">
-            <span slot="reference">{node.label}</span>
-            <p domPropsInnerHTML={data.description}></p>
-          </el-popover>)
+  mounted() {
+    // this.$store.dispatch('getMethodTree')
+    this.$http.get(urlStore.findList, {
+      params: {
+        userId: this.$store.getters.user.userId
+      }
+    }).then(res => {
+      if (!res.ok || res.body.status != 'success') {
+        Message({
+          message: '无法获取项目列表，请稍后再试',
+          type: 'warning',
+          duration: 1500
+        })
+        return
+      }
+      let data = res.body
+      if (data.isCanExecute == 0) {
+        this.$store.commit('setAuditStatus', true)
+        this.$store.commit('setContinueAudit', true)
+      }
+      this.projectList = res.body.jobs
+    })
+  },
+  computed: {
+    methodTree: function() {
+      return this.$store.getters.methodTree
+    },
+    selectedId: function() {
+      return this.$store.getters.selectedId
+    },
+    auditing: function() {
+      return this.$store.getters.auditing
+    },
+    continueAudit: function() {
+      return this.$store.getters.continueAudit
+    }
+  },
+  watch: {
+    auditing: function(newVal) {
+      if (newVal) {
+        $(this.$el).find('.el-tree .el-checkbox__input').addClass('is-disabled').find('input').attr('disabled', 'disabled')
       } else {
-        return (<span>{node.label}</span>)
+        $(this.$el).find('.el-tree .el-checkbox__input').removeClass('is-disabled').find('input').removeAttr('disabled')
       }
     },
+    methodTree: function(tree) {
+      let self = this
+      setTimeout(function() {
+        self.checkChange()
+      }, 500)
+    },
+    continueAudit: function(newVal) {
+      if (newVal) {
+        let self = this
+        setTimeout(function() {
+          $(self.$el).find('.el-tree .el-checkbox__input').addClass('is-disabled').find('input').attr('disabled', 'disabled')
+        }, 10)
+      }
+    }
+  },
+  methods: {
     loadMethodTree: function(index, cb) {
       if (this.projectList[index]) {
         this.$http.get(urlStore.getDetail, {
@@ -283,65 +324,33 @@ export default {
     },
     showNewProject: function() {
       // console.log($(this.$el).find('.new-input'))
-    }
-  },
-  mounted() {
-    // this.$store.dispatch('getMethodTree')
-    this.$http.get(urlStore.findList, {
-      params: {
-        userId: this.$store.getters.user.userId
-      }
-    }).then(res => {
-      if (!res.ok || res.body.status != 'success') {
-        Message({
-          message: '无法获取项目列表，请稍后再试',
-          type: 'warning',
-          duration: 1500
-        })
-        return
-      }
-      let data = res.body
-      if (data.isCanExecute == 0) {
-        this.$store.commit('setAuditStatus', true)
-        this.$store.commit('setContinueAudit', true)
-      }
-      this.projectList = res.body.jobs
-    })
-  },
-  computed: {
-    methodTree: function() {
-      return this.$store.getters.methodTree
     },
-    selectedId: function() {
-      return this.$store.getters.selectedId
+    refresh: function(){
+      this.projectList.forEach(item => {
+        item.selectedId = null
+        item.methodTree = null
+        $(this.$el).find('.project-item .active').removeClass('active')
+      })
+      $(this.$el).find('.project-item .tree-content').hide()
+      this.$forceUpdate()
     },
-    auditing: function() {
-      return this.$store.getters.auditing
-    },
-    continueAudit: function() {
-      return this.$store.getters.continueAudit
-    }
-  },
-  watch: {
-    auditing: function(newVal) {
-      if (newVal) {
-        $(this.$el).find('.el-tree .el-checkbox__input').addClass('is-disabled').find('input').attr('disabled', 'disabled')
+    renderContent(h, {
+      node,
+      data,
+      store
+    }) {
+      if ($.trim(data.description)) {
+        return (
+          <el-popover
+            placement="right"
+            // title="标题"
+            width="600"
+            trigger="hover">
+            <span slot="reference">{node.label}</span>
+            <p domPropsInnerHTML={data.description}></p>
+          </el-popover>)
       } else {
-        $(this.$el).find('.el-tree .el-checkbox__input').removeClass('is-disabled').find('input').removeAttr('disabled')
-      }
-    },
-    methodTree: function(tree) {
-      let self = this
-      setTimeout(function() {
-        self.checkChange()
-      }, 500)
-    },
-    continueAudit: function(newVal) {
-      if (newVal) {
-        let self = this
-        setTimeout(function() {
-          $(self.$el).find('.el-tree .el-checkbox__input').addClass('is-disabled').find('input').attr('disabled', 'disabled')
-        }, 10)
+        return (<span>{node.label}</span>)
       }
     }
   }

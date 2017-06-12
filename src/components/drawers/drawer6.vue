@@ -62,7 +62,6 @@ export default {
   },
 
   mounted() {
-    console.log('=====mounted====')
     this.$drawerPane = $(this.$el).parents('.drawer-pane')[0]
   },
 

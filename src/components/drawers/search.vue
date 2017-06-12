@@ -8,42 +8,12 @@
   </div>
 </template>
 <script>
-import {
-  Message
-} from 'element-ui'
-import urlStore from '../../api/urlStore.js'
 export default {
-  data: function() {
-    return {
-
-    }
-  },
   props: ['title'],
   methods: {
     submit() {
-      this.$emit('changeLoading')
       let searchVal = event.target.value
-      this.$http.get(urlStore.findMethods + '?methodName=' + searchVal).then(res => {
-        this.$emit('changeLoading')
-        if (res.body.status == 'success') {
-          this.$store.commit('setSingleMethods', res.body.data)
-        } else {
-          Message({
-            message: '未搜索出正确结果，' + res.body.msg,
-            type: 'warning',
-            duration: 2000,
-            showClose: true
-          })
-        }
-      }, res => {
-        this.$emit('changeLoading')
-        Message({
-          message: '搜索超时',
-          type: 'warning',
-          duration: 2000,
-          showClose: true
-        })
-      })
+      this.$emit('message', searchVal)
     }
   }
 }

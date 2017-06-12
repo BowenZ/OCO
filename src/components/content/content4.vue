@@ -290,7 +290,6 @@ export default {
           }
         } else if (this.currentState == 'update') {
           if(this.currentModel.params && this.currentModel.params.length){
-            console.log(this.currentModel.params)
             this.currentModel.params.forEach(param => {
               param.isNull = param.isNull == 1
             })
@@ -429,7 +428,7 @@ export default {
             innerDataSource: this.methodForm.innerDataSource,
             externalDataSource: this.methodForm.externalDataSource,
             methodCode: this.methodForm.methodCode,
-            params: this.methodForm.params.slice(0),
+            params: JSON.parse(JSON.stringify(this.methodForm.params)),
             methodType: this.$store.getters.methodType
           }
           newMethod.params.forEach((param, index) => {
@@ -483,6 +482,15 @@ export default {
                 Message({
                   message: '修改成功',
                   type: 'success'
+                })
+                this.$store.commit('setSelectedMethods', [])
+                this.$store.commit('refreshSelectedParams')
+                $('.drawer1').find('.title-copy.active').removeClass('active')
+                let drawers = this.$parent.$parent.$children[1].$children[0].$children
+                drawers.forEach(drawer => {
+                  if(typeof drawer.refresh == 'function'){
+                    drawer.refresh()
+                  }
                 })
               }
             })

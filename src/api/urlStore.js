@@ -1,4 +1,7 @@
-const devMode = false
+let devMode = true
+if(process.env.NODE_ENV === 'production'){
+  devMode = false
+}
 const ip = devMode ? 'http://localhost:3000/' : ''
 
 const urls = {

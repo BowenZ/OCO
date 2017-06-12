@@ -49,7 +49,7 @@ const mutations = {
   },
   setSelectedMethod(state, method) {
     state.selectedMethod = method
-    state.singleParams = method.params
+    state.singleParams = method ? method.params : null
   },
   setSingleExecuteStatus(state, status) {
     state.singleExecuteStatus = status
