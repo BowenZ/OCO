@@ -49,6 +49,7 @@ const mutations = {
     state.currentLevel = val
   },
   setCurrentModel(state, val) {
+    console.log('+++++', val)
     state.currentModel = val
   },
   setCurrentState(state, val) {
@@ -119,7 +120,7 @@ const mutations = {
     state.currentNode.data.innerDataSource = method.innerDataSource
     state.currentNode.data.externalDataSource = method.externalDataSource
     state.currentNode.data.methodCode = method.methodCode
-    state.currentNode.data.params = method.params
+    state.currentNode.data.params = JSON.parse(method.params)
   }
 }
 

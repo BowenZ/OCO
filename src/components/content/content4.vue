@@ -114,31 +114,53 @@
           <el-form-item label="参数配置" prop="methodCode">
           </el-form-item>
           <div class="params-setting">
+          {{methodForm.params}}
             <div class="param-container" v-for="(param, index) in methodForm.params">
-              <el-form-item>
-                <a href="#" @click.prevent="removeParam(index)"><i class="el-icon-close"></i></a>
-              </el-form-item>
-              <el-form-item label="参数名" prop="name">
-                <el-input v-model="methodForm.params[index].name"></el-input>
-              </el-form-item>
-              <el-form-item label="类型">
-                <el-select v-model="methodForm.params[index].type" placeholder="请选择活动区域">
-                  <el-option label="整数" value="int"></el-option>
-                  <el-option label="小数" value="float"></el-option>
-                  <el-option label="字符串" value="string"></el-option>
-                  <el-option label="布尔值" value="boolean"></el-option>
-                  <el-option label="日期" value="date"></el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item label="允许为空">
-                <el-switch on-text="是" off-text="否" v-model="methodForm.params[index].isNull"></el-switch>
-              </el-form-item>
-              <el-form-item label="默认值" prop="value">
-                <el-date-picker v-if="methodForm.params[index].type == 'date'" format="yyyy-MM-dd" type="date" placeholder="选择日期" v-model="methodForm.params[index].value"></el-date-picker>
-                <el-input v-if="methodForm.params[index].type == 'string'" v-model="methodForm.params[index].value"></el-input>
-                <el-input v-if="methodForm.params[index].type == 'int' || methodForm.params[index].type == 'float'" type="number" v-model.number="methodForm.params[index].value"></el-input>
-                <el-switch v-if="methodForm.params[index].type == 'boolean'" on-text="是" off-text="否" v-model="methodForm.params[index].value"></el-switch>
-              </el-form-item>
+              <el-row :gutter="20">
+                <el-col :span="1">
+                  <el-form-item>
+                    <a href="#" @click.prevent="removeParam(index)"><i class="el-icon-close"></i></a>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="10">
+                  <el-form-item label="参数名" prop="name">
+                    <el-input v-model="methodForm.params[index].name"></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="填写形式" prop="style">
+                    <el-radio-group v-model="methodForm.params[index].style">
+                      <el-radio label="text">填写</el-radio>
+                      <el-radio label="pop">选择</el-radio>
+                    </el-radio-group>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="10">
+                  <el-form-item label="类型">
+                    <el-select v-model="methodForm.params[index].type" placeholder="请选择活动区域">
+                      <el-option label="整数" value="int"></el-option>
+                      <el-option label="小数" value="float"></el-option>
+                      <el-option label="字符串" value="string"></el-option>
+                      <el-option label="布尔值" value="boolean"></el-option>
+                      <el-option label="日期" value="date"></el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="允许为空">
+                    <el-switch on-text="是" off-text="否" v-model="methodForm.params[index].isNull"></el-switch>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="10">
+                  <el-form-item label="默认值" prop="value">
+                    <el-date-picker v-if="methodForm.params[index].type == 'date'" format="yyyy-MM-dd" type="date" placeholder="选择日期" v-model="methodForm.params[index].value"></el-date-picker>
+                    <el-input v-if="methodForm.params[index].type == 'string'" v-model="methodForm.params[index].value"></el-input>
+                    <el-input v-if="methodForm.params[index].type == 'int' || methodForm.params[index].type == 'float'" type="number" v-model.number="methodForm.params[index].value"></el-input>
+                    <el-switch v-if="methodForm.params[index].type == 'boolean'" on-text="是" off-text="否" v-model="methodForm.params[index].value"></el-switch>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8"></el-col>
+              </el-row>
             </div>
             <div class="param-container">
               <el-form-item>
@@ -148,6 +170,7 @@
           </div>
           <el-form-item>
             <el-button type="primary" @click="createMethod">保存</el-button>
+            <el-button type="success" @click="approveMethod" v-if="showPassBtn">审核通过</el-button>
           </el-form-item>
         </el-form>
       </el-card>
@@ -232,6 +255,9 @@ export default {
     },
     currentNode: function() {
       return this.$store.getters.currentNode
+    },
+    showPassBtn: function() {
+      return this.$store.getters.user.username == 'admin' && this.$store.getters.currentModel.isPass == 0
     }
   },
   watch: {
@@ -289,12 +315,12 @@ export default {
             params: []
           }
         } else if (this.currentState == 'update') {
-          if(this.currentModel.params && this.currentModel.params.length){
+          if (this.currentModel.params && this.currentModel.params.length) {
             this.currentModel.params.forEach(param => {
               param.isNull = param.isNull == 1
             })
           }
-          
+
           this.methodForm = {
             id: this.currentModel.id,
             title: this.currentModel.title || null,
@@ -440,13 +466,13 @@ export default {
           newMethod.params = JSON.stringify(newMethod.params)
           if (this.methodForm.id === undefined) {
             newMethod.itemId = this.$store.getters.currentId
-            /* 增加文件上传，将发送的数据改为FormData */
+              /* 增加文件上传，将发送的数据改为FormData */
             let formData = new FormData()
             Object.keys(newMethod).forEach((item) => {
               formData.append(item, newMethod[item])
             })
             let fileInput = this.$el.querySelector('input[type="file"]')
-            if(fileInput.files.length){
+            if (fileInput.files.length) {
               formData.append('manuscript', fileInput.files[0])
             }
             /* end */
@@ -463,15 +489,15 @@ export default {
           } else {
             newMethod.itemId = this.$store.getters.parentId
             newMethod.id = this.methodForm.id
-            /* 增加文件上传，将发送的数据改为FormData */
+              /* 增加文件上传，将发送的数据改为FormData */
             let formData = new FormData()
             Object.keys(newMethod).forEach((item) => {
-              if(newMethod[item]){
+              if (newMethod[item]) {
                 formData.append(item, newMethod[item])
               }
             })
             let fileInput = this.$el.querySelector('input[type="file"]')
-            if(fileInput.files.length){
+            if (fileInput.files.length) {
               formData.append('manuscript', fileInput.files[0])
             }
             /* end */
@@ -488,9 +514,8 @@ export default {
                 $('.drawer1').find('.title-copy.active').removeClass('active')
                 let drawers = this.$parent.$parent.$children[1].$children[0].$children
                 drawers.forEach(drawer => {
-                  if(typeof drawer.refresh == 'function'){
-                    drawer.refresh()
-                  }
+                  console.log(drawer.refresh)
+                  drawer.refresh && drawer.refresh()
                 })
               }
             })
@@ -501,6 +526,7 @@ export default {
     addParam: function() {
       this.methodForm.params.push({
         name: '',
+        style: 'text',
         type: 'int',
         isNull: true,
         value: null
@@ -508,6 +534,26 @@ export default {
     },
     removeParam: function(index) {
       this.methodForm.params.splice(index, 1)
+    },
+    approveMethod: function() {
+      this.$http.post(urlStore.approveMethod, {
+        methodModelID: this.currentModel.id
+      }, {
+        emulateJSON: true
+      }).then(res => {
+        if(res.ok && res.body.status == 'success'){
+          Message({
+            message: '审核通过',
+            type: 'success'
+          })
+          this.currentModel.isPass = 1
+        }else{
+          Message({
+            message: '审核失败',
+            type: 'warning'
+          })
+        }
+      })
     }
   }
 }
@@ -546,7 +592,7 @@ export default {
       margin: 0!important;
     }
     .el-input {
-      width: 120px;
+      width: 180px;
     }
     a {
       font-size: 12px;

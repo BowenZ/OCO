@@ -14,7 +14,19 @@
           <el-col :xs="24" :md="12" v-for="(item, index) in params" :key="index">
             <div class="input-box">
               <span class="required-param" v-if="!(item.isNull-0)"><i>*</i></span>
-              <el-form-item v-if="item.type=='boolean'" :prop="item.name" :label="item.name" :rules="[{ required: !(item.isNull-0), message: '请输入参数信息', trigger: 'change' }]" :data-id="item.id" :data-rid="item.releventMethodsId && item.releventMethodsId.join(',')">
+              <el-form-item v-if="item.style='pop'" :prop="item.name" :label="item.name" :rules="[{ required: !(item.isNull-0), message: '请输入参数信息', trigger: 'blur' }]" :data-id="item.id" :data-rid="item.releventMethodsId && item.releventMethodsId.join(',')">
+                <el-input v-model="formModel[item.name]" :disabled="disableInput">
+                  <el-button slot="prepend" icon="more" @click="showChooseParam(item.name)"></el-button>
+                  <el-tooltip v-if="multiple" slot="append" placement="top-start">
+                    <div slot="content">
+                      <h3>相关方法列表</h3>
+                      <p v-for="method in item.releventMethods">{{method}}</p>
+                    </div>
+                    <el-button>({{item.releventMethods.length}})</el-button>
+                  </el-tooltip>
+                </el-input>
+              </el-form-item>
+              <el-form-item v-else-if="item.type=='boolean'" :prop="item.name" :label="item.name" :rules="[{ required: !(item.isNull-0), message: '请输入参数信息', trigger: 'change' }]" :data-id="item.id" :data-rid="item.releventMethodsId && item.releventMethodsId.join(',')">
                 <el-radio-group v-model="formModel[item.name]" :disabled="disableInput">
                   <el-radio label="1">是</el-radio>
                   <el-radio label="0">否</el-radio>
@@ -59,6 +71,18 @@
         <el-button type="primary" @click="execute" :loading="disableInput">执行审计</el-button>
       </div>
     </el-card>
+    <el-dialog title="选择参数" v-model="dialogVisible" size="tiny" @close="handleClose">
+      <div class="popup-param">
+        <el-select v-model="popupSearch" multiple filterable remote placeholder="请搜索参数" :remote-method="searchParam" :loading="loading">
+          <el-option v-for="item in paramList" :key="item.value" :label="item.label" :value="item.value">
+          </el-option>
+        </el-select>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -67,7 +91,11 @@ export default {
   props: ['showExecuteButton', 'multiple', 'disableInput', 'params'],
   data: function() {
     return {
-      formModel: null
+      formModel: null,
+      popupSearch: '',
+      dialogVisible: false,
+      loading: false,
+      paramList: []
     }
   },
   methods: {
@@ -104,6 +132,17 @@ export default {
     },
     changeDate: function() {
       // console.log('=========')
+    },
+    showChooseParam: function(itemName) {
+      console.log(itemName)
+      this.dialogVisible = true
+      console.log(this.dialogVisible)
+    },
+    searchParam: function(query) {
+      console.log(query)
+    },
+    handleClose: function() {
+
     }
   },
   watch: {
@@ -165,6 +204,9 @@ export default {
   }
   .el-date-editor.el-input {
     width: 100%;
+  }
+  .popup-param{
+    text-align: center;
   }
 }
 </style>

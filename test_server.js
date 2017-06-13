@@ -89,5 +89,11 @@ http.createServer(function(req, res) {
     res.write(JSON.stringify(mock.deleteAuditMethodModel))
   }
 
+  else if(pathname == '/auditMethodModel/copy.do'){
+    res.write(JSON.stringify(mock.copy))
+  }else if(pathname == '/auditMethodModel/pass.do'){
+    res.write(JSON.stringify(mock.pass))
+  }
+
   res.end()
 }).listen(3000)

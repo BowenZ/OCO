@@ -18,18 +18,19 @@
       </div>
     </section>
     <ul class="el-dropdown-menu right-menu category-menu" x-placement="bottom-end">
-      <li class="el-dropdown-menu__item" @click="createAudit(2)" :class="{'is-disabled': currentData && currentData.title == '基础数据'}">新增审计事项</li>
-      <li class="el-dropdown-menu__item" @click="editAudit(1)" :class="{'is-disabled': currentData && currentData.title == '基础数据'}">编辑审计类别</li>
-      <li class="el-dropdown-menu__item" @click="deleteAudit(1)" :class="{'is-disabled': currentData && currentData.title == '基础数据'}">删除审计类别</li>
+      <li class="el-dropdown-menu__item" @click="createAudit(2)" :class="{'is-disabled': !isAdmin || (currentData && currentData.title == '基础数据')}">新增审计事项</li>
+      <li class="el-dropdown-menu__item" @click="editAudit(1)" :class="{'is-disabled': !isAdmin || (currentData && currentData.title == '基础数据')}">编辑审计类别</li>
+      <li class="el-dropdown-menu__item" @click="deleteAudit(1)" :class="{'is-disabled': !isAdmin || (currentData && currentData.title == '基础数据')}">删除审计类别</li>
     </ul>
     <ul class="el-dropdown-menu right-menu issue-menu" x-placement="bottom-end">
-      <li class="el-dropdown-menu__item" @click="createAudit(3)">新增审计方法</li>
-      <li class="el-dropdown-menu__item" @click="editAudit(2)" :class="{'is-disabled': currentData && currentData.title == '基础数据'}">编辑审计事项</li>
-      <li class="el-dropdown-menu__item" @click="deleteAudit(2)" :class="{'is-disabled': currentData && currentData.title == '基础数据'}">删除审计事项</li>
+      <li class="el-dropdown-menu__item" @click="createAudit(3)" :class="{'is-disabled': !isAdmin}">新增审计方法</li>
+      <li class="el-dropdown-menu__item" @click="editAudit(2)" :class="{'is-disabled': !isAdmin || (currentData && currentData.title == '基础数据')}">编辑审计事项</li>
+      <li class="el-dropdown-menu__item" @click="deleteAudit(2)" :class="{'is-disabled': !isAdmin || (currentData && currentData.title == '基础数据')}">删除审计事项</li>
     </ul>
     <ul class="el-dropdown-menu right-menu method-menu" x-placement="bottom-end">
-      <li class="el-dropdown-menu__item" @click="editAudit(3)">编辑审计方法</li>
-      <li class="el-dropdown-menu__item" @click="deleteAudit(3)">删除审计方法</li>
+      <li class="el-dropdown-menu__item" @click="copyAudit(3)">复制审计方法</li>
+      <li class="el-dropdown-menu__item" @click="editAudit(3)" :class="{'is-disabled': !isAdmin && isPassed}">编辑审计方法</li>
+      <li class="el-dropdown-menu__item" @click="deleteAudit(3)" :class="{'is-disabled': !isAdmin && isPassed}">删除审计方法</li>
     </ul>
   </div>
 </template>
@@ -71,6 +72,12 @@ export default {
     },
     treeData: function() {
       return this.$store.getters.modelTreeData
+    },
+    isAdmin: function() {
+      return this.$store.getters.user.username == 'admin'
+    },
+    isPassed: function() {
+      return this.currentData && this.currentData.type == 'method' && this.currentData.isPass == 1
     }
   },
 
@@ -102,6 +109,30 @@ export default {
       this.$store.commit('setCurrentLevel', level)
       this.$store.commit('setCurrentState', 'create')
       this.$store.commit('setCurrentModel', null)
+    },
+    copyAudit: function(level) {
+      if (this.currentData) {
+        this.$http.post(urlStore.copyMethod, {
+          userId: this.$store.getters.user.userId,
+          methodModelID: this.currentData.id
+        }, {
+          emulateJSON: true
+        }).then(res => {
+          let parent = this.currentNode.parent.data
+          let currentNodeIndex = parent.children.indexOf(this.currentNode.data)
+          parent.children.splice(currentNodeIndex, 0, res.body.method)
+
+          setTimeout(() => {
+            this.currentNode = this.currentNode.parent.childNodes[currentNodeIndex]
+            console.log(this.currentNode)
+            this.currentData = this.currentNode.data
+            this.$store.commit('setCurrentNode', this.currentNode)
+            this.$store.commit('setCurrentLevel', level)
+            this.$store.commit('setCurrentState', 'update')
+            this.$store.commit('setCurrentModel', this.currentData)
+          }, 10);
+        })
+      }
     },
     editAudit: function(level) {
       if (this.currentData) {
