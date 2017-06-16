@@ -12,7 +12,7 @@
           </a>
         </p>
         <div class="tree-container" v-loading="!treeData" element-loading-text="正在加载模型数据...">
-          <el-tree v-if="treeData" :data="treeData" :props="defaultProps" node-key="id" highlight-current @current-change="currentChange" :expand-on-click-node="false">
+          <el-tree v-if="treeData" :data="treeData" :props="defaultProps" node-key="id" highlight-current @current-change="currentChange" :expand-on-click-node="false" :render-content="renderContent">
           </el-tree>
         </div>
       </div>
@@ -124,7 +124,6 @@ export default {
 
           setTimeout(() => {
             this.currentNode = this.currentNode.parent.childNodes[currentNodeIndex]
-            console.log(this.currentNode)
             this.currentData = this.currentNode.data
             this.$store.commit('setCurrentNode', this.currentNode)
             this.$store.commit('setCurrentLevel', level)
@@ -191,6 +190,13 @@ export default {
             }
           })
         }).catch(() => {})
+      }
+    },
+    renderContent: function(h, { node, data, store }){
+      if(data.isPass == 0){
+        return (<span class="no-pass">{node.label}</span>)
+      }else{
+        return (<span>{node.label}</span>)
       }
     }
   },
@@ -284,6 +290,15 @@ export default {
     }
     &.el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
       background-color: #077dad;
+    }
+    .no-pass:before{
+      content: '';
+      background-color: #ff4949;
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 5px;
     }
   }
   .right-menu {

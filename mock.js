@@ -57,7 +57,8 @@ const getDetail = {
           "name": "预算年度",
           "type": "string",
           "value": "4444",
-          "isNull": 1
+          "isNull": 1,
+          "style": "pop"
         }, {
           "id": 74,
           "name": "单位编码",
@@ -1181,7 +1182,8 @@ const findMethods = {
       "name": "p01",
       "type": "int",
       "value": "-99",
-      "isNull": 1
+      "isNull": 1,
+      "style": "pop"
     }, {
       "id": 2,
       "name": "p02",
@@ -5059,8 +5061,148 @@ const copy = {
 }
 
 const pass = {
- "status":"success",//状态
- "msg":""//错误信息，如果成功，没有该属性
+  "status": "success", //状态
+  "msg": "" //错误信息，如果成功，没有该属性
+}
+
+const queryParamKeyValues = {
+  "list": [{
+    "value": "4.2",
+    "label": "安阳市工商局高新开发区分局"
+  }, {
+    "value": "4.2",
+    "label": "濮阳市工商局开发区分局"
+  }, {
+    "value": "312",
+    "label": "河南省财政厅农业综合开发资金专户"
+  }, {
+    "value": "313",
+    "label": "河南省农业综合开发公司"
+  }, {
+    "value": "4.2",
+    "label": "开封市工商局机关"
+  }, {
+    "value": "4.2",
+    "label": "开封市经济检查支队"
+  }, {
+    "value": "4.2",
+    "label": "开封市工商行政管理局经济技术开发区分局"
+  }, {
+    "value": "4.2",
+    "label": "开封市工商局相国寺分局"
+  }, {
+    "value": "4.2",
+    "label": "开封市工商局夜市分局"
+  }, {
+    "value": "4.2",
+    "label": "开封市工商局专业分局"
+  }, {
+    "value": "4.2",
+    "label": "开封市工商局龙亭分局"
+  }, {
+    "value": "4.2",
+    "label": "开封市工商局顺河分局"
+  }, {
+    "value": "4.2",
+    "label": "开封市工商局鼓楼分局"
+  }, {
+    "value": "4.2",
+    "label": "开封市工商局禹王台分局"
+  }, {
+    "value": "4.2",
+    "label": "开封市工商局金明分局"
+  }, {
+    "value": "511",
+    "label": "开封市中原文化研究会"
+  }, {
+    "value": "4.2",
+    "label": "南阳市工商局高新开发区分局"
+  }, {
+    "value": "4.2",
+    "label": "开封县工商局"
+  }, {
+    "value": "4.2",
+    "label": "开封市消费者协会"
+  }, {
+    "value": "4.2",
+    "label": "开封市工商局信息中心"
+  }, {
+    "value": "4.2",
+    "label": "开封市个体私营协会"
+  }, {
+    "value": "3.0",
+    "label": "河南省扶贫开发办公室后勤中心（驾驶员）"
+  }, {
+    "value": "3.0",
+    "label": "河南省扶贫开发办公室后勤中心（其他）"
+  }, {
+    "value": "4.2",
+    "label": "新乡市工商局开发分局"
+  }, {
+    "value": "308",
+    "label": "河南省扶贫开发办公室后勤中心"
+  }, {
+    "value": "4.2",
+    "label": "驻马店市工商局高新开发区分局"
+  }, {
+    "value": "9.9",
+    "label": "漯河开发区"
+  }, {
+    "value": "308",
+    "label": "河南省扶贫开发办公室机关"
+  }, {
+    "value": "4.2",
+    "label": "郑州市工商局高新开发区分局"
+  }, {
+    "value": "4.2",
+    "label": "郑州市工商局经济开发区分局"
+  }, {
+    "value": "9.9",
+    "label": "许昌开发区"
+  }, {
+    "value": "502",
+    "label": "河南省开封人民警察学校"
+  }, {
+    "value": "4.2",
+    "label": "平顶山市工商局高新开发区分局"
+  }, {
+    "value": "421",
+    "label": "开封市工商局"
+  }, {
+    "value": "4.2",
+    "label": "洛阳市工商局高新开发区分局"
+  }, {
+    "value": "4.2",
+    "label": "洛阳市工商局经济开发区分局"
+  }, {
+    "value": "8.0",
+    "label": "漯河市经济开发区地方税务局"
+  }, {
+    "value": "201",
+    "label": "河南省地质矿产勘查开发局第一地质勘查院"
+  }, {
+    "value": "201",
+    "label": "河南省地质矿产勘查开发局第二地质勘查院"
+  }, {
+    "value": "9.9",
+    "label": "驻马店开发区"
+  }, {
+    "value": "201",
+    "label": "河南省地质矿产勘查开发局第四地质探矿队"
+  }, {
+    "value": "9.9",
+    "label": "开封县"
+  }, {
+    "value": "8.0",
+    "label": "濮阳市经济开发区地方税务局"
+  }, {
+    "value": "203",
+    "label": "省食品开发中心"
+  }, {
+    "value": "8.0",
+    "label": "驻马店市经济开发区地方税务局"
+  }],
+  "status": "success"
 }
 
 module.exports = {
@@ -5095,5 +5237,6 @@ module.exports = {
   updateAuditMethodModel,
   deleteAuditMethodModel,
   copy,
-  pass
+  pass,
+  queryParamKeyValues
 }

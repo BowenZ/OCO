@@ -84,6 +84,9 @@ body.put-top {
 }
 
 body.theme-default {
+  .el-input-group__append .el-button--primary{
+    color: #fff;
+  }
   .el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
     background-color: rgb(197, 200, 206);
   }

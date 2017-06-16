@@ -114,7 +114,6 @@
           <el-form-item label="参数配置" prop="methodCode">
           </el-form-item>
           <div class="params-setting">
-          {{methodForm.params}}
             <div class="param-container" v-for="(param, index) in methodForm.params">
               <el-row :gutter="20">
                 <el-col :span="1">
@@ -122,7 +121,7 @@
                     <a href="#" @click.prevent="removeParam(index)"><i class="el-icon-close"></i></a>
                   </el-form-item>
                 </el-col>
-                <el-col :span="10">
+                <el-col :span="8">
                   <el-form-item label="参数名" prop="name">
                     <el-input v-model="methodForm.params[index].name"></el-input>
                   </el-form-item>
@@ -135,8 +134,10 @@
                     </el-radio-group>
                   </el-form-item>
                 </el-col>
-                <el-col :span="10">
-                  <el-form-item label="类型">
+              </el-row>
+              <el-row :gutter="20">
+                <el-col :span="8" :offset="1">
+                  <el-form-item label="类型">&nbsp;&nbsp;
                     <el-select v-model="methodForm.params[index].type" placeholder="请选择活动区域">
                       <el-option label="整数" value="int"></el-option>
                       <el-option label="小数" value="float"></el-option>
@@ -147,11 +148,6 @@
                   </el-form-item>
                 </el-col>
                 <el-col :span="8">
-                  <el-form-item label="允许为空">
-                    <el-switch on-text="是" off-text="否" v-model="methodForm.params[index].isNull"></el-switch>
-                  </el-form-item>
-                </el-col>
-                <el-col :span="10">
                   <el-form-item label="默认值" prop="value">
                     <el-date-picker v-if="methodForm.params[index].type == 'date'" format="yyyy-MM-dd" type="date" placeholder="选择日期" v-model="methodForm.params[index].value"></el-date-picker>
                     <el-input v-if="methodForm.params[index].type == 'string'" v-model="methodForm.params[index].value"></el-input>
@@ -159,7 +155,11 @@
                     <el-switch v-if="methodForm.params[index].type == 'boolean'" on-text="是" off-text="否" v-model="methodForm.params[index].value"></el-switch>
                   </el-form-item>
                 </el-col>
-                <el-col :span="8"></el-col>
+                <el-col :span="6">
+                  <el-form-item label="允许为空">
+                    <el-switch on-text="是" off-text="否" v-model="methodForm.params[index].isNull"></el-switch>
+                  </el-form-item>
+                </el-col>
               </el-row>
             </div>
             <div class="param-container">
@@ -514,7 +514,6 @@ export default {
                 $('.drawer1').find('.title-copy.active').removeClass('active')
                 let drawers = this.$parent.$parent.$children[1].$children[0].$children
                 drawers.forEach(drawer => {
-                  console.log(drawer.refresh)
                   drawer.refresh && drawer.refresh()
                 })
               }
@@ -541,13 +540,13 @@ export default {
       }, {
         emulateJSON: true
       }).then(res => {
-        if(res.ok && res.body.status == 'success'){
+        if (res.ok && res.body.status == 'success') {
           Message({
             message: '审核通过',
             type: 'success'
           })
           this.currentModel.isPass = 1
-        }else{
+        } else {
           Message({
             message: '审核失败',
             type: 'warning'
@@ -574,6 +573,15 @@ export default {
     color: #888;
   }
   .params-setting {
+    .param-container {
+      padding: 10px;
+      border: 1px solid #eee;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      &:hover{
+        border: 1px solid #ccc;
+      }
+    }
     padding-left: 50px;
     * {
       vertical-align: middle;
@@ -592,7 +600,7 @@ export default {
       margin: 0!important;
     }
     .el-input {
-      width: 180px;
+      width: 130px;
     }
     a {
       font-size: 12px;

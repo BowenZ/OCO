@@ -14,7 +14,7 @@
           <el-col :xs="24" :md="12" v-for="(item, index) in params" :key="index">
             <div class="input-box">
               <span class="required-param" v-if="!(item.isNull-0)"><i>*</i></span>
-              <el-form-item v-if="item.style='pop'" :prop="item.name" :label="item.name" :rules="[{ required: !(item.isNull-0), message: '请输入参数信息', trigger: 'blur' }]" :data-id="item.id" :data-rid="item.releventMethodsId && item.releventMethodsId.join(',')">
+              <el-form-item v-if="item.style=='pop'" :prop="item.name" :label="item.name" :rules="[{ required: !(item.isNull-0), message: '请输入参数信息', trigger: 'blur' }]" :data-id="item.id" :data-rid="item.releventMethodsId && item.releventMethodsId.join(',')">
                 <el-input v-model="formModel[item.name]" :disabled="disableInput">
                   <el-button slot="prepend" icon="more" @click="showChooseParam(item.name)"></el-button>
                   <el-tooltip v-if="multiple" slot="append" placement="top-start">
@@ -71,31 +71,34 @@
         <el-button type="primary" @click="execute" :loading="disableInput">执行审计</el-button>
       </div>
     </el-card>
-    <el-dialog title="选择参数" v-model="dialogVisible" size="tiny" @close="handleClose">
+    <el-dialog title="选择参数" v-model="dialogVisible" size="tiny" @close="handleClose" :close-on-click-modal="false">
       <div class="popup-param">
-        <el-select v-model="popupSearch" multiple filterable remote placeholder="请搜索参数" :remote-method="searchParam" :loading="loading">
-          <el-option v-for="item in paramList" :key="item.value" :label="item.label" :value="item.value">
+        <p>请在输入框中输入要搜索的参数名</p>
+        <el-select v-model="popupSearch" multiple filterable remote placeholder="请搜索参数" :remote-method="searchParam" :loading="loading" loading-text="正在加载参数信息，请稍后...">
+          <el-option v-for="(item, index) in paramList" :key="index" :label="item.label" :value="item.value+index">
           </el-option>
         </el-select>
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="confirmParam">确 定</el-button>
       </span>
     </el-dialog>
   </div>
 </template>
 <script>
 import $ from 'webpack-zepto'
+import urlStore from '@/api/urlStore.js'
 export default {
   props: ['showExecuteButton', 'multiple', 'disableInput', 'params'],
   data: function() {
     return {
       formModel: null,
-      popupSearch: '',
+      popupSearch: null,
       dialogVisible: false,
       loading: false,
-      paramList: []
+      paramList: [],
+      currentParamName: null
     }
   },
   methods: {
@@ -134,15 +137,42 @@ export default {
       // console.log('=========')
     },
     showChooseParam: function(itemName) {
-      console.log(itemName)
       this.dialogVisible = true
-      console.log(this.dialogVisible)
+      this.currentParamName = itemName
     },
     searchParam: function(query) {
       console.log(query)
+      this.loading = true
+      this.$http.post(urlStore.queryParamKeyValues, {
+        paramName: this.currentParamName,
+        key: query
+      }, {
+        emulateJSON: true
+      }).then(res => {
+        this.loading = false
+        console.log(res)
+        if(res.ok && res.body.status == 'success'){
+          this.paramList = res.body.list
+        }
+      }).catch(err => {
+        this.loading = false
+      })
     },
     handleClose: function() {
-
+      this.popupSearch = []
+    },
+    confirmParam: function(){
+      let tmpObj = {}
+      this.popupSearch.forEach(item => {
+        item = item.substring(0, item.length-1)
+        if(tmpObj.item){
+          return
+        }else{
+          tmpObj[item] = 1
+        }
+      })
+      this.formModel[this.currentParamName] = Object.keys(tmpObj).join(',')
+      this.dialogVisible = false
     }
   },
   watch: {
@@ -205,8 +235,11 @@ export default {
   .el-date-editor.el-input {
     width: 100%;
   }
-  .popup-param{
+  .popup-param {
     text-align: center;
+    .el-select{
+      width: 100%;
+    }
   }
 }
 </style>

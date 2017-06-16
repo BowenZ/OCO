@@ -51,7 +51,8 @@ const urls = {
   deleteAuditMethodModel: ip + 'auditMethodModel/delete.do',
 
   copyMethod: ip + 'auditMethodModel/copy.do',
-  approveMethod: ip + 'auditMethodModel/pass.do'
+  approveMethod: ip + 'auditMethodModel/pass.do',
+  queryParamKeyValues: ip + 'paramModel/queryParamKeyValues.do'
 }
 
 export default urls

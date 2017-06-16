@@ -93,6 +93,8 @@ http.createServer(function(req, res) {
     res.write(JSON.stringify(mock.copy))
   }else if(pathname == '/auditMethodModel/pass.do'){
     res.write(JSON.stringify(mock.pass))
+  }else if(pathname == '/paramModel/queryParamKeyValues.do'){
+    res.write(JSON.stringify(mock.queryParamKeyValues))
   }
 
   res.end()
