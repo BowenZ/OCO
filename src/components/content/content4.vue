@@ -257,7 +257,7 @@ export default {
       return this.$store.getters.currentNode
     },
     showPassBtn: function() {
-      return this.$store.getters.user.username == 'admin' && this.$store.getters.currentModel.isPass == 0
+      return this.$store.getters.user.username == 'admin' && this.$store.getters.currentModel && this.$store.getters.currentModel.isPass == 0
     }
   },
   watch: {
@@ -545,7 +545,7 @@ export default {
             message: '审核通过',
             type: 'success'
           })
-          this.currentModel.isPass = 1
+          this.currentModel && (this.currentModel.isPass = 1)
         } else {
           Message({
             message: '审核失败',
