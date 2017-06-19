@@ -4,7 +4,7 @@
       <div slot="header" class="clearfix">
         <h2 class="card-title">执行摘要</h2>
       </div>
-      <div v-if="showProgress && currentJobId == selectedJobId" class="progress-container">
+      <div v-if="showProgress && currentJobId == selectedJobId && auditing" class="progress-container">
         <el-progress :percentage="progress"></el-progress>
         <p style="text-align: center;">{{progressMsg}}</p>
       </div>
@@ -50,6 +50,9 @@ export default {
     }
   },
   computed: {
+    auditing: function() {
+      return this.$store.getters.auditing
+    },
     currentJobId: function() {
       return this.$store.getters.currentJobId
     },
@@ -102,7 +105,6 @@ export default {
       this.isIndeterminate = false
     },
     batchOutput: function() {
-      console.log(this.$refs)
       let outputArr = []
       $(this.$el).find('.check-result').find('.is-checked input').each(function(index, el) {
         outputArr.push($(el).attr('true-value'))

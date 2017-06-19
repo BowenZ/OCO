@@ -28,8 +28,8 @@
                   <i class="el-icon-caret-bottom el-icon--right"></i>
                 </span>
                 <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item command="deletProject"><span class="el-icon-delete"></span>删除审计项目</el-dropdown-item>
-                  <el-dropdown-item command="renameProject"><span class="el-icon-edit"></span>更改项目名称</el-dropdown-item>
+                  <el-dropdown-item command="deletProject" :disabled="auditing"><span class="el-icon-delete"></span>删除审计项目</el-dropdown-item>
+                  <el-dropdown-item command="renameProject" :disabled="auditing"><span class="el-icon-edit"></span>更改项目名称</el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>
             </h5>
@@ -236,13 +236,17 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.$http.get(`${urlStore.deleteById}?jobId=${this.projectList[this.dropdownIndex].jobId}`).then(res => {
+          let targetJobId = this.projectList[this.dropdownIndex].jobId
+          this.$http.get(`${urlStore.deleteById}?jobId=${targetJobId}`).then(res => {
             if (res.body.status == 'success') {
               this.projectList.splice(this.dropdownIndex, 1)
               this.$message({
                 type: 'success',
                 message: '删除成功!'
               })
+              if(targetJobId == this.$store.getters.multipleExecuteStatus.jobId){
+                this.$store.commit('setMultipleExecuteStatus', null)
+              }
             } else {
               this.$message({
                 type: 'warning',

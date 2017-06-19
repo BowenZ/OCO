@@ -32,6 +32,7 @@ export default {
       this.$store.commit('logout')
       this.$router.push('/login')
       this.$store.commit('updateCurrentDrawerIndex', 0)
+      location.reload()
     }
   }
 }

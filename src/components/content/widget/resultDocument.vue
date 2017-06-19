@@ -78,6 +78,7 @@ export default {
     dialogVisible: function(newVal) {
       if (!newVal) {
         this.hideUpload()
+      }else{
       }
     }
   },

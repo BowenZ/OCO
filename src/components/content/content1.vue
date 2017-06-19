@@ -2,8 +2,6 @@
   <div class="content content1">
     <v-step :steps="steps" :currentStep="currentStep"></v-step>
     <div class="content-block" element-loading-text="正在加载数据">
-      <!-- {{disableInput}}/{{auditing}} -->
-      <!-- {{selectedParams}} -->
       <v-params @doAudit="doAudit" :showExecuteButton="true" :multiple="true" :disableInput="disableInput || auditing" :params="selectedParams"></v-params>
       <v-result :single="false" :executeStatus="multipleExecuteStatus" :finished="finished" :showProgress="showProgress" :progress="progress" :progressMsg="progressMsg"></v-result>
     </div>
@@ -104,6 +102,10 @@ export default {
       this.disableInput = false
         // this.$store.commit('finishIt')
       this.currentStep = 2
+      Message({
+        message: '审计执行完毕',
+        type: 'success'
+      })
     },
     doAudit: function() {
       if (this.$store.getters.selectedJobId === null) {
@@ -163,7 +165,7 @@ export default {
           if (result.status == 'success') {
             console.log('多方法审计开始：', result)
             Message({
-              message: '审计即将开始正在执行...',
+              message: '审计正在执行...',
               type: 'info',
               duration: 5000,
               showClose: true
@@ -175,6 +177,7 @@ export default {
               let timer = setInterval(function() {
                 if (self.finished) {
                   clearInterval(timer)
+                  self.finishAudit()
                 } else {
                   console.log('====multiple continue====')
                   self.updateExeStatus(result.jobId)

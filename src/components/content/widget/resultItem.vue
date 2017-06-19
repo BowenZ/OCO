@@ -20,7 +20,7 @@
                 <span class="row-count" v-if="method.data && !isNaN(method.data.rowCount) && method.data.rowCount!=0" @click="shwoMoreData($event)"> | ({{method.data.rowCount}})</span><!-- 数据量 -->
                 <span class="row-count" v-if="method.status == 'error'" @click="shwoMoreData($event)"> | (查看错误详情)</span>
                 <span class="accord" v-if="method.accord"  @click="shwoMoreData($event, 1)">| (定性依据)</span>
-                <span @click="showDocuementManagement">| 资料管理</span>
+                <span @click="showDocuementManagement(index)">| 资料管理</span>
               </h4>
               <a v-if="method.outputLink" :href="urlStore.root+method.outputLink" target="_blank" class="el-button el-button--primary output-link">导出数据</a>
             </div>
@@ -41,8 +41,8 @@
               </div>
             </div>
           </div>
-          <el-dialog title="提示" v-model="dialogVisible" size="small">
-            <v-result-document :documents="method.documents" :methodId="method.methodId" :dialogVisible="dialogVisible"></v-result-document>
+          <el-dialog title="提示" v-model="dialogVisible[index]" size="small">
+            <v-result-document :documents="method.documents" :methodId="method.methodId" :dialogVisible="!!dialogVisible[index]"></v-result-document>
           </el-dialog>
         </li>
       </ul>
@@ -61,7 +61,7 @@ export default {
   data: function() {
     return {
       urlStore: urlStore,
-      dialogVisible: false
+      dialogVisible: []
     }
   },
   methods: {
@@ -85,8 +85,9 @@ export default {
         }, 200)
       }
     },
-    showDocuementManagement: function() {
-      this.dialogVisible = true
+    showDocuementManagement: function(index) {
+      this.dialogVisible[index] = true
+      this.$forceUpdate()
     },
     changeCheckResult: function() {
       this.$emit('changeCheck')

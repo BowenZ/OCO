@@ -41,7 +41,7 @@
               </el-form-item>
               <el-form-item v-else-if="item.type=='date'" :prop="item.name" :label="item.name" :rules="[{ type: 'date', required: !(item.isNull-0), message: '请输入参数信息', trigger: 'blur' }]" :data-id="item.id" :data-rid="item.releventMethodsId && item.releventMethodsId.join(',')">
                 <!-- {{item.releventMethodsId}} -->
-                <el-date-picker @change="changeDate" v-model="formModel[item.name]" type="date" :disabled="disableInput" placeholder="选择日期">
+                <el-date-picker v-model="formModel[item.name]" type="date" :disabled="disableInput" placeholder="选择日期">
                 </el-date-picker>
                 <el-tooltip v-if="multiple" placement="top-start" class="right-tooltip">
                   <div slot="content">
@@ -98,7 +98,9 @@ export default {
       dialogVisible: false,
       loading: false,
       paramList: [],
-      currentParamName: null
+      currentParamName: null,
+
+      searchTimer: null
     }
   },
   methods: {
@@ -133,45 +135,47 @@ export default {
         this.$emit('doAudit')
       }
     },
-    changeDate: function() {
-      // console.log('=========')
-    },
     showChooseParam: function(itemName) {
       this.dialogVisible = true
       this.currentParamName = itemName
     },
     searchParam: function(query) {
-      console.log(query)
+      clearTimeout(this.searchTimer)
       this.loading = true
-      this.$http.post(urlStore.queryParamKeyValues, {
-        paramName: this.currentParamName,
-        key: query
-      }, {
-        emulateJSON: true
-      }).then(res => {
-        this.loading = false
-        console.log(res)
-        if(res.ok && res.body.status == 'success'){
-          this.paramList = res.body.list
-        }
-      }).catch(err => {
-        this.loading = false
-      })
+      this.searchTimer = setTimeout(() => {
+        this.$http.post(urlStore.queryParamKeyValues, {
+          paramName: this.currentParamName,
+          key: query
+        }, {
+          emulateJSON: true
+        }).then(res => {
+          this.loading = false
+          if (res.ok && res.body.status == 'success') {
+            this.paramList = res.body.list
+          }
+        }).catch(err => {
+          this.loading = false
+        })
+      }, 1500)
     },
     handleClose: function() {
       this.popupSearch = []
     },
-    confirmParam: function(){
+    confirmParam: function() {
       let tmpObj = {}
       this.popupSearch.forEach(item => {
-        item = item.substring(0, item.length-1)
-        if(tmpObj.item){
+        item = item.substring(0, item.length - 1)
+        if (tmpObj.item) {
           return
-        }else{
+        } else {
           tmpObj[item] = 1
         }
       })
-      this.formModel[this.currentParamName] = Object.keys(tmpObj).join(',')
+      if (this.formModel[this.currentParamName]) {
+        this.formModel[this.currentParamName] += (',' + Object.keys(tmpObj).join(','))
+      } else {
+        this.formModel[this.currentParamName] = Object.keys(tmpObj).join(',')
+      }
       this.dialogVisible = false
     }
   },
@@ -237,7 +241,7 @@ export default {
   }
   .popup-param {
     text-align: center;
-    .el-select{
+    .el-select {
       width: 100%;
     }
   }
