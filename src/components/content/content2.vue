@@ -46,7 +46,7 @@ export default {
     }
   },
   methods: {
-    updateExeStatus: function(jobId) {
+    updateExeStatus: function(jobId, methodId) {
       if (!jobId) {
         let currentSingleJobId = this.$store.getters.currentSingleJobId
         if (currentSingleJobId) {
@@ -58,6 +58,7 @@ export default {
       this.$http.get(urlStore.getExecuteSingleMethod, {
         params: {
           jobId: jobId,
+          methodModelId: methodId?methodId:'',
           userId: this.$store.getters.user.userId
         }
       }).then(res => {
@@ -159,13 +160,13 @@ export default {
           })
           self.$store.commit('setSingleExecuteStatus', null)
           self.finished = false
-          self.updateExeStatus(res.body.jobId)
+          self.updateExeStatus(res.body.jobId, auditParams.methodId)
           let timer = setInterval(function() {
             if (self.finished) {
               clearInterval(timer)
             } else {
               console.log('====single continue====')
-              self.updateExeStatus(res.body.jobId)
+              self.updateExeStatus(res.body.jobId, auditParams.methodId)
             }
           }, 5000)
         } else {

@@ -7,7 +7,6 @@ const state = {
   selectedMethods: [],
   selectedParams: [],
   multipleResult: [],
-  auditing: false,
   multipleExecuteStatus: null,
   localAuditingMethods: [],
   auditParams: [],
@@ -39,7 +38,6 @@ const getters = {
   selectedMethods: state => state.selectedMethods,
   selectedParams: state => state.selectedParams,
   multipleResult: state => state.multipleResult,
-  auditing: state => state.auditing,
   multipleExecuteStatus: state => state.multipleExecuteStatus,
   localAuditingMethods: state => state.localAuditingMethods,
   auditParams: state => state.auditParams,
@@ -53,11 +51,10 @@ const actions = {
     Vue.http.get(urlStore.getTree).then(res => {
       if (res.body.status == 'success') {
         commit('setMethodTree', res.body.tree)
-        if (res.body.isCanExecute && res.body.isCanExecute == 0) {
-          state.auditing = true
-          state.continueAudit = true
-            // state.currentJobId = res.body.jobId
-        }
+          // if (res.body.isCanExecute && res.body.isCanExecute == 0) {
+          //   state.auditing = true
+          //   state.continueAudit = true
+          // }
       }
     }, res => {
       commit('setMethodTree', [])
@@ -86,7 +83,7 @@ const mutations = {
             params[item.name].releventMethods = []
             params[item.name].releventMethodsId = []
           }
-          params[item.name].releventMethods.push(method.title)
+          params[item.name].releventMethods.push(method.rName)
           params[item.name].releventMethodsId.push(method.id)
         })
       }
@@ -99,12 +96,6 @@ const mutations = {
   },
   setMultipleResult(state, result) {
     state.multipleResult = result
-  },
-  changeAuditStatus(state) {
-    state.auditing = !state.auditing
-  },
-  setAuditStatus(state, val) {
-    state.auditing = val
   },
   setMultipleExecuteStatus(state, staus) {
     state.multipleExecuteStatus = staus

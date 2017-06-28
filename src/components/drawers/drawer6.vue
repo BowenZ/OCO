@@ -29,7 +29,7 @@
     </ul>
     <ul class="el-dropdown-menu right-menu method-menu" x-placement="bottom-end">
       <li class="el-dropdown-menu__item" @click="copyAudit(3)">复制审计方法</li>
-      <li class="el-dropdown-menu__item" @click="editAudit(3)" :class="{'is-disabled': !isAdmin && isPassed}">编辑审计方法</li>
+      <!-- <li class="el-dropdown-menu__item" @click="editAudit(3)" :class="{'is-disabled': !isAdmin && isPassed}">编辑审计方法</li> -->
       <li class="el-dropdown-menu__item" @click="deleteAudit(3)" :class="{'is-disabled': !isAdmin && isPassed}">删除审计方法</li>
     </ul>
   </div>
@@ -129,8 +129,11 @@ export default {
     currentChange: function(data, node) {
       this.currentData = data
       this.currentNode = node
+      console.log('+++++++++++', data)
+      if(data.type == 'method'){
+        this.editAudit(3)
+      }
       if (this.rightClick) {
-
         if (data.type == 'category') {
           this.$menus.hide()
           this.$categoryMenu.show()

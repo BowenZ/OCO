@@ -44,7 +44,7 @@ export default {
     }
   },
   methods: {
-    updateExeStatus: function(jobId) {
+    updateExeStatus: function(jobId, methodId) {
       if (!jobId) {
         let currentBaseJobId = this.currentBaseJobId
         if (currentBaseJobId) {
@@ -56,6 +56,7 @@ export default {
       this.$http.get(urlStore.getExecuteBasicMethod, {
         params: {
           jobId: jobId,
+          methodModelId: methodId?methodId:'',
           userId: this.$store.getters.user.userId
         }
       }).then(res => {
@@ -143,13 +144,13 @@ export default {
             showClose: true
           })
           this.finished = false
-          this.updateExeStatus(res.body.jobId)
+          this.updateExeStatus(res.body.jobId, auditParams.methodId)
           let timer = setInterval(() => {
             if (this.finished) {
               clearInterval(timer)
             } else {
               console.log('====base continue====')
-              this.updateExeStatus(res.body.jobId)
+              this.updateExeStatus(res.body.jobId, auditParams.methodId)
             }
           }, 5000)
         } else {

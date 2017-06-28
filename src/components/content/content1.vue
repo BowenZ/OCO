@@ -273,4 +273,8 @@ export default {
 }
 </script>
 <style lang="scss">
+.el-tooltip__popper>div:first-of-type{
+  max-height: 400px;
+  overflow: auto;
+}
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div id="index">
-    <v-logo></v-logo>
+    <!-- <v-logo></v-logo> -->
     <v-menu></v-menu>
     <v-main :class="{active: drawerIsOpened}"></v-main>
   </div>

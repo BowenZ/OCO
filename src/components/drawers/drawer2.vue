@@ -67,7 +67,12 @@ export default {
       this.query = msg
       return
       this.loading = true
-      this.$http.get(urlStore.findMethods + '?methodName=' + msg).then(res => {
+      this.$http.get(urlStore.findMethods, {
+        params: {
+          methodName: msg,
+          userId: this.$store.getters.user.userId
+        }
+      }).then(res => {
         this.loading = false
         if (res.body.status == 'success') {
           this.$store.commit('setSingleMethods', res.body.data)

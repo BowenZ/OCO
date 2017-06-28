@@ -180,8 +180,18 @@ export default {
             self.selectedNodes = []
             if (ref) {
               self.selectedNodes = []
+              let currentCategory = null
+              let currentIssue = null
               ref.getCheckedNodes().forEach((item) => {
+                console.log(item)
+                if(item.type == 'category'){
+                  currentCategory = item.sort
+                }
+                if(item.type == 'issues'){
+                  currentIssue = item.sort
+                }
                 if (item.type == 'method') {
+                  console.log('+++++++++++', `${currentCategory}_${currentIssue}_${item.title}`)
                   self.selectedNodes.push(item)
                 }
               })
@@ -197,8 +207,17 @@ export default {
       this.selectedNodes = []
       if (ref) {
         this.selectedNodes = []
+        let currentCategory = null
+        let currentIssue = null
         ref.getCheckedNodes().forEach((item) => {
+          if(item.type == 'category'){
+            currentCategory = item.sort
+          }
+          if(item.type == 'issues'){
+            currentIssue = item.sort
+          }
           if (item.type == 'method') {
+            item.rName = `${currentCategory}_${currentIssue}_${item.title}`
             this.selectedNodes.push(item)
           }
         })
