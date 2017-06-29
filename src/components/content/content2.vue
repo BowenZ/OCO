@@ -58,7 +58,7 @@ export default {
       this.$http.get(urlStore.getExecuteSingleMethod, {
         params: {
           jobId: jobId,
-          methodModelId: methodId?methodId:'',
+          methodModelId: methodId?methodId:this.$store.getters.auditingMethodId,
           userId: this.$store.getters.user.userId
         }
       }).then(res => {
@@ -71,6 +71,8 @@ export default {
           this.finished = true
           this.disableInput = false
           this.currentStep = 4
+          this.$store.commit('setCurrentSingleJobId', null)
+          this.$store.commit('setAuditingMethodId', '')
           console.log('====single finished====')
         }
       }, res => {
@@ -181,9 +183,11 @@ export default {
     },
     doContinueAudit: function() {
       let self = this
+      let methodId = this.$store.getters.auditingMethodId
       this.$http.get(urlStore.getExecuteSingleMethod, {
         params: {
           jobId: '',
+          methodModelId: methodId?methodId:'',
           userId: this.$store.getters.user.userId
         }
       }).then(res => {
@@ -245,9 +249,13 @@ export default {
   },
   watch: {
     continueAudit: function(newVal) {
-      if (newVal) {
+      if (newVal == 'single') {
         this.doContinueAudit()
       }
+    },
+    selectedMethod: function(newVal){
+      console.log('+++++++++++', newVal)
+      this.updateExeStatus(null, newVal.id)
     }
   }
 }

@@ -102,6 +102,7 @@ export default {
       this.disableInput = false
         // this.$store.commit('finishIt')
       this.currentStep = 2
+      this.$store.commit('setCurrentJobId', '')
       Message({
         message: '审计执行完毕',
         type: 'success'
@@ -204,9 +205,10 @@ export default {
     },
     doContinueAudit: function() {
       let self = this
+      let jobId = this.$store.getters.currentJobId
       this.$http.get(urlStore.getExecuteMethods, {
         params: {
-          jobId: '',
+          jobId: jobId?jobId:'',
           userId: this.$store.getters.user.userId
         }
       }).then(res => {
@@ -261,13 +263,20 @@ export default {
     },
     multipleExecuteStatus: function() {
       return this.$store.getters.multipleExecuteStatus
+    },
+    selectedJobId: function(){
+      return this.$store.getters.selectedJobId
     }
   },
   watch: {
     continueAudit: function(newVal) {
-      if (newVal) {
+      if (newVal == 'multi') {
         this.doContinueAudit()
       }
+    },
+    selectedJobId: function(newId){
+      console.log('+++++++++++', newId)
+      this.updateExeStatus(newId)
     }
   }
 }

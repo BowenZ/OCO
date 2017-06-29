@@ -1,11 +1,13 @@
 const state = {
   selectedData: null,
-  currentBaseJobId: null
+  currentBaseJobId: null,
+  auditingBaseMethodId: null
 }
 
 const getters = {
   selectedData: state => state.selectedData,
-  currentBaseJobId: state => state.currentBaseJobId
+  currentBaseJobId: state => state.currentBaseJobId,
+  auditingBaseMethodId: state => state.auditingBaseMethodId
 }
 
 const mutations = {
@@ -14,6 +16,9 @@ const mutations = {
   },
   setSelectedData(state, data) {
     state.selectedData = data
+  },
+  setAuditingBaseMethodId(state, id) {
+    state.auditingBaseMethodId = id
   }
 }
 

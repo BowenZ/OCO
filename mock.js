@@ -2989,7 +2989,11 @@ const saveSingleMehtodJob = {
 const isCanExecute = {
   status: "success", //操作状态，success：成功；fail：失败
   msg: "", //操作信息,
-  isCanExecute: 1 //是否可以执行审计
+  data: {
+     isCanExecute:0, //是否可以执行审计
+       type:"basic",
+       methodModelId:12
+  }
 }
 
 const uploadDocument = {

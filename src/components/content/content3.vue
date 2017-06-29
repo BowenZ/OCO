@@ -56,10 +56,12 @@ export default {
       this.$http.get(urlStore.getExecuteBasicMethod, {
         params: {
           jobId: jobId,
-          methodModelId: methodId?methodId:'',
+          methodModelId: methodId?methodId:this.$store.getters.auditingBaseMethodId,
           userId: this.$store.getters.user.userId
         }
       }).then(res => {
+        this.$store.commit('setCurrentBaseJobId', res.body.jobId)
+        this.$store.commit('setAuditingBaseMethodId', res.body.data[0].children[0].methodId)
         this.currentBaseJobId = res.body.jobId
         this.baseDataExecuteStatus = res.body
         if (res.body.data[0].children[0].status == 'success' || res.body.data[0].children[0].status == 'error') {
@@ -68,6 +70,8 @@ export default {
           this.finished = true
           this.disableInput = false
           this.currentStep = 4
+          this.$store.commit('setCurrentBaseJobId', '')
+          this.$store.commit('setAuditingBaseMethodId', '')
           console.log('====base finished====')
         }
       }, res => {
@@ -165,9 +169,11 @@ export default {
     },
     doContinueAudit: function() {
       let self = this
+      let methodId = this.$store.getters.auditingBaseMethodId
       this.$http.get(urlStore.getExecuteBasicMethod, {
         params: {
           jobId: '',
+          methodModelId: methodId?methodId:'',
           userId: this.$store.getters.user.userId
         }
       }).then(res => {
@@ -214,9 +220,13 @@ export default {
   },
   watch: {
     continueAudit: function(newVal) {
-      if (newVal) {
+      if (newVal == 'basic') {
         this.doContinueAudit()
       }
+    },
+    selectedData: function(newVal){
+      console.log('+++++++++++', newVal)
+      this.updateExeStatus(null, newVal.id)
     }
   }
 }

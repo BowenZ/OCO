@@ -70,6 +70,24 @@ export default {
   },
   mounted() {
     // this.$store.dispatch('getMethodTree')
+    this.$http.get(urlStore.isCanExecute).then(res => {
+      if(res.ok && res.body.status == 'success'){
+        let data = res.body.data
+        if(!data.isCanExecute){
+          if(data.type == 'multi'){
+            this.$store.commit('setCurrentJobId', data.jobId)
+          }
+          if(data.type == 'single'){
+            this.$store.commit('setAuditingMethodId', data.methodModelId)
+          }
+          if(data.type == 'basic'){
+            this.$store.commit('setAuditingBaseMethodId', data.methodModelId)
+          }
+          this.$store.commit('setContinueAudit', data.type)
+          this.$store.commit('setAuditStatus', true)
+        }
+      }
+    })
     this.$http.get(urlStore.findList, {
       params: {
         userId: this.$store.getters.user.userId

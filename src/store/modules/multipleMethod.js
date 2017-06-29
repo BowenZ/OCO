@@ -10,7 +10,6 @@ const state = {
   multipleExecuteStatus: null,
   localAuditingMethods: [],
   auditParams: [],
-  continueAudit: false,
   selectedJobId: null,
   currentJobId: null
 }
@@ -41,7 +40,6 @@ const getters = {
   multipleExecuteStatus: state => state.multipleExecuteStatus,
   localAuditingMethods: state => state.localAuditingMethods,
   auditParams: state => state.auditParams,
-  continueAudit: state => state.continueAudit,
   selectedJobId: state => state.selectedJobId,
   currentJobId: state => state.currentJobId
 }
@@ -51,10 +49,6 @@ const actions = {
     Vue.http.get(urlStore.getTree).then(res => {
       if (res.body.status == 'success') {
         commit('setMethodTree', res.body.tree)
-          // if (res.body.isCanExecute && res.body.isCanExecute == 0) {
-          //   state.auditing = true
-          //   state.continueAudit = true
-          // }
       }
     }, res => {
       commit('setMethodTree', [])
@@ -111,9 +105,6 @@ const mutations = {
   },
   setAuditParams(state, autidParams) {
     state.auditParams = autidParams
-  },
-  setContinueAudit(state, val) {
-    state.continueAudit = val
   },
   setSelectedJobId(state, id) {
     state.selectedJobId = id
