@@ -72,9 +72,9 @@
       </div>
     </el-card>
     <el-dialog title="选择参数" v-model="dialogVisible" size="tiny" @close="handleClose" :close-on-click-modal="false">
-      <div class="popup-param">
+      <div class="popup-param" @keyup.enter="searchParam('pressEnter')">
         <p>请在输入框中输入要搜索的参数名</p>
-        <el-select v-model="popupSearch" multiple filterable remote placeholder="请搜索参数" :remote-method="searchParam" :loading="loading" loading-text="正在加载参数信息，请稍后...">
+        <el-select v-model="popupSearch" multiple filterable remote placeholder="请搜索参数" :remote-method="searchParam" :loading="loading" loading-text="正在加载参数信息，请稍后..." :no-data-text="searchTips">
           <el-option v-for="(item, index) in paramList" :key="index" :label="item.label" :value="item.value+index">
           </el-option>
         </el-select>
@@ -99,8 +99,7 @@ export default {
       loading: false,
       paramList: [],
       currentParamName: null,
-
-      searchTimer: null
+      searchTips: '请按回车键搜索'
     }
   },
   methods: {
@@ -140,23 +139,31 @@ export default {
       this.currentParamName = itemName
     },
     searchParam: function(query) {
-      clearTimeout(this.searchTimer)
-      this.loading = true
-      this.searchTimer = setTimeout(() => {
+      if(query == 'pressEnter'){
+        let searchVal = $(this.$el).find('.el-select__input').val()
+        if(!searchVal){
+          return
+        }
+        this.loading = true
         this.$http.post(urlStore.queryParamKeyValues, {
           paramName: this.currentParamName,
-          key: query
+          key: searchVal
         }, {
           emulateJSON: true
         }).then(res => {
           this.loading = false
           if (res.ok && res.body.status == 'success') {
             this.paramList = res.body.list
+            if(!this.paramList.length){
+              this.searchTips = '无数据'
+            }
           }
         }).catch(err => {
           this.loading = false
         })
-      }, 1500)
+      }else{
+        this.searchTips = '请按回车键搜索'
+      }
     },
     handleClose: function() {
       this.popupSearch = []

@@ -71,7 +71,7 @@ export default {
           this.disableInput = false
           this.currentStep = 4
           this.$store.commit('setCurrentBaseJobId', '')
-          this.$store.commit('setAuditingBaseMethodId', '')
+          // this.$store.commit('setAuditingBaseMethodId', '')
           console.log('====base finished====')
         }
       }, res => {
@@ -225,8 +225,7 @@ export default {
       }
     },
     selectedData: function(newVal){
-      console.log('+++++++++++', newVal)
-      this.updateExeStatus(null, newVal.id)
+      newVal && this.updateExeStatus(null, newVal.id)
     }
   }
 }

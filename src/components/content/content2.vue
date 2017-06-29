@@ -71,8 +71,8 @@ export default {
           this.finished = true
           this.disableInput = false
           this.currentStep = 4
-          this.$store.commit('setCurrentSingleJobId', null)
-          this.$store.commit('setAuditingMethodId', '')
+          this.$store.commit('setCurrentSingleJobId', '')
+          // this.$store.commit('setAuditingMethodId', '')
           console.log('====single finished====')
         }
       }, res => {

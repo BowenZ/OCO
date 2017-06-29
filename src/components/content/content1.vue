@@ -102,7 +102,7 @@ export default {
       this.disableInput = false
         // this.$store.commit('finishIt')
       this.currentStep = 2
-      this.$store.commit('setCurrentJobId', '')
+      // this.$store.commit('setCurrentJobId', '')
       Message({
         message: '审计执行完毕',
         type: 'success'
