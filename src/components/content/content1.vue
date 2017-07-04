@@ -2,7 +2,11 @@
   <div class="content content1">
     <v-step :steps="steps" :currentStep="currentStep"></v-step>
     <div class="content-block" element-loading-text="正在加载数据">
-      <v-params @doAudit="doAudit" :showExecuteButton="true" :multiple="true" :disableInput="disableInput || auditing" :params="selectedParams"></v-params>
+      <v-params @doAudit="doAudit" ref="params" :showExecuteButton="true" :multiple="true" :disableInput="disableInput || auditing" :params="selectedParams"></v-params>
+      <div class="execute-button clearfix" v-if="selectedMethods">
+        <el-button type="primary" size="large" v-if="!auditing" @click="doAudint" :loading="disableInput || auditing">执行审计</el-button>
+        <el-button type="danger" size="large" v-if="(auditing && continueAudit == 'multi') || multiAuditing" @click="stopAudit" :loading="stoping">停止执行</el-button>
+      </div>
       <v-result :single="false" :executeStatus="multipleExecuteStatus" :finished="finished" :showProgress="showProgress" :progress="progress" :progressMsg="progressMsg"></v-result>
     </div>
   </div>
@@ -38,10 +42,30 @@ export default {
       finished: false,
       showProgress: false,
       progress: 0,
-      progressMsg: null
+      progressMsg: null,
+      multiAuditing: false,
+      stoping: false,
+      timer: null
     }
   },
   methods: {
+    stopAudit: function(){
+      this.stoping = true
+      this.$http.get(urlStore.stopJob, {
+        params: {
+          jobId: this.$store.getters.currentJobId
+        }
+      }).then(res => {
+        if(res.ok && res.body.status == 'success'){
+          clearInterval(this.timer)
+          this.finishAudit()
+        }
+        this.stoping = false
+      })
+    },
+    doAudint: function() {
+      this.$refs.params.execute()
+    },
     updateExeStatus: function(jobId) {
       if (!jobId) {
         let currentJobId = this.$store.getters.currentJobId
@@ -99,10 +123,11 @@ export default {
       this.$store.commit('setAuditStatus', false)
       this.$store.commit('setContinueAudit', false)
       this.finished = true
+      this.multiAuditing = false
       this.disableInput = false
         // this.$store.commit('finishIt')
       this.currentStep = 2
-      // this.$store.commit('setCurrentJobId', '')
+        // this.$store.commit('setCurrentJobId', '')
       Message({
         message: '审计执行完毕',
         type: 'success'
@@ -172,12 +197,13 @@ export default {
               showClose: true
             })
             self.finished = false
+            self.multiAuditing = true
             if (!self.finished) {
               self.$store.commit('setMultipleExecuteStatus', null)
               self.updateExeStatus(result.jobId)
-              let timer = setInterval(function() {
+              self.timer = setInterval(function() {
                 if (self.finished) {
-                  clearInterval(timer)
+                  clearInterval(self.timer)
                   self.finishAudit()
                 } else {
                   console.log('====multiple continue====')
@@ -208,7 +234,7 @@ export default {
       let jobId = this.$store.getters.currentJobId
       this.$http.get(urlStore.getExecuteMethods, {
         params: {
-          jobId: jobId?jobId:'',
+          jobId: jobId ? jobId : '',
           userId: this.$store.getters.user.userId
         }
       }).then(res => {
@@ -219,6 +245,7 @@ export default {
           self.disableInput = true
           self.$store.commit('setAuditStatus', true)
           self.finished = false
+          self.multiAuditing = true
           if (!self.finished) {
             console.log('====multiple begin====')
             Message({
@@ -229,9 +256,9 @@ export default {
             })
             self.showProgress = true
             self.updateExeStatus()
-            let timer = setInterval(function() {
+            self.timer = setInterval(function() {
               if (self.finished) {
-                clearInterval(timer)
+                clearInterval(self.timer)
               } else {
                 console.log('====multiple continue====')
                 self.updateExeStatus()
@@ -264,8 +291,11 @@ export default {
     multipleExecuteStatus: function() {
       return this.$store.getters.multipleExecuteStatus
     },
-    selectedJobId: function(){
+    selectedJobId: function() {
       return this.$store.getters.selectedJobId
+    },
+    selectedMethods: function() {
+      return this.$store.getters.selectedMethods
     }
   },
   watch: {
@@ -274,7 +304,7 @@ export default {
         this.doContinueAudit()
       }
     },
-    selectedJobId: function(newId){
+    selectedJobId: function(newId) {
       console.log('+++++++++++', newId)
       this.updateExeStatus(newId)
     }
@@ -282,8 +312,17 @@ export default {
 }
 </script>
 <style lang="scss">
-.el-tooltip__popper>div:first-of-type{
+.el-tooltip__popper>div:first-of-type {
   max-height: 400px;
   overflow: auto;
+}
+
+.execute-button {
+  margin-top: 20px;
+  margin-bottom: 30px;
+  button {
+    width: 180px;
+    float: right;
+  }
 }
 </style>

@@ -71,6 +71,7 @@ export default {
           this.disableInput = false
           this.currentStep = 4
           this.$store.commit('setCurrentBaseJobId', '')
+          this.$store.commit('setContinueAudit', false)
           // this.$store.commit('setAuditingBaseMethodId', '')
           console.log('====base finished====')
         }
@@ -152,6 +153,7 @@ export default {
           let timer = setInterval(() => {
             if (this.finished) {
               clearInterval(timer)
+              this.$store.commit('setContinueAudit', false)
             } else {
               console.log('====base continue====')
               this.updateExeStatus(res.body.jobId, auditParams.methodId)
@@ -194,6 +196,7 @@ export default {
             let timer = setInterval(function() {
               if (self.finished) {
                 clearInterval(timer)
+                this.$store.commit('setContinueAudit', false)
               } else {
                 console.log('====base continue====')
                 self.updateExeStatus()
@@ -231,11 +234,5 @@ export default {
 }
 </script>
 <style lang="scss">
-.main-container .inner-container .content-container .content3 {
-  .content-block {
-    .execute-button {
-      margin-bottom: 30px;
-    }
-  }
-}
+
 </style>

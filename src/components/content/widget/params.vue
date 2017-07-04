@@ -67,9 +67,9 @@
         </el-row>
       </el-form>
       <p v-else>无参数</p>
-      <div class="execute-button clearfix" v-if="showExecuteButton">
+      <!-- <div class="execute-button clearfix" v-if="showExecuteButton">
         <el-button type="primary" @click="execute" :loading="disableInput">执行审计</el-button>
-      </div>
+      </div> -->
     </el-card>
     <el-dialog title="选择参数" v-model="dialogVisible" size="tiny" @close="handleClose" :close-on-click-modal="false">
       <div class="popup-param" @keyup.enter="searchParam('pressEnter')">

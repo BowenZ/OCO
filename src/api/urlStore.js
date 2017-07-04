@@ -52,7 +52,9 @@ const urls = {
 
   copyMethod: ip + 'auditMethodModel/copy.do',
   approveMethod: ip + 'auditMethodModel/pass.do',
-  queryParamKeyValues: ip + 'paramModel/queryParamKeyValues.do'
+  queryParamKeyValues: ip + 'paramModel/queryParamKeyValues.do',
+
+  stopJob: ip + 'auditJob/stopJob.do'
 }
 
 export default urls
