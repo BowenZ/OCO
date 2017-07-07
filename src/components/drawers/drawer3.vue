@@ -43,13 +43,6 @@ export default {
         }
       })
     },
-    clickMethod: function(event, index, title) {
-      let $target = $(event.target)
-      $target.parents('.audit-methods').find('.active').removeClass('active')
-      $target.addClass('active')
-      this.currentIndex = index
-      this.$store.commit('setSelectedData', this.basicMethods[index])
-    },
     handleMessage: function(msg) {
       // this.loading = true
       this.$refs.tree.filter(msg)

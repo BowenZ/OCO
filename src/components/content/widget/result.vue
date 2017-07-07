@@ -19,7 +19,7 @@
         </el-collapse-item>
       </el-collapse>
       <!-- {{auditingMethodId}}/{{selectedMethodId}} -->
-      <div class="result-list" v-if="single && auditingMethodId == selectedMethodId && executeStatus && executeStatus.status == 'success'">
+      <div class="result-list" v-if="single && ((selectedMethodId && auditingMethodId == selectedMethodId) || (selectedBasicId && auditingBaseMethodId == selectedBasicId)) && executeStatus && executeStatus.status == 'success'">
         <v-result-item v-if="executeStatus.data.length" v-for="(item, index) in executeStatus.data" :key="index" :item="item"></v-result-item>
       </div>
       <div class="batch-output clearfix" v-if="executeStatus && finished && currentJobId == selectedJobId">
@@ -62,8 +62,15 @@ export default {
     auditingMethodId: function() {
       return this.$store.getters.auditingMethodId
     },
+    auditingBaseMethodId: function(){
+      return this.$store.getters.auditingBaseMethodId
+    },
     selectedMethodId: function() {
       return this.$store.getters.selectedMethod ? this.$store.getters.selectedMethod.id : null
+    },
+    selectedBasicId: function(){
+      console.log(this.$store.getters.selectedData)
+      return this.$store.getters.selectedData?this.$store.getters.selectedData.id:null
     },
     slecteOptions: function() {
       let options = []

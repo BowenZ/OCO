@@ -58,7 +58,7 @@ export default {
       this.$http.get(urlStore.getExecuteSingleMethod, {
         params: {
           jobId: jobId,
-          methodModelId: methodId?methodId:'',
+          methodModelId: methodId?methodId:this.$store.getters.auditingMethodId,
           userId: this.$store.getters.user.userId
         }
       }).then(res => {
@@ -71,6 +71,9 @@ export default {
           this.finished = true
           this.disableInput = false
           this.currentStep = 4
+          this.$store.commit('setCurrentSingleJobId', '')
+          this.$store.commit('setContinueAudit', false)
+          // this.$store.commit('setAuditingMethodId', '')
           console.log('====single finished====')
         }
       }, res => {
@@ -164,6 +167,7 @@ export default {
           let timer = setInterval(function() {
             if (self.finished) {
               clearInterval(timer)
+              this.$store.commit('setContinueAudit', false)
             } else {
               console.log('====single continue====')
               self.updateExeStatus(res.body.jobId, auditParams.methodId)
@@ -181,9 +185,11 @@ export default {
     },
     doContinueAudit: function() {
       let self = this
+      let methodId = this.$store.getters.auditingMethodId
       this.$http.get(urlStore.getExecuteSingleMethod, {
         params: {
           jobId: '',
+          methodModelId: methodId?methodId:'',
           userId: this.$store.getters.user.userId
         }
       }).then(res => {
@@ -204,6 +210,7 @@ export default {
             let timer = setInterval(function() {
               if (self.finished) {
                 clearInterval(timer)
+                this.$store.commit('setContinueAudit', false)
               } else {
                 console.log('====single continue====')
                 self.updateExeStatus()
@@ -245,30 +252,17 @@ export default {
   },
   watch: {
     continueAudit: function(newVal) {
-      if (newVal) {
+      if (newVal == 'single') {
         this.doContinueAudit()
       }
+    },
+    selectedMethod: function(newVal){
+      console.log('+++++++++++', newVal)
+      this.updateExeStatus(null, newVal.id)
     }
   }
 }
 </script>
 <style lang="scss">
-.content2 {
-  .content-block {
-    .execute-button {
-      margin-bottom: 30px;
-    }
-  }
-}
 
-.content {
-  .content-block {
-    .execute-button {
-      button {
-        float: right;
-        min-width: 200px;
-      }
-    }
-  }
-}
 </style>

@@ -97,5 +97,10 @@ http.createServer(function(req, res) {
     res.write(JSON.stringify(mock.queryParamKeyValues))
   }
 
+  else if(pathname == '/auditJob/stopJob.do'){
+    console.log(mock.stopJob)
+    res.write(JSON.stringify(mock.stopJob))
+  }
+
   res.end()
 }).listen(3000)

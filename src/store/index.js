@@ -10,6 +10,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     auditing: false,
+    continueAudit: null,
     drawerIsOpened: true,
     currentDrawerIndex: sessionStorage.getItem('currentDrawerIndex') || 0,
     user: null
@@ -17,10 +18,14 @@ export default new Vuex.Store({
   getters: {
     auditing: state => state.auditing,
     drawerIsOpened: state => state.drawerIsOpened,
+    continueAudit: state => state.continueAudit,
     currentDrawerIndex: state => state.currentDrawerIndex,
     user: state => state.user
   },
   mutations: {
+    setContinueAudit(state, val) {
+      state.continueAudit = val
+    },
     changeAuditStatus(state) {
       state.auditing = !state.auditing
     },

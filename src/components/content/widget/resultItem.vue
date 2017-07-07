@@ -41,7 +41,7 @@
               </div>
             </div>
           </div>
-          <el-dialog title="提示" v-model="dialogVisible[index]" size="small">
+          <el-dialog title="资料管理" v-model="dialogVisible[index]" size="small">
             <v-result-document :documents="method.documents" :methodId="method.methodId" :dialogVisible="!!dialogVisible[index]"></v-result-document>
           </el-dialog>
         </li>

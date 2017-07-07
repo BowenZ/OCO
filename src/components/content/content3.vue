@@ -56,10 +56,12 @@ export default {
       this.$http.get(urlStore.getExecuteBasicMethod, {
         params: {
           jobId: jobId,
-          methodModelId: methodId?methodId:'',
+          methodModelId: methodId?methodId:this.$store.getters.auditingBaseMethodId,
           userId: this.$store.getters.user.userId
         }
       }).then(res => {
+        this.$store.commit('setCurrentBaseJobId', res.body.jobId)
+        this.$store.commit('setAuditingBaseMethodId', res.body.data[0].children[0].methodId)
         this.currentBaseJobId = res.body.jobId
         this.baseDataExecuteStatus = res.body
         if (res.body.data[0].children[0].status == 'success' || res.body.data[0].children[0].status == 'error') {
@@ -68,6 +70,9 @@ export default {
           this.finished = true
           this.disableInput = false
           this.currentStep = 4
+          this.$store.commit('setCurrentBaseJobId', '')
+          this.$store.commit('setContinueAudit', false)
+          // this.$store.commit('setAuditingBaseMethodId', '')
           console.log('====base finished====')
         }
       }, res => {
@@ -148,6 +153,7 @@ export default {
           let timer = setInterval(() => {
             if (this.finished) {
               clearInterval(timer)
+              this.$store.commit('setContinueAudit', false)
             } else {
               console.log('====base continue====')
               this.updateExeStatus(res.body.jobId, auditParams.methodId)
@@ -165,9 +171,11 @@ export default {
     },
     doContinueAudit: function() {
       let self = this
+      let methodId = this.$store.getters.auditingBaseMethodId
       this.$http.get(urlStore.getExecuteBasicMethod, {
         params: {
           jobId: '',
+          methodModelId: methodId?methodId:'',
           userId: this.$store.getters.user.userId
         }
       }).then(res => {
@@ -188,6 +196,7 @@ export default {
             let timer = setInterval(function() {
               if (self.finished) {
                 clearInterval(timer)
+                this.$store.commit('setContinueAudit', false)
               } else {
                 console.log('====base continue====')
                 self.updateExeStatus()
@@ -214,19 +223,16 @@ export default {
   },
   watch: {
     continueAudit: function(newVal) {
-      if (newVal) {
+      if (newVal == 'basic') {
         this.doContinueAudit()
       }
+    },
+    selectedData: function(newVal){
+      newVal && this.updateExeStatus(null, newVal.id)
     }
   }
 }
 </script>
 <style lang="scss">
-.main-container .inner-container .content-container .content3 {
-  .content-block {
-    .execute-button {
-      margin-bottom: 30px;
-    }
-  }
-}
+
 </style>
