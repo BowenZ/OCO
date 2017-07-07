@@ -11,11 +11,12 @@ export default new Vuex.Store({
   state: {
     auditing: false,
     drawerIsOpened: true,
-    currentDrawerIndex: 0,
+    currentDrawerIndex: sessionStorage.getItem('currentDrawerIndex') || 0,
     user: null
   },
   getters: {
     auditing: state => state.auditing,
+    drawerIsOpened: state => state.drawerIsOpened,
     currentDrawerIndex: state => state.currentDrawerIndex,
     user: state => state.user
   },
@@ -37,6 +38,7 @@ export default new Vuex.Store({
     },
     updateCurrentDrawerIndex(state, index) {
       state.currentDrawerIndex = index
+      sessionStorage.setItem('currentDrawerIndex', index)
     },
     login(state, user) {
       sessionStorage && sessionStorage.setItem('user', JSON.stringify(user))

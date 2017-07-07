@@ -23,7 +23,22 @@ export default new Router({
     meta: {
       requireAuth: true // 添加该字段，表示进入这个路由是需要登录的
     },
-    component: Project
+    component: Project,
+    children: [{
+      path: 'index',
+      name: 'index',
+      meta: {
+        requireAuth: true
+      },
+      component: Index
+    }, {
+      path: 'statisticAnalysis',
+      name: 'statisticAnalysis',
+      meta: {
+        requireAuth: true
+      },
+      component: require('@/components/pages/statisticAnalysis')
+    }]
   }, {
     path: '/hello',
     name: 'hello',
@@ -41,21 +56,6 @@ export default new Router({
     component: Project,
     meta: {
       requireAuth: true
-    },
-    children: [{
-      path: 'index',
-      name: 'index',
-      meta: {
-        requireAuth: true
-      },
-      component: Index
-    }, {
-      path: 'main',
-      name: 'main',
-      meta: {
-        requireAuth: true
-      },
-      component: Hello
-    }]
+    }
   }]
 })

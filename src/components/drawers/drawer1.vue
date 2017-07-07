@@ -170,6 +170,7 @@ export default {
     checkChange: function(index, obj, isSelected, hasSChildren) {
       this.currentProjectIndex = index
       let jobId = this.projectList[index].jobId
+      console.log('========', jobId)
       this.$store.commit('setSelectedJobId', jobId)
       if (!this.$refs['tree' + index]) {
         let self = this
@@ -191,7 +192,6 @@ export default {
                   currentIssue = item.sort
                 }
                 if (item.type == 'method') {
-                  console.log('+++++++++++', `${currentCategory}_${currentIssue}_${item.title}`)
                   self.selectedNodes.push(item)
                 }
               })

@@ -2,39 +2,45 @@
   <div class="left-bar">
     <nav>
       <ul>
-        <li class="active">
+        <li :class="{active: showDrawer(0)}">
           <a href="" title="审计项目" @click.prevent="toggleDrawer(0, $event)">
             <span class="el-icon-menu"></span>
             <span class="nav-title">审计项目</span>
           </a>
         </li>
-        <li>
+        <li :class="{active: showDrawer(1)}">
           <a href="" title="审计方法" @click.prevent="toggleDrawer(1, $event)">
             <span class="el-icon-star-off"></span>
             <span class="nav-title">审计方法</span>
           </a>
         </li>
-        <li>
+        <li :class="{active: showDrawer(2)}">
           <a href="" title="基础数据" @click.prevent="toggleDrawer(2, $event)">
             <span class="el-icon-document"></span>
             <span class="nav-title">基础数据</span>
           </a>
         </li>
-        <li>
+        <li :class="{active: showDrawer(5)}">
           <a href="" title="模型维护" @click.prevent="toggleDrawer(5, $event)">
             <span class="el-icon-edit"></span>
             <span class="nav-title">模型维护</span>
           </a>
         </li>
+        <li :class="{active: showDrawer(6)}">
+          <a href="" title="决策分析" @click.prevent="toggleDrawer(6, $event)">
+            <span class="el-icon-share"></span>
+            <span class="nav-title">决策分析</span>
+          </a>
+        </li>
       </ul>
       <ul>
-        <li>
+        <li :class="{active: showDrawer(3)}">
           <a href="" title="风格样式" @click.prevent="toggleDrawer(3, $event)">
             <span class="el-icon-picture"></span>
             <span class="nav-title">风格样式</span>
           </a>
         </li>
-        <li>
+        <li :class="{active: showDrawer(4)}">
           <a href="" title="登录管理" @click.prevent="toggleDrawer(4, $event)">
             <span class="el-icon-setting"></span>
             <span class="nav-title">登录管理</span>
@@ -65,6 +71,9 @@
         <div class="drawer-pane" :key="'data6'" v-show="showDrawer(5)">
           <v-drawer6></v-drawer6>
         </div>
+        <div class="drawer-pane" :key="'data6'" v-show="showDrawer(6)">
+          <v-drawer7></v-drawer7>
+        </div>
       </transition-group>
     </div>
   </div>
@@ -75,7 +84,7 @@ import $ from 'webpack-zepto'
 export default {
   data: function() {
     return {
-      currentIndex: 0
+      currentIndex: Number(sessionStorage.getItem('currentDrawerIndex'))
     }
   },
   methods: {
@@ -85,14 +94,12 @@ export default {
         this.$store.commit('updateCurrentDrawerIndex', index)
       }
       let $targetLi = $(event.target).parents('li')
-      if ($targetLi.hasClass('active')) {
-        $targetLi.removeClass('active')
+      if ($targetLi.hasClass('active') && this.$store.getters.drawerIsOpened) {
         this.$store.commit('closeDrawer')
       } else {
-        $targetLi.parents('nav').find('li.active').removeClass('active')
-        $targetLi.addClass('active')
         this.$store.commit('openDrawer')
       }
+      index!=6 && this.$router.push({path: '/'})
       return false
     },
     showDrawer(index) {
@@ -105,7 +112,8 @@ export default {
     vDrawer3: require('./drawers/drawer3.vue'),
     vDrawer4: require('./drawers/drawer4.vue'),
     vDrawer5: require('./drawers/drawer5.vue'),
-    vDrawer6: require('./drawers/drawer6.vue')
+    vDrawer6: require('./drawers/drawer6.vue'),
+    vDrawer7: require('./drawers/drawer7.vue')
   }
 }
 </script>
