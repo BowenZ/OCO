@@ -56,11 +56,10 @@ export default {
           jobId: this.$store.getters.currentJobId
         }
       }).then(res => {
-        if(res.ok && res.body.status == 'success'){
-          clearInterval(this.timer)
-          this.finishAudit()
-        }
-        this.stoping = false
+        // if(res.ok && res.body.status == 'success'){
+        //   clearInterval(this.timer)
+        //   this.finishAudit()
+        // }
       })
     },
     doAudint: function() {
@@ -128,6 +127,7 @@ export default {
         // this.$store.commit('finishIt')
       this.currentStep = 2
         // this.$store.commit('setCurrentJobId', '')
+      this.stoping = false
       Message({
         message: '审计执行完毕',
         type: 'success'
@@ -204,7 +204,7 @@ export default {
               self.timer = setInterval(function() {
                 if (self.finished) {
                   clearInterval(self.timer)
-                  self.finishAudit()
+                  // self.finishAudit()
                 } else {
                   console.log('====multiple continue====')
                   self.updateExeStatus(result.jobId)

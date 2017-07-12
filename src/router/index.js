@@ -37,7 +37,7 @@ export default new Router({
       meta: {
         requireAuth: true
       },
-      component: require('@/components/pages/statisticAnalysis')
+      component: require('@/components/pages/statisticAnalysis/statisticAnalysis')
     }]
   }, {
     path: '/hello',
