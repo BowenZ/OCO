@@ -11,14 +11,14 @@
       </el-row>
     </el-card>
     <el-card class="table-container">
-      <v-table :rowData="selectedMethods" :colData="selectedCompany"></v-table>
+      <v-table :tableData="tableData"></v-table>
     </el-card>
   </div>
 </template>
 <script>
 import urlStore from '@/api/urlStore.js'
 import vTree from './children/tree'
-import vTable from './children/table'
+import vTable from './children/table2'
 export default {
   components: {
     vTree,
@@ -32,161 +32,9 @@ export default {
         children: 'children',
         label: 'title'
       },
-      selectedMethods: [{
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }],
-      selectedCompany: [{
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }, {
-        id: 1,
-        title: 'asd'
-      }]
+      selectedMethods: [],
+      selectedCompany: [],
+      tableData: []
     }
   },
   mounted() {
@@ -205,11 +53,37 @@ export default {
     })
   },
   methods: {
-    addMethod: function(data) {
-      console.log(data)
+    addMethod(data) {
+      this.selectedMethods = this.selectedMethods.concat(data)
+      this.tableData = this.getResult()
     },
-    addCompany: function(data) {
-      console.log(data)
+    addCompany(data) {
+      this.selectedCompany.push(data)
+      this.tableData = this.getResult()
+    },
+    getResult(){
+      let ret = []
+      this.selectedMethods.forEach(method => {
+        let obj = {}
+        let sum = 0
+        obj.method = {
+          methodId: method.id,
+          methodName: method.title
+        }
+        obj.companies = []
+        this.selectedCompany.forEach((company, index) => {
+          let issuesNum = Math.ceil(Math.random() * 10)
+          obj.companies.push({
+            companyId: company.id,
+            companyName: company.title,
+            issues: issuesNum
+          })
+          sum += issuesNum
+        })
+        obj.sum = sum
+        ret.push(obj)
+      })
+      return ret
     }
   }
 }

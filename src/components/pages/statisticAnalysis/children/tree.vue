@@ -38,7 +38,26 @@ export default {
       this.$refs.tree.filter(msg)
     },
     add(node, data){
-      this.$emit('add', data)
+      node.parent.removeChildByData(data)
+      if(data.type){
+        this.$emit('add', this.getMethods(data))
+      }else{
+        this.$emit('add', data)
+      }
+    },
+    getMethods(data){
+      if(!data){
+        return
+      }
+      let ret = []
+      if(data.type == 'method'){
+        ret.push(data)
+      }else if(data.children && data.children.length){
+        data.children.forEach(item => {
+          ret = ret.concat(this.getMethods(item))
+        })
+      }
+      return ret
     },
     renderContent(h, { node, data, store }) {
       return (
