@@ -30,6 +30,9 @@ export default {
     }
   },
   methods: {
+    appendTreeNode(data){
+      this.$refs.tree.store.append(data, this.$refs.tree.data)
+    },
     filterNode(value, data) {
       if (!value) return true;
       return data.title.indexOf(value) !== -1;

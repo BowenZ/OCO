@@ -44,7 +44,7 @@ body {
 }
 
 body.theme-default {
-  .el-input-group__append .el-button--primary{
+  .el-input-group__append .el-button--primary {
     color: #fff;
   }
   .el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
@@ -401,6 +401,9 @@ body.theme-dark {
           background: #2b3245;
         }
       }
+      .el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
+        background-color: rgb(45, 50, 64);
+      }
     }
     .drawer1 {
       .new-project {
@@ -442,9 +445,6 @@ body.theme-dark {
   }
   .drawer6 .el-tree.el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
     background-color: #2b3245;
-  }
-  .el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
-    background-color: rgb(45, 50, 64);
   }
 }
 

@@ -28,7 +28,7 @@ export default {
 }
 </script>
 <style lang="scss">
-#index {
+body {
   .el-loading-mask {
     background-color: initial;
   }
