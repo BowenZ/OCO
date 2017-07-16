@@ -1,10 +1,10 @@
 <template>
-  <div class="line-chart">
-    <ve-histogram :data="chartData"></ve-histogram>
+  <div class="bar-chart">
+    <ve-bar :data="chartData"></ve-bar>
   </div>
 </template>
 <script>
-import VeHistogram from 'v-charts/lib/histogram'
+import VeBar from 'v-charts/lib/bar'
 export default {
   created() {
       this.chartData = {
@@ -32,7 +32,7 @@ export default {
     },
 
     components: {
-      VeHistogram
+      VeBar
     }
 }
 </script>

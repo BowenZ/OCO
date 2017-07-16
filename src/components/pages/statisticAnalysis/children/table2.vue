@@ -6,7 +6,7 @@
           <span>{{scope.row.method.methodName}}</span>
         </template>
       </el-table-column>
-      <el-table-column v-for="(company, index) in tableData[0].companies" :prop="'company-'+company.companyId" :label="company.companyName">
+      <el-table-column v-for="(company, index) in tableData[0].companies" :key="index" :prop="'company-'+company.companyId" :label="company.companyName">
         <el-table-column :prop="'company-'+company.companyId" :label="company.subCompany?company.subCompany.label:''" show-overflow-tooltip min-width="100">
           <template scope="scope">
             <span>{{scope.row.companies[index].issues}}</span>
@@ -17,7 +17,7 @@
       </el-table-column>
     </el-table>
     <p v-if="!tableData || !tableData.length" style="text-align:center">请从上方添加审计方法和单位数据</p>
-    <div class="covers" v-if="tableData.length">
+    <div class="covers" v-if="tableData.length && tableData[0].companies.length">
       <div class="year-selector">
         <el-popover ref="popover" placement="top" width="160" v-model="popVisible">
           <el-select v-model="selectedYear" multiple placeholder="请选择年份" size="small">
@@ -36,14 +36,20 @@
       </div>
       <span class="left-bottom-copy">各方法汇总</span>
       <div class="menu">
-        <el-dropdown trigger="click">
+        <el-dropdown trigger="click" @command="handleMenuCommand" @visible-change="handleMenuVisible">
           <span class="el-dropdown-link">
-        下拉菜单<i class="el-icon-caret-bottom el-icon--right"></i>
-      </span>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>清空数据</el-dropdown-item>
-            <el-dropdown-item>导出到前数据</el-dropdown-item>
-            <el-dropdown-item>生成统计方法图形报表</el-dropdown-item>
+		        菜单<i class="el-icon-caret-bottom el-icon--right"></i>
+		      </span>
+          <el-dropdown-menu slot="dropdown" class="table-menu">
+            <el-dropdown-item command="clearData" class="hide-trigger">清空数据</el-dropdown-item>
+            <el-dropdown-item command="exportData" class="hide-trigger">导出到前数据</el-dropdown-item>
+            <el-dropdown-item class="dropdown-item-chart">生成统计方法图形报表<i class="el-icon-caret-right"></i></el-dropdown-item>
+            <ul class="el-dropdown-menu" x-placement="top-end" v-show="dropdownMenuVisible">
+              <li class="el-dropdown-menu__item" @click="showChart(0)">所有单位</li>
+              <li class="el-dropdown-menu__item" @click="showChart(1)">一级单位</li>
+              <li class="el-dropdown-menu__item" @click="showChart(2)">二级单位</li>
+              <li class="el-dropdown-menu__item" @click="showChart(3)">三级单位</li>
+            </ul>
           </el-dropdown-menu>
         </el-dropdown>
       </div>
@@ -91,7 +97,7 @@
         <el-input placeholder="输入关键字进行过滤" v-model="filterText">
         </el-input>
       </div>
-      <el-tree class="company-tree" :data="companyData" :props="defaultProps" default-expand-all :filter-node-method="filterNode" ref="companyTree" highlight-current @current-change="handleCompanyTreeChange">
+      <el-tree class="company-tree" :data="companyData" :props="defaultProps" default-expand-all :filter-node-method="filterNode" ref="companyTree" node-key="id" highlight-current @current-change="handleCompanyTreeChange">
       </el-tree>
       <span slot="footer" class="dialog-footer">
 		    <el-button @click="headCompanyVisible = false">取 消</el-button>
@@ -167,14 +173,18 @@ export default {
       defaultProps: {
         children: 'children',
         label: 'label'
-      }
+      },
+
+      dropdownMenuVisible: false,
+      dropdownMenuListened: false
     }
   },
   watch: {
     tableData: function(newVal) {
       setTimeout(() => {
         this.addEventListener()
-      }, 10)
+        $(this.$el).find('.el-table__fixed-right, .el-table__fixed').height($(this.$el).height())
+      }, 100)
     }
   },
   mounted() {
@@ -194,7 +204,8 @@ export default {
         this.methodSecondaryMenuVisible1 = false
         this.methodSecondaryMenuVisible2 = true
       })
-    }, 10);
+
+    }, 100)
   },
   methods: {
     // +++++++搜索单位++++++++
@@ -264,66 +275,69 @@ export default {
       })
       $table.off()
       $table.on('contextmenu', (event) => {
-        event.preventDefault()
-        if ($(event.target).parents('.el-table__fixed-header-wrapper').length) {
-          this.righeMenuVisible = false
-          return
-        }
-        if (this.currentHoverCell) {
-          if (this.currentHoverCell.col.property == 'method') {
-            this.companyMenuVisible = false
-            this.issueMenuVisible = false
-            this.methodMenuVisible = true
-            this.currentRightMethod = this.currentHoverCell.row.method.methodId
-          } else if (this.currentHoverCell.col.property.match('company')) {
-            this.companyMenuVisible = false
+          event.preventDefault()
+          if ($(event.target).parents('.el-table__fixed-header-wrapper').length) {
+            this.righeMenuVisible = false
+            return
+          }
+          if (this.currentHoverCell) {
+            if (this.currentHoverCell.col.property == 'method') {
+              this.companyMenuVisible = false
+              this.issueMenuVisible = false
+              this.methodMenuVisible = true
+              this.currentRightMethod = this.currentHoverCell.row.method.methodId
+            } else if (this.currentHoverCell.col.property.match('company')) {
+              this.companyMenuVisible = false
+              this.methodMenuVisible = false
+              this.issueMenuVisible = true
+            } else if (this.currentHoverCell.col.property == 'sum') {
+              this.righeMenuVisible = false
+              return
+            }
+          } else if (!this.currentHoverCell) {
+            if ($(event.target).hasClass('el-table__fixed') || $(event.target).hasClass('el-table__fixed-right') || $(event.target).parents('.el-table__fixed, .el-table__footer-wrapper, .el-table__fixed-right').length) {
+              this.righeMenuVisible = false
+              return
+            }
             this.methodMenuVisible = false
-            this.issueMenuVisible = true
-          } else if (this.currentHoverCell.col.property == 'sum') {
-            this.righeMenuVisible = false
-            return
-          }
-        } else if (!this.currentHoverCell) {
-          if ($(event.target).parents('.el-table__fixed').length) {
-            this.righeMenuVisible = false
-            return
-          }
-          this.methodMenuVisible = false
-          this.issueMenuVisible = false
-          this.companyMenuVisible = true
+            this.issueMenuVisible = false
+            this.companyMenuVisible = true
 
-          let companyName = ''
-          let $target = $(event.target)
-          if ($target.hasClass('cell')) {
-            companyName = $target.text()
-          } else if ($target.children('.cell').length) {
-            companyName = $target.children('.cell').text()
+            let companyName = ''
+            let $target = $(event.target)
+            if ($target.hasClass('cell')) {
+              companyName = $target.text()
+            } else if ($target.children('.cell').length) {
+              companyName = $target.children('.cell').text()
+            }
+            this.currentRightCompany = companyName
           }
-          this.currentRightCompany = companyName
-        }
-        $menu.css({
-          left: `${event.clientX}px`,
-          top: `${event.clientY}px`
+          $menu.css({
+            left: `${event.clientX}px`,
+            top: `${event.clientY}px`
+          })
+          this.righeMenuVisible = true
         })
-        this.righeMenuVisible = true
-      });
+        // let vm = this
+        // $table.find('.el-table__body-wrapper').on('scroll', function(event){
+        // 	console.log(event.target)
+        // })
     },
     changeYear() {
-      console.log(this.selectedYear)
+      // console.log(this.selectedYear)
+      this.popVisible = false
     },
     handleClickTableCell(row, event) {
       // console.log(row, event)
     },
     handleHoverCell(row, col, cell, event) {
       this.currentHoverCell = {
-          row,
-          col
-        }
-        // $(cell).addClass('active')
+        row,
+        col
+      }
     },
     handleLeaveCell(row, col, cell, event) {
       this.currentHoverCell = null
-        // $(cell).removeClass('active')
     },
     handleDbClickCell(row, col, cell, event) {
       if (col.property.match('company')) {
@@ -345,8 +359,25 @@ export default {
       }
     },
     handleHeaderClick(column, event) {
-      this.currentHeadCompany = column.property.split('-').pop()
-      this.headCompanyVisible = true
+      if (column.property.match('company')) {
+        let $head
+        let $target = $(event.target)
+        if ($target.hasClass('cell')) {
+          $head = $target.parent('th')
+        } else {
+          $head = $target
+        }
+        let index
+        if ($head.hasClass('is-leaf')) {
+          index = $head.index()
+        } else {
+          index = $head.index() - 1
+        }
+        console.log(index)
+
+        this.currentHeadCompany = column.property.split('-').pop()
+        this.headCompanyVisible = true
+      }
     },
     removeCompany() {
       this.$emit('removeCompany', this.currentRightCompany)
@@ -356,6 +387,39 @@ export default {
     },
     createChart(level) {
       this.$emit('createChart', level, this.currentRightMethod)
+    },
+
+    // 右下菜单
+    handleMenuCommand(command) {
+      if (command == 'clearData') {
+        this.$emit('clearData')
+      } else if (command == 'exportData') {
+
+      } else if (command == 'showChart') {
+        this.$emit('showChart')
+      }
+    },
+    showChart(level) {
+      this.$emit('showChart', level)
+    },
+    handleMenuVisible(visible) {
+      console.log(visible)
+      if (visible && !this.dropdownMenuListened) {
+        this.dropdownMenuListened = true
+        console.log('====gogogo====')
+        setTimeout(() => {
+          $('.dropdown-item-chart').on('mouseenter', (event) => {
+            event.preventDefault();
+            this.dropdownMenuVisible = true
+          })
+          $('body .table-menu').find('.hide-trigger').on('mouseenter', (event) => {
+            event.preventDefault();
+            this.dropdownMenuVisible = false
+          });
+        }, 10)
+      } else {
+        this.dropdownMenuVisible = false
+      }
     }
   }
 }
@@ -387,6 +451,7 @@ export default {
       }
     }
     .el-table__body-wrapper {
+      overflow-y: scroll;
       td {
         cursor: pointer;
       }
@@ -394,17 +459,50 @@ export default {
     .el-table__header-wrapper th {
       cursor: pointer;
     }
+    .el-table__header-wrapper tr:last-of-type {
+      th .cell:before {
+        content: "\E61D";
+        font-family: element-icons!important;
+        speak: none;
+        font-style: normal;
+        font-weight: 400;
+        font-variant: normal;
+        text-transform: none;
+        line-height: 1;
+        vertical-align: baseline;
+        display: inline-block;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        display: inline-block;
+        font-size: 15px;
+        color: #8492a6;
+      }
+    }
+    .el-table__footer-wrapper {
+      border-top: 1px solid rgb(223, 236, 235);
+      overflow-x: hidden;
+      overflow-y: scroll;
+      td {
+        min-width: 100px;
+        &.gutter {
+          min-width: 0;
+        }
+        &:first-child .cell {
+          width: 140px;
+        }
+      }
+    }
   }
   .year-selector {
     position: absolute;
-    top: 8px;
+    top: 28px;
     left: 85px;
     z-index: 99;
   }
   .level-selector {
     position: absolute;
     right: 28px;
-    top: 5px;
+    top: 26px;
     z-index: 99;
     width: 125px;
     .el-input__inner {
@@ -421,16 +519,40 @@ export default {
   }
   .left-bottom-copy {
     position: absolute;
-    left: 30px;
-    bottom: 10px;
+    left: 1px;
+    bottom: 0px;
     font-size: 14px;
-    color: rgb(31, 61, 58);
+    color: #1f3d3a;
+    padding: 9px 34px;
+    background: #fff;
   }
   .menu {
     position: absolute;
-    right: 50px;
-    bottom: 10px;
+    right: 0;
+    bottom: 0;
     cursor: pointer;
+    background: #fff;
+    padding: 8px 59px;
+  }
+}
+
+.el-dropdown-menu {
+  .el-dropdown-menu__item {
+    font-size: 14px;
+    line-height: 30px;
+  }
+  .el-icon-caret-right {
+    font-family: 'element-icons';
+    content: "\E606";
+    font-size: 12px;
+    transform: scale(0.8);
+    color: #bfcbd9;
+    line-height: 30px;
+    margin-left: 5px;
+  }
+  >.el-dropdown-menu {
+    left: 100%;
+    top: -6px;
   }
 }
 </style>

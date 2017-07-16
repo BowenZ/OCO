@@ -48,11 +48,11 @@ export default {
       }
     }
 
-    $(document.body).attr('class', `${this.theme} ${this.color} ${this.bg} ${this.topLogo}`)
+    $(document.body).attr('class', `${this.color}`)
   },
   methods: {
     changeColor: function(val) {
-      $(document.body).attr('class', `${this.theme} ${this.color} ${this.bg} ${this.topLogo}`)
+      $(document.body).attr('class', `${this.color}`)
       if (localStorage) {
         localStorage.setItem('color', val)
       }

@@ -3,15 +3,15 @@
     <el-card class="top-box">
       <el-row :gutter="30">
         <el-col :span="12">
-          <v-tree class="method-container" :data="methodTree" title="审计方法" @add="addMethod"></v-tree>
+          <v-tree v-loading="methodTreeLoading" class="method-container" :data="methodTree" title="审计方法" @add="addMethod"></v-tree>
         </el-col>
         <el-col :span="12">
-          <v-tree ref="companyList" class="company-container" :data="companyList" title="被审单位" @add="addCompany"></v-tree>
+          <v-tree v-loading="companyListLoading" ref="companyList" class="company-container" :data="companyList" title="被审单位" @add="addCompany"></v-tree>
         </el-col>
       </el-row>
     </el-card>
     <el-card class="table-container">
-      <v-table v-loading="tableLoading" :tableData="tableData" @removeCompany="handleRemoveCompany" @removeMethod="handleRemoveMethod" @showDetail="handleShowDetail" @changeCompany="handleChangeCompany" @createChart="handleCreateChare"></v-table>
+      <v-table v-loading="tableLoading" :tableData="tableData" @removeCompany="handleRemoveCompany" @removeMethod="handleRemoveMethod" @showDetail="handleShowDetail" @changeCompany="handleChangeCompany" @createChart="handleCreateChare" @clearData="handleClearData" @showChart="handleShowChart"></v-table>
     </el-card>
     <el-dialog title="数据钻取" :visible.sync="dialogVisibleDetail" size="large">
       <el-table :data="detailData" style="width: 100%">
@@ -27,11 +27,18 @@
         <el-button type="primary" @click="dialogVisibleDetail = false">确 定</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="图表" :visible.sync="dialogVisibleLineChart" size="large">
-      <v-line-chart></v-line-chart>
+    <el-dialog title="图表" :visible.sync="dialogVisibleBarChart" size="large">
+      <v-bar-chart></v-bar-chart>
       <span slot="footer" class="dialog-footer">
         <!-- <el-button @click="dialogVisibleDetail = false">取 消</el-button> -->
-        <el-button type="primary" @click="dialogVisibleDetail = false">确 定</el-button>
+        <el-button type="primary" @click="dialogVisibleBarChart = false">确 定</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog title="图表" :visible.sync="dialogVisiblePieChart" size="large">
+      <v-pie-chart></v-pie-chart>
+      <span slot="footer" class="dialog-footer">
+        <!-- <el-button @click="dialogVisibleDetail = false">取 消</el-button> -->
+        <el-button type="primary" @click="dialogVisiblePieChart = false">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -40,16 +47,20 @@
 import urlStore from '@/api/urlStore.js'
 import vTree from './children/tree'
 import vTable from './children/table2'
-import vLineChart from './children/lineChart'
+import vBarChart from './children/barChart'
+import vPieChart from './children/pieChart'
 export default {
   components: {
     vTree,
     vTable,
-    vLineChart
+    vBarChart,
+    vPieChart
   },
   data() {
     return {
+      methodTreeLoading: false,
       methodTree: null,
+      companyListLoading: false,
       companyList: null,
       methodProps: {
         children: 'children',
@@ -81,25 +92,39 @@ export default {
       }],
 
       // 图表
-      dialogVisibleLineChart: false
+      dialogVisibleBarChart: false,
+      dialogVisiblePieChart: false
     }
   },
   mounted() {
-    // 加载方法树
-    this.$http.get(urlStore.getDetail).then(res => {
-      if (res.ok) {
-        this.methodTree = res.body.tree
-      }
-    })
-
-    // 加载单位
-    this.$http.get(urlStore.findMethods).then(res => {
-      if (res.ok) {
-        this.companyList = res.body.data
-      }
-    })
+    this.loadMethodTree()
+    this.loadCompanyList()
   },
   methods: {
+    loadMethodTree() {
+      // 加载方法树
+      this.methodTreeLoading = true
+      this.$http.get(urlStore.getDetail).then(res => {
+        if (res.ok) {
+          this.methodTree = res.body.tree
+        }
+        this.methodTreeLoading = false
+      }).catch(err => {
+        this.methodTreeLoading = false
+      })
+    },
+    loadCompanyList() {
+      // 加载单位
+      this.companyListLoading = true
+      this.$http.get(urlStore.findMethods).then(res => {
+        if (res.ok) {
+          this.companyList = res.body.data
+        }
+        this.companyListLoading = false
+      }).catch(err => {
+        this.companyListLoading = false
+      })
+    },
     addMethod(data) {
       this.selectedMethods = this.selectedMethods.concat(data)
       this.tableData = this.getResult()
@@ -142,7 +167,7 @@ export default {
           setTimeout(() => {
             this.tableData = this.getResult()
             this.tableLoading = false
-          }, 10)
+          }, 0)
           return false
         }
         return true
@@ -160,22 +185,20 @@ export default {
         }
         return true
       })
-    }, 
+    },
     handleShowDetail(data) {
-      console.log(data)
       this.dialogVisibleDetail = true
     },
-    handleChangeCompany(parentCompany, childCompany){
-      console.log(parentCompany, childCompany)
+    handleChangeCompany(parentCompany, childCompany) {
       this.selectedCompany.every(item => {
-        if(item.id == parentCompany){
-          if(item.subCompany && childCompany.id == item.subCompany.id){
+        if (item.id == parentCompany) {
+          if (item.subCompany && childCompany.id == item.subCompany.id) {
             return false
           }
-          if(childCompany.level == 1 && !item.subCompany){
+          if (childCompany.level == 1 && !item.subCompany) {
             return false
           }
-          if(childCompany.level == 1){
+          if (childCompany.level == 1) {
             item.subCompany = null
             this.tableData = this.getResult()
             return false
@@ -187,9 +210,30 @@ export default {
         return true
       })
     },
-    handleCreateChare(level, methodId){
-      console.log(level, methodId)
-      this.dialogVisibleLineChart = true
+    handleCreateChare(level, methodId) {
+      this.dialogVisibleBarChart = true
+    },
+    handleClearData() {
+      this.$confirm('是否清空当前表格?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.selectedCompany = []
+        this.selectedMethods = []
+        this.tableData = []
+        this.loadMethodTree()
+        this.loadCompanyList()
+        this.$message({
+          type: 'success',
+          message: '已清空!'
+        });
+      }).catch(() => {
+
+      })
+    },
+    handleShowChart(){
+      this.dialogVisiblePieChart = true
     }
   }
 }
