@@ -41,12 +41,13 @@ export default {
       this.$refs.tree.filter(msg)
     },
     add(node, data){
-      node.parent.removeChildByData(data)
+      // node.parent.removeChildByData(data)
       if(data.type){
         this.$emit('add', this.getMethods(data))
       }else{
         this.$emit('add', data)
       }
+      return false
     },
     getMethods(data){
       if(!data){

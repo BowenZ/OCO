@@ -13,23 +13,23 @@
           </template>
         </el-table-column>
       </el-table-column>
-      <el-table-column prop="sum" fixed="right" label="各单位汇总" show-overflow-tooltip width="150">
+      <el-table-column prop="sum" fixed="right" label="汇总" show-overflow-tooltip width="150">
       </el-table-column>
     </el-table>
     <p v-if="!tableData || !tableData.length" style="text-align:center">请从上方添加审计方法和单位数据</p>
     <div class="covers" v-if="tableData.length && tableData[0].companies.length">
       <div class="year-selector">
-        <el-popover ref="popover" placement="top" width="160" v-model="popVisible">
-          <el-select v-model="selectedYear" multiple placeholder="请选择年份" size="small">
+        <el-popover ref="popover" placement="top" width="200" v-model="popVisible">
+          <el-select style="width:120px;" v-model="selectedYear" multiple placeholder="请选择年份" size="small">
             <el-option v-for="(item, index) in years" :key="index" :label="item" :value="item">
             </el-option>
           </el-select>
-          <el-button type="primary" size="small" @click="changeYear" style="margin-top: 5px;float: right;">确定</el-button>
+          <el-button type="primary" size="small" @click="changeYear">确定</el-button>
         </el-popover>
         <el-button type="text" size="small" v-popover:popover>修改日期</el-button>
       </div>
       <div class="level-selector">
-        <el-select v-model="selectedLevel" placeholder="各单位汇总（全）" size="small">
+        <el-select v-model="selectedLevel" placeholder="各单位汇总（全）" size="small" @change="handleChangeLevel">
           <el-option v-for="item in levelOptions" :key="item.value" :label="item.label" :value="item.value">
           </el-option>
         </el-select>
@@ -318,14 +318,10 @@ export default {
           })
           this.righeMenuVisible = true
         })
-        // let vm = this
-        // $table.find('.el-table__body-wrapper').on('scroll', function(event){
-        // 	console.log(event.target)
-        // })
     },
     changeYear() {
-      // console.log(this.selectedYear)
       this.popVisible = false
+      this.$emit('changeYear', this.selectedYear)
     },
     handleClickTableCell(row, event) {
       // console.log(row, event)
@@ -373,7 +369,6 @@ export default {
         } else {
           index = $head.index() - 1
         }
-        console.log(index)
 
         this.currentHeadCompany = column.property.split('-').pop()
         this.headCompanyVisible = true
@@ -387,6 +382,11 @@ export default {
     },
     createChart(level) {
       this.$emit('createChart', level, this.currentRightMethod)
+    },
+
+    // 右上菜单
+    handleChangeLevel(val){
+    	this.$emit('changeLevel', val)
     },
 
     // 右下菜单
@@ -403,10 +403,8 @@ export default {
       this.$emit('showChart', level)
     },
     handleMenuVisible(visible) {
-      console.log(visible)
       if (visible && !this.dropdownMenuListened) {
         this.dropdownMenuListened = true
-        console.log('====gogogo====')
         setTimeout(() => {
           $('.dropdown-item-chart').on('mouseenter', (event) => {
             event.preventDefault();
@@ -415,7 +413,7 @@ export default {
           $('body .table-menu').find('.hide-trigger').on('mouseenter', (event) => {
             event.preventDefault();
             this.dropdownMenuVisible = false
-          });
+          })
         }, 10)
       } else {
         this.dropdownMenuVisible = false
@@ -450,8 +448,18 @@ export default {
         padding: 0 18px;
       }
     }
+    .el-table__fixed{
+    	.el-table__fixed-body-wrapper tr{
+    		background-color: #f3bcbc;
+    	}
+    }
+    .el-table__fixed-right{
+    	.el-table__fixed-body-wrapper tr{
+    		background-color: #7fe07f;
+    	}
+    }
     .el-table__body-wrapper {
-      overflow-y: scroll;
+      // overflow-y: scroll;
       td {
         cursor: pointer;
       }
@@ -482,6 +490,9 @@ export default {
       border-top: 1px solid rgb(223, 236, 235);
       overflow-x: hidden;
       overflow-y: scroll;
+      tr{
+      	background-color: #a1a1fb;
+      }
       td {
         min-width: 100px;
         &.gutter {
@@ -501,7 +512,7 @@ export default {
   }
   .level-selector {
     position: absolute;
-    right: 28px;
+    right: 24px;
     top: 26px;
     z-index: 99;
     width: 125px;
@@ -524,14 +535,14 @@ export default {
     font-size: 14px;
     color: #1f3d3a;
     padding: 9px 34px;
-    background: #fff;
+    background: #a1a1fb;
   }
   .menu {
     position: absolute;
     right: 0;
     bottom: 0;
     cursor: pointer;
-    background: #fff;
+    background: #a1a1fb;
     padding: 8px 59px;
   }
 }
@@ -553,6 +564,7 @@ export default {
   >.el-dropdown-menu {
     left: 100%;
     top: -6px;
+    min-width: 80px;
   }
 }
 </style>
