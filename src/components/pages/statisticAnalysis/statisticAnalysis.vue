@@ -70,8 +70,194 @@ export default {
         children: 'children',
         label: 'title'
       },
-      selectedMethods: [],
-      selectedCompany: [],
+      selectedMethods: 
+        [
+          {
+            "id": 382,
+            "type": "method",
+            "title": "部门项目支出预算与执行差异分析",
+            "selected": 0,
+            "methodCode": "SELECT [预算年度]\r\n      ,[预算单位编码]\r\n      ,[预算单位名称]\r\n      ,[预算项目名称]\r\n      ,[指标来源编码]\r\n      ,[指标来源名称]\r\n      ,[项目分类名称]\r\n      ,[预算类型名称]\r\n      ,[可执行指标金额]\r\n      ,[支付金额]\r\n      ,[差额]\r\n      ,[预算执行率]\r\n  FROM [03 部门项目支出预算与执行差异分析]",
+            "isEnable": 1,
+            "sort": 1,
+            "methodType": "model",
+            "autidType": "自动",
+            "description": "部门项目支出预算与执行差异分析",
+            "params": [
+              {
+                "id": 2268,
+                "name": "审计年度",
+                "type": "string",
+                "value": "2016",
+                "isNull": 1,
+                "style": "text"
+              },
+              {
+                "id": 2269,
+                "name": "预算年度",
+                "type": "int",
+                "value": "2017",
+                "isNull": 1,
+                "style": "text"
+              }
+            ]
+          },
+          {
+            "id": 384,
+            "type": "method",
+            "title": "测试复制222",
+            "selected": 0,
+            "methodCode": "SELECT [预算年度]\r\n      ,[预算单位编码]\r\n      ,[预算单位名称]\r\n      ,[预算项目名称]\r\n      ,[指标来源编码]\r\n      ,[指标来源名称]\r\n      ,[项目分类名称]\r\n      ,[预算类型名称]\r\n      ,[可执行指标金额]\r\n      ,[支付金额]\r\n      ,[差额]\r\n      ,[预算执行率]\r\n  FROM [03 部门项目支出预算与执行差异分析]",
+            "isEnable": 1,
+            "sort": 1,
+            "methodType": "model",
+            "autidType": "自动",
+            "description": "部门项目支出预算与执行差异分析",
+            "params": [
+              {
+                "id": 1269,
+                "name": "审计年度",
+                "type": "string",
+                "value": "2016",
+                "isNull": 1,
+                "style": "text"
+              }
+            ]
+          },
+          {
+            "id": 261,
+            "type": "method",
+            "title": "01 部门违规收取协会、学会的“赞助费”或“管理费”",
+            "selected": 0,
+            "accord": "定性依据",
+            "externalDataSource": "",
+            "innerDataSource": "",
+            "methodCode": "SELECT   \n       [ID]\n      ,[会计科目编号]\n      ,[会计科目名称]\n      ,[记账凭证摘要]\n      ,[记账凭证日期]\n      ,[业务日期]\n      ,[借方发生额]\n      ,[贷方发生额]\n      ,[记账凭证种类]\n      ,[记账凭证编号]\n      ,[附件数]\n      ,a.[会计年度]\n      ,[会计月份]\n      ,[财务主管]\n      ,[记账人员]\n      ,[出纳人员]\n      ,[审核人员]\n      ,[制单人员]\n      ,[源凭证号]\n      ,[金额]\n      ,[备注]\n      ,[凭证类型编号]\n      ,[借方外币金额]\n      ,[贷方外币金额]\n      ,[币种代码]\n      ,[币种名称]\n      ,[汇率]\n      ,[是否外币凭证]\n      ,[选择]\n      ,[票据号]\n      ,[记账凭证行号]\n      ,[记账标志]\n      ,a.[会计电子账簿编号]\n      ,[乡镇代码]\n      ,[AO单位代码]\n      ,[源数据包名称]\n      ,[年度]\n      ,a.[会计电子账簿名称] \n      ,[行政区划代码]\n      ,[对方科目名称]\n      ,[对方科目编码]\n      ,b.会计核算单位\n      ,b.单位代码\n  FROM  [czcw_gh].[dbo].[基础表_财务类_记账凭证表] a\n inner join (\n  select 单位代码,会计年度,会计电子账簿编号,会计电子账簿名称,会计核算单位 \n  FROM  [czcw_gh].[dbo].[基础表_财务类_电子账簿信息表]  \n  where 单位代码 like  '$单位编码$%'\n  ) b \n  on a.会计电子账簿编号 =b.会计电子账簿编号 and a.会计年度=b.会计年度\n  where   a.会计年度 in ($预算年度$)\n  \n and 会计科目名称  not like '%物业%' and [记账凭证摘要]  not like '%物业%'  \n and (会计科目名称 like '%赞助费%' or 会计科目名称 like '%管理费%' \n or [记账凭证摘要] like '%赞助费%' or [记账凭证摘要] like '%管理费%' )",
+            "isEnable": 1,
+            "sort": 1,
+            "methodType": "model",
+            "autidType": "自动",
+            "description": "可以通过两种方式审计。<br/>一、查询代开发票中收款方纳税人名称为预算单位，付款方纳税人名称为协会、学会的信息，根据发票开具内容进行延伸审计。如果预算单位收取费用未入账，可延伸审计该单位是否私设“小金库”。<br/>二、在预算单位财务账中，通过会计科目或摘要查询是否有对协会、学会等收取的“赞助费”或“管理费”等。",
+            "params": [
+              {
+                "id": 185,
+                "name": "单位编码",
+                "type": "string",
+                "value": "028",
+                "isNull": 0,
+                "style": "pop"
+              },
+              {
+                "id": 186,
+                "name": "预算年度",
+                "type": "string",
+                "value": "2016",
+                "isNull": 0,
+                "style": "text"
+              }
+            ]
+          },
+          {
+            "id": 262,
+            "type": "method",
+            "title": "02 部门在协会、学会私设“小金库”和报销各类费用",
+            "selected": 0,
+            "accord": "定性依据",
+            "externalDataSource": "",
+            "innerDataSource": "",
+            "methodCode": "SELECT  [编号]\n      ,[预算年度]\n      ,[交易凭证类型编码]\n      ,[交易凭证类型名称]\n      ,[业务科室编码]\n      ,[业务科室名称]\n      ,[预算单位编码]\n      ,[预算单位名称]\n      ,[预算科目编码]\n      ,[预算科目名称]\n      ,[项目分类编码]\n      ,[项目分类名称]\n      ,[资金性质编码]\n      ,[资金性质名称]\n      ,[预算项目编码]\n      ,[预算项目名称]\n      ,[指标特性编码]\n      ,[指标特性名称]\n      ,[指标来源编码]\n      ,[指标来源名称]\n      ,[指标文件编号]\n      ,[指标文件名称]\n      ,[支付方式编码]\n      ,[支付方式名称]\n      ,[预算类型编码]\n      ,[预算类型名称]\n      ,[支出经济项目分类编码]\n      ,[支出经济项目分类名称]\n      ,[支付金额]\n      ,[摘要]\n      ,[支付时间]\n      ,[清算时间]\n      ,[结算方式]\n      ,[供应商名称]\n      ,[银行账号]\n      ,[开户银行]\n      ,[付款账号]\n      ,[付款帐户]\n      ,[付款银行]\n      ,[生成人]\n      ,[生成时间]\n      ,[来源计划额度ID]\n      ,[行政区划代码]\n   \n  FROM [czcw_gh].[dbo].[基础表_支付凭证表]\n  where [预算单位编码] like  '$单位编码$%'\n    and [预算年度] in  ($预算年度$)\n  and [行政区划代码]='410000' \n  and [预算单位名称]<>[供应商名称]\n \n  and ([供应商名称] like '%协会%' or [供应商名称] like '%学会%')",
+            "isEnable": 1,
+            "sort": 2,
+            "methodType": "model",
+            "autidType": "自动",
+            "description": "通过国库集中支付凭证表，查询预算单位向协会、协会拨付资金的情况，延伸资金的使用情况，重点关注是否形成“小金库”或者预算单位在协会、学会报销费用。",
+            "params": [
+              {
+                "id": 187,
+                "name": "单位编码",
+                "type": "string",
+                "value": "028",
+                "isNull": 0,
+                "style": "pop"
+              },
+              {
+                "id": 188,
+                "name": "预算年度",
+                "type": "string",
+                "value": "2016",
+                "isNull": 0,
+                "style": "text"
+              }
+            ]
+          },
+          {
+            "id": 263,
+            "type": "method",
+            "title": "03 部门工作人员违规兼职取酬",
+            "selected": 0,
+            "accord": "定性依据",
+            "externalDataSource": "",
+            "innerDataSource": "",
+            "isEnable": 1,
+            "sort": 3,
+            "methodType": "model",
+            "autidType": "人工",
+            "description": "需要手工审计。审查预算单位下属部门或协会等的工资单或者补贴领取单据，关注预算单位本级人员领取工资或者补贴的记录。",
+            "params": []
+          },
+          {
+            "id": 264,
+            "type": "method",
+            "title": "04 协会、学会等中介机构利用部门的影响力违规收费",
+            "selected": 0,
+            "accord": "定性依据",
+            "externalDataSource": "",
+            "innerDataSource": "",
+            "methodCode": "SELECT distinct [通用发票uuid]\r\n      ,[代开申请uuid]\r\n      ,[土地税源编号]\r\n      ,[房源编号]\r\n      ,[付款方名称]\r\n      ,[付款方登记序号]\r\n      ,[付款方身份证件号码]\r\n      ,[付款方身份证件种类代码]\r\n      ,[付款方纳税人识别号]\r\n      ,[蓝字发票号码]\r\n      ,[蓝字发票代码]\r\n      ,[联系电话]\r\n      ,a.[地址]\r\n      ,[收款方名称]\r\n      ,[收款方纳税人识别号]\r\n      ,[录入人代码]\r\n      ,[录入日期]\r\n      ,[修改人代码]\r\n      ,[修改日期]\r\n      ,[数据归属地区]\r\n      ,[收款方身份证件类型代码]\r\n      ,[收款方身份证件号码]\r\n      ,[数据同步时间]\r\n      ,[通用发票货劳uuid]\r\n      ,[货物劳务名称]\r\n      ,[规格型号]\r\n      ,[单位数量代码]\r\n      ,[货劳数量]\r\n      ,[单价]\r\n      ,[金额]\r\n      ,[发票开具信息uuid]\r\n      ,[代开发票类别代码]\r\n      ,[代开发票类别名称]\r\n      ,[开具税务机关代码]\r\n      ,[开票人代码]\r\n      ,[开具日期]\r\n      ,[登记序号]\r\n      ,[纳税人识别号]\r\n      ,[纳税人名称]\r\n\t  ,b.业务主管部门 纳税人业务主管部门\r\n      ,[发票种类代码]\r\n      ,[发票代码]\r\n      ,[发票号码]\r\n      ,[开票金额]\r\n      ,[特殊纳税人登记序号]\r\n      ,[发票库房代码]\r\nFROM [229].[datactr].[dbo].[分析表_发票_代开通用机打发票] a\r\n,[qthy_gh].[dbo].基础表_民政_社团基本信息_合并后 b\r\n,[czcw_gh].[dbo].[基础表_预算单位] c\r\nwhere c.[行政区划代码]='410000'\r\nand c.预算单位编码 like '$单位编码$%'\r\nand c.预算年度 in ($预算年度$) \r\nand left(a.开具日期,4 ) in ($预算年度$) \r\n\r\nand b.单位名称 not like '%学校%' \r\nand b.单位名称 not like '%学院%'\r\nand a.纳税人名称=b.单位名称\r\nand c.预算单位名称 like '%'+b.业务主管部门+'%'\r\nand (货物劳务名称 like '%咨询%'\r\n or 货物劳务名称 like '%管理%'\r\n or 货物劳务名称 like '%委托%'\r\n or 货物劳务名称 like '%服务%'\r\n or 货物劳务名称 like '%中介%'\r\n or 货物劳务名称 like '%培训%'\r\n or 货物劳务名称 like '%会议%'\r\n ) ",
+            "isEnable": 1,
+            "sort": 4,
+            "methodType": "model",
+            "autidType": "自动",
+            "description": "查询代开发票中收款方纳税人名称为协会、学会，发票内容为咨询费、管理费、委托费、服务费、中介费、培训费、会议费等的信息，延伸审计是否存在协会、学会等中介机构利用部门的影响力违规收费的问题。",
+            "params": [
+              {
+                "id": 211,
+                "name": "单位编码",
+                "type": "string",
+                "value": "028",
+                "isNull": 0,
+                "style": "pop"
+              },
+              {
+                "id": 212,
+                "name": "预算年度",
+                "type": "string",
+                "value": "2016",
+                "isNull": 0,
+                "style": "text"
+              }
+            ]
+          }
+        ],
+      selectedCompany: 
+        [
+          {
+            "id": 101,
+            "title": "开封市工商局相国寺分局",
+            "params": [],
+            "externalDataSource": [
+              "临时表_人员信息"
+            ]
+          },
+          {
+            "id": 102,
+            "title": "开封市工商局夜市分局",
+            "params": [],
+            "externalDataSource": [
+              "临时表_人员信息"
+            ]
+          }
+        ],
       tableData: [],
       tableLoading: false,
 
@@ -103,6 +289,7 @@ export default {
   mounted() {
     this.loadMethodTree()
     this.loadCompanyList()
+    this.tableData = this.getResult()
   },
   methods: {
     loadMethodTree() {

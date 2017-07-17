@@ -26,7 +26,7 @@
           </el-select>
           <el-button type="primary" size="small" @click="changeYear">确定</el-button>
         </el-popover>
-        <el-button type="text" size="small" v-popover:popover>修改日期</el-button>
+        <el-button type="text" v-popover:popover>修改日期</el-button>
       </div>
       <div class="level-selector">
         <el-select v-model="selectedLevel" placeholder="各单位汇总（全）" size="small" @change="handleChangeLevel">
@@ -438,6 +438,9 @@ export default {
     .el-table__header-wrapper thead div {
       background-color: transparent;
     }
+    .el-table__fixed-header-wrapper th:first-of-type{
+    	background: #d2d6dc;
+    }
     thead .cell {
       white-space: nowrap;
       padding: 0 3px;
@@ -450,12 +453,12 @@ export default {
     }
     .el-table__fixed{
     	.el-table__fixed-body-wrapper tr{
-    		background-color: #f3bcbc;
+    		background-color: #eef1f6;
     	}
     }
     .el-table__fixed-right{
     	.el-table__fixed-body-wrapper tr{
-    		background-color: #7fe07f;
+    		background-color: #e2f0e4;
     	}
     }
     .el-table__body-wrapper {
@@ -491,7 +494,7 @@ export default {
       overflow-x: hidden;
       overflow-y: scroll;
       tr{
-      	background-color: #a1a1fb;
+      	background-color: #c9e5f5;
       }
       td {
         min-width: 100px;
@@ -506,9 +509,11 @@ export default {
   }
   .year-selector {
     position: absolute;
-    top: 28px;
-    left: 85px;
+    top: 5px;
+    left: 5px;
     z-index: 99;
+    padding: 18px 38px;
+    background: #d2d6dc;
   }
   .level-selector {
     position: absolute;
@@ -535,14 +540,14 @@ export default {
     font-size: 14px;
     color: #1f3d3a;
     padding: 9px 34px;
-    background: #a1a1fb;
+    background: #c9e5f5;
   }
   .menu {
     position: absolute;
     right: 0;
     bottom: 0;
     cursor: pointer;
-    background: #a1a1fb;
+    background: #d2d6dc;
     padding: 8px 59px;
   }
 }

@@ -1,6 +1,10 @@
 <template>
   <div class="tree-box">
-    <v-search :title="title" @message="handleSearch"></v-search>
+    <v-search :title="title" @message="handleSearch">
+      <span slot="append">
+        <span>aaa</span>
+      </span>
+    </v-search>
     <div class="method-tree">
       <el-tree ref="tree" :data="data" :render-content="renderContent" node-key="id" :default-expand-all="false" :props="methodProps" :filter-node-method="filterNode">
       </el-tree>

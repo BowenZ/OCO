@@ -1,6 +1,11 @@
 <template>
   <div class="search-input">
-    <h4 class="search-title">{{title}}</h4>
+    <h4 class="search-title">
+      {{title}}
+      <span class="title-append" v-if="$slots.append">
+        <slot name="append"></slot>
+      </span>
+    </h4>
     <form action="" autocomplete="on">
       <input name="search" type="text" placeholder="请输入内容，按回车搜索" autocomplete="off" @keydown.enter.prevent="submit($event)">
       <a href="javascript: void(0)" class="search-btn el-icon-search"></a>
