@@ -175,15 +175,14 @@ export default {
         label: 'label'
       },
 
-      dropdownMenuVisible: false,
-      dropdownMenuListened: false
+      dropdownMenuVisible: false
     }
   },
   watch: {
     tableData: function(newVal) {
       setTimeout(() => {
         this.addEventListener()
-        $(this.$el).find('.el-table__fixed-right, .el-table__fixed').height($(this.$el).height())
+        this.resizeFixedTableCol()
       }, 100)
     }
   },
@@ -204,10 +203,14 @@ export default {
         this.methodSecondaryMenuVisible1 = false
         this.methodSecondaryMenuVisible2 = true
       })
-
+      $('body').append('<div class="el-tooltip__popper is-dark el-fade-in-linear-enter-to table-head-tooltip"></div>')
     }, 100)
   },
   methods: {
+    resizeFixedTableCol() {
+      let height = $(this.$el).find('.el-table__fixed .el-table__fixed-header-wrapper').height() + $(this.$el).find('.el-table__fixed .el-table__fixed-body-wrapper').height()
+      $(this.$el).find('.el-table__fixed-right, .el-table__fixed').height(height)
+    },
     // +++++++搜索单位++++++++
     searchCompany() {
       this.$refs.companyTree.filter(this.filterText);
@@ -220,8 +223,11 @@ export default {
       this.selectedTreeCompany = data
     },
     confirmChangeCompany() {
-      this.$emit('changeCompany', this.currentHeadCompany, this.selectedTreeCompany)
       this.headCompanyVisible = false
+      if (!this.selectedTreeCompany) {
+        return
+      }
+      this.$emit('changeCompany', this.currentHeadCompany, this.selectedTreeCompany)
     },
     // ++++++++++++++++++++++
     getSummaries(param) {
@@ -275,49 +281,68 @@ export default {
       })
       $table.off()
       $table.on('contextmenu', (event) => {
-          event.preventDefault()
-          if ($(event.target).parents('.el-table__fixed-header-wrapper').length) {
+        event.preventDefault()
+        if ($(event.target).parents('.el-table__fixed-header-wrapper').length) {
+          this.righeMenuVisible = false
+          return
+        }
+        if (this.currentHoverCell) {
+          if (this.currentHoverCell.col.property == 'method') {
+            this.companyMenuVisible = false
+            this.issueMenuVisible = false
+            this.methodMenuVisible = true
+            this.currentRightMethod = this.currentHoverCell.row.method.methodId
+          } else if (this.currentHoverCell.col.property.match('company')) {
+            this.companyMenuVisible = false
+            this.methodMenuVisible = false
+            this.issueMenuVisible = true
+          } else if (this.currentHoverCell.col.property == 'sum') {
             this.righeMenuVisible = false
             return
           }
-          if (this.currentHoverCell) {
-            if (this.currentHoverCell.col.property == 'method') {
-              this.companyMenuVisible = false
-              this.issueMenuVisible = false
-              this.methodMenuVisible = true
-              this.currentRightMethod = this.currentHoverCell.row.method.methodId
-            } else if (this.currentHoverCell.col.property.match('company')) {
-              this.companyMenuVisible = false
-              this.methodMenuVisible = false
-              this.issueMenuVisible = true
-            } else if (this.currentHoverCell.col.property == 'sum') {
-              this.righeMenuVisible = false
-              return
-            }
-          } else if (!this.currentHoverCell) {
-            if ($(event.target).hasClass('el-table__fixed') || $(event.target).hasClass('el-table__fixed-right') || $(event.target).parents('.el-table__fixed, .el-table__footer-wrapper, .el-table__fixed-right').length) {
-              this.righeMenuVisible = false
-              return
-            }
-            this.methodMenuVisible = false
-            this.issueMenuVisible = false
-            this.companyMenuVisible = true
-
-            let companyName = ''
-            let $target = $(event.target)
-            if ($target.hasClass('cell')) {
-              companyName = $target.text()
-            } else if ($target.children('.cell').length) {
-              companyName = $target.children('.cell').text()
-            }
-            this.currentRightCompany = companyName
+        } else if (!this.currentHoverCell) {
+          if ($(event.target).hasClass('el-table__fixed') || $(event.target).hasClass('el-table__fixed-right') || $(event.target).parents('.el-table__fixed, .el-table__footer-wrapper, .el-table__fixed-right').length) {
+            this.righeMenuVisible = false
+            return
           }
-          $menu.css({
-            left: `${event.clientX}px`,
-            top: `${event.clientY}px`
-          })
-          this.righeMenuVisible = true
+          this.methodMenuVisible = false
+          this.issueMenuVisible = false
+          this.companyMenuVisible = true
+
+          let companyName = ''
+          let $target = $(event.target)
+          if ($target.hasClass('cell')) {
+            companyName = $target.text()
+          } else if ($target.children('.cell').length) {
+            companyName = $target.children('.cell').text()
+          }
+          this.currentRightCompany = companyName
+        }
+        $menu.css({
+          left: `${event.clientX}px`,
+          top: `${event.clientY}px`
         })
+        this.righeMenuVisible = true
+      })
+
+      let $tooltip = $('.table-head-tooltip')
+      let $tableHeader = $(this.$el).find('.el-table__header-wrapper')
+      $tableHeader.off()
+      $tableHeader.on('mouseenter', 'th .cell', (event) => {
+        event.preventDefault();
+        let txt = $(event.target).text()
+        if (txt) {
+          let targetPosition = event.target.getClientRects()[0]
+          $tooltip.text(txt).css({
+            top: `${targetPosition.top - targetPosition.height - 25}px`,
+            left: `${targetPosition.left + (targetPosition.width/2)}px`,
+            display: 'block'
+          });
+        }
+      }).on('mouseleave', 'th .cell', (event) => {
+        event.preventDefault();
+        $tooltip.css('display', 'none');
+      });
     },
     changeYear() {
       this.popVisible = false
@@ -385,8 +410,8 @@ export default {
     },
 
     // 右上菜单
-    handleChangeLevel(val){
-    	this.$emit('changeLevel', val)
+    handleChangeLevel(val) {
+      this.$emit('changeLevel', val)
     },
 
     // 右下菜单
@@ -403,8 +428,9 @@ export default {
       this.$emit('showChart', level)
     },
     handleMenuVisible(visible) {
-      if (visible && !this.dropdownMenuListened) {
-        this.dropdownMenuListened = true
+      if (visible) {
+        $('.dropdown-item-chart').off()
+        $('body .table-menu').find('.hide-trigger').off()
         setTimeout(() => {
           $('.dropdown-item-chart').on('mouseenter', (event) => {
             event.preventDefault();
@@ -421,6 +447,7 @@ export default {
     }
   }
 }
+
 </script>
 <style lang="scss">
 .table-box {
@@ -438,8 +465,8 @@ export default {
     .el-table__header-wrapper thead div {
       background-color: transparent;
     }
-    .el-table__fixed-header-wrapper th:first-of-type{
-    	background: #d2d6dc;
+    .el-table__fixed-header-wrapper th:first-of-type {
+      background: #d2d6dc;
     }
     thead .cell {
       white-space: nowrap;
@@ -451,15 +478,16 @@ export default {
         padding: 0 18px;
       }
     }
-    .el-table__fixed{
-    	.el-table__fixed-body-wrapper tr{
-    		background-color: #eef1f6;
-    	}
+    .el-table__fixed {
+      .el-table__fixed-body-wrapper tr {
+        background-color: #eef1f6;
+        cursor: context-menu;
+      }
     }
-    .el-table__fixed-right{
-    	.el-table__fixed-body-wrapper tr{
-    		background-color: #e2f0e4;
-    	}
+    .el-table__fixed-right {
+      .el-table__fixed-body-wrapper tr {
+        background-color: #e2f0e4;
+      }
     }
     .el-table__body-wrapper {
       // overflow-y: scroll;
@@ -467,34 +495,37 @@ export default {
         cursor: pointer;
       }
     }
-    .el-table__header-wrapper th {
-      cursor: pointer;
-    }
-    .el-table__header-wrapper tr:last-of-type {
-      th .cell:before {
-        content: "\E61D";
-        font-family: element-icons!important;
-        speak: none;
-        font-style: normal;
-        font-weight: 400;
-        font-variant: normal;
-        text-transform: none;
-        line-height: 1;
-        vertical-align: baseline;
-        display: inline-block;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        display: inline-block;
-        font-size: 15px;
-        color: #8492a6;
+    .el-table__header-wrapper {
+      tr:first-of-type {
+        cursor: context-menu;
+      }
+      tr:last-of-type {
+        cursor: pointer;
+        th .cell:before {
+          content: "\E61D";
+          font-family: element-icons!important;
+          speak: none;
+          font-style: normal;
+          font-weight: 400;
+          font-variant: normal;
+          text-transform: none;
+          line-height: 1;
+          vertical-align: baseline;
+          display: inline-block;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          display: inline-block;
+          font-size: 15px;
+          color: #8492a6;
+        }
       }
     }
     .el-table__footer-wrapper {
       border-top: 1px solid rgb(223, 236, 235);
       overflow-x: hidden;
       overflow-y: scroll;
-      tr{
-      	background-color: #c9e5f5;
+      tr {
+        background-color: #c9e5f5;
       }
       td {
         min-width: 100px;
@@ -505,6 +536,11 @@ export default {
           width: 140px;
         }
       }
+    }
+    .el-table__fixed:before,
+    .el-table__fixed-right:before {
+      height: 0;
+      visibility: hidden;
     }
   }
   .year-selector {
@@ -539,16 +575,19 @@ export default {
     bottom: 0px;
     font-size: 14px;
     color: #1f3d3a;
-    padding: 9px 34px;
+    padding: 7px 35px;
     background: #c9e5f5;
+    border-right: 1px solid rgb(223, 236, 235);
   }
   .menu {
     position: absolute;
     right: 0;
     bottom: 0;
-    cursor: pointer;
     background: #d2d6dc;
     padding: 8px 59px;
+    .el-dropdown-link {
+      cursor: pointer;
+    }
   }
 }
 
@@ -572,4 +611,26 @@ export default {
     min-width: 80px;
   }
 }
+
+.table-head-tooltip {
+  display: none;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  &:after {
+    content: '';
+    border-style: solid;
+    border-width: 5px;
+    border-color: transparent;
+    border-top-color: rgb(31, 61, 58);
+    position: absolute;
+    display: block;
+    left: 0;
+    right: 0;
+    margin: auto;
+    width: 0px;
+    height: 0px;
+    top: 100%;
+  }
+}
+
 </style>

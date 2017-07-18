@@ -2,7 +2,7 @@
   <div class="tree-box">
     <v-search :title="title" @message="handleSearch">
       <span slot="append">
-        <span>aaa</span>
+        <el-button type="text" size="small" style="margin-left:5px" @click="addAll">添加所有</el-button>
       </span>
     </v-search>
     <div class="method-tree">
@@ -66,6 +66,9 @@ export default {
         })
       }
       return ret
+    },
+    addAll(){
+      this.$emit('addAll')
     },
     renderContent(h, { node, data, store }) {
       return (

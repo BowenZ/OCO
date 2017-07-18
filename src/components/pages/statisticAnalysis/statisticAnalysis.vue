@@ -4,15 +4,15 @@
       <el-collapse-item title="统计分析" name="1" class="top-box opened">
           <el-row :gutter="30">
             <el-col :span="12">
-              <v-tree v-loading="methodTreeLoading" class="method-container" :data="methodTree" title="审计方法" @add="addMethod"></v-tree>
+              <v-tree v-loading="methodTreeLoading" class="method-container" :data="methodTree" title="审计方法" @add="addMethod" @addAll="handleAddAll('method')"></v-tree>
             </el-col>
             <el-col :span="12">
-              <v-tree v-loading="companyListLoading" ref="companyList" class="company-container" :data="companyList" title="被审单位" @add="addCompany"></v-tree>
+              <v-tree v-loading="companyListLoading" ref="companyList" class="company-container" :data="companyList" title="被审单位" @add="addCompany" @addAll="handleAddAll('company')"></v-tree>
             </el-col>
           </el-row>
       </el-collapse-item>
       <el-collapse-item title="结果" name="2" class="table-container opened">
-          <v-table v-loading="tableLoading" :tableData="tableData" @removeCompany="handleRemoveCompany" @removeMethod="handleRemoveMethod" @showDetail="handleShowDetail" @changeCompany="handleChangeCompany" @createChart="handleCreateChare" @clearData="handleClearData" @showChart="handleShowChart" @changeLevel="handleChangeLevel" @changeYear="handleChangeYear"></v-table>
+          <v-table ref="resultTable" v-loading="tableLoading" :tableData="tableData" @removeCompany="handleRemoveCompany" @removeMethod="handleRemoveMethod" @showDetail="handleShowDetail" @changeCompany="handleChangeCompany" @createChart="handleCreateChare" @clearData="handleClearData" @showChart="handleShowChart" @changeLevel="handleChangeLevel" @changeYear="handleChangeYear"></v-table>
       </el-collapse-item>
     </el-collapse>
     <el-dialog title="数据钻取" :visible.sync="dialogVisibleDetail" size="large">
@@ -2424,6 +2424,9 @@ export default {
       }else{
         $(this.$el).find('.el-collapse').removeClass('one')
       }
+      setTimeout(() => {
+        this.$refs.resultTable.resizeFixedTableCol()
+      }, 1000)
     },
     addMethod(data) {
       let filteredData = []
@@ -2552,6 +2555,36 @@ export default {
     handleChangeYear(year){
       console.log(year)
       this.tableData = this.getResult()
+    },
+    getMethods(data){
+      if(!data){
+        return
+      }
+      let ret = []
+      if(data.type == 'method'){
+        ret.push(data)
+      }else if(data.children && data.children.length){
+        data.children.forEach(item => {
+          ret = ret.concat(this.getMethods(item))
+        })
+      }
+      return ret
+    },
+    getAllMethods(){
+      let ret = []
+      this.methodTree.forEach((item, index) => {
+        ret = ret.concat(this.getMethods(item))
+      })
+      return ret
+    },
+    handleAddAll(target){
+      if(target == 'method'){
+        this.selectedMethods = this.getAllMethods()
+        this.tableData = this.getResult()
+      }else if(target == 'company'){
+        this.selectedCompany = this.companyList
+        this.tableData = this.getResult()
+      }
     }
   }
 }
