@@ -210,6 +210,7 @@ export default {
     resizeFixedTableCol() {
       let height = $(this.$el).find('.el-table__fixed .el-table__fixed-header-wrapper').height() + $(this.$el).find('.el-table__fixed .el-table__fixed-body-wrapper').height()
       $(this.$el).find('.el-table__fixed-right, .el-table__fixed').height(height)
+      console.log('====resize====')
     },
     // +++++++搜索单位++++++++
     searchCompany() {
