@@ -13,7 +13,7 @@
               <el-input type="password" size="large" v-model="loginForm.password" placeholder="密码" auto-complete="off"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" size="large" @click="submitForm('loginForm')">登录</el-button>
+              <el-button type="primary" size="large" @click="submitForm('loginForm')" :loading="loginLoading">登录</el-button>
               <!-- <el-button @click="resetForm('loginForm')">重置</el-button> -->
             </el-form-item>
           </el-form>
@@ -45,13 +45,15 @@ export default {
           message: '请输入密码',
           trigger: 'blur'
         }]
-      }
+      },
+      loginLoading: false
     }
   },
   methods: {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
+          this.loginLoading = true
           this.$http.post(urlStore.login, {
             username: this.loginForm.username,
             password: this.loginForm.password
@@ -76,6 +78,9 @@ export default {
                 type: 'warning'
               })
             }
+            this.loginLoading = false
+          }).catch(err => {
+            this.loginLoading = false
           })
         } else {
           console.log('error submit!!')

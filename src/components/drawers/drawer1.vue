@@ -12,7 +12,7 @@
           </el-popover>
           <p v-popover:newProject>
             <span class="el-icon-plus"></span>
-            <span>新建项目工程</span>
+            <span>新建审计项目</span>
           </p>
         </div>
         <div class="project-list">
@@ -188,7 +188,6 @@ export default {
     checkChange: function(index, obj, isSelected, hasSChildren) {
       this.currentProjectIndex = index
       let jobId = this.projectList[index].jobId
-      console.log('========', jobId)
       this.$store.commit('setSelectedJobId', jobId)
       if (!this.$refs['tree' + index]) {
         let self = this
@@ -202,7 +201,6 @@ export default {
               let currentCategory = null
               let currentIssue = null
               ref.getCheckedNodes().forEach((item) => {
-                console.log(item)
                 if(item.type == 'category'){
                   currentCategory = item.sort
                 }
@@ -210,6 +208,7 @@ export default {
                   currentIssue = item.sort
                 }
                 if (item.type == 'method') {
+                  item.rName = `${currentCategory}_${currentIssue}_${item.title}`
                   self.selectedNodes.push(item)
                 }
               })
@@ -264,7 +263,7 @@ export default {
       $target.toggleClass('active')
       setTimeout(() => {
         self.checkChange(index)
-      }, 50)
+      }, 100)
     },
     handleCommand: function(commond) {
       if (commond == 'deletProject') {
@@ -364,7 +363,6 @@ export default {
       }
     },
     showNewProject: function() {
-      // console.log($(this.$el).find('.new-input'))
     },
     refresh: function(){
       this.projectList.forEach(item => {

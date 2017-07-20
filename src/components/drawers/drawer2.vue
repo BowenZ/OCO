@@ -1,7 +1,7 @@
 <template>
   <div class="drawer-inner drawer2" v-loading="!singleMethods || loading" element-loading-text="正在加载数据">
     <header>
-      <v-search title="审计方法" @message="handleMessage"></v-search>
+      <v-search title="外部数据" @message="handleMessage"></v-search>
     </header>
     <section class="drawer-content">
       <!-- <p>当前选中方法：<strong v-if="singleMethods && singleMethods.length && singleMethods[currentIndex]">{{singleMethods[currentIndex].title}}</strong> <strong v-else>无</strong></p> -->

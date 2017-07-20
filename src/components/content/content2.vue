@@ -257,8 +257,8 @@ export default {
       }
     },
     selectedMethod: function(newVal){
-      console.log('+++++++++++', newVal)
-      this.updateExeStatus(null, newVal.id)
+      // console.log('+++++++++++', newVal)
+      // this.updateExeStatus(null, newVal.id)
     }
   }
 }

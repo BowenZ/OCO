@@ -305,7 +305,6 @@ export default {
       }
     },
     selectedJobId: function(newId) {
-      console.log('+++++++++++', newId)
       this.updateExeStatus(newId)
     }
   }

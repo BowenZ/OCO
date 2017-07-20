@@ -6,7 +6,7 @@
       <el-radio-button label="pie">饼图</el-radio-button>
       <el-radio-button label="line">折线图</el-radio-button>
     </el-radio-group>
-    <ve-chart :data="chartData" :settings="chartSettings" tooltip-visible legend-visible></ve-chart>
+    <ve-chart :data="chartData" :settings="chartSettings" :events="chartEvents" tooltip-visible legend-visible></ve-chart>
   </div>
 </template>
 <script>
@@ -29,6 +29,11 @@ export default {
     	chartType: this.defaultType?this.defaultType:'bar',
       chartSettings: {
         type: this.defaultType?this.defaultType:'bar'
+      },
+      chartEvents: {
+      	click: (event) => {
+      		console.log('chart click: ', event)
+      	}
       }
     }
   },

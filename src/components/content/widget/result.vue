@@ -69,7 +69,6 @@ export default {
       return this.$store.getters.selectedMethod ? this.$store.getters.selectedMethod.id : null
     },
     selectedBasicId: function(){
-      console.log(this.$store.getters.selectedData)
       return this.$store.getters.selectedData?this.$store.getters.selectedData.id:null
     },
     slecteOptions: function() {

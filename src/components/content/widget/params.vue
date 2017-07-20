@@ -73,8 +73,8 @@
     </el-card>
     <el-dialog title="选择参数" v-model="dialogVisible" size="tiny" @close="handleClose" :close-on-click-modal="false">
       <div class="popup-param" @keyup.enter="searchParam('pressEnter')">
-        <p>请在输入框中输入要搜索的参数名</p>
-        <el-select v-model="popupSearch" multiple filterable remote placeholder="请搜索参数" :remote-method="searchParam" :loading="loading" loading-text="正在加载参数信息，请稍后..." :no-data-text="searchTips">
+        <p>请输入要搜索的单位名称</p>
+        <el-select v-model="popupSearch" multiple filterable remote placeholder="搜索关键词" :remote-method="searchParam" :loading="loading" loading-text="正在加载参数信息，请稍后..." :no-data-text="searchTips">
           <el-option v-for="(item, index) in paramList" :key="index" :label="item.label" :value="item.value+index">
           </el-option>
         </el-select>

@@ -90,6 +90,13 @@ export default {
     .el-tree {
       height: 100%;
       overflow: auto;
+      .tree-btn{
+        padding: 0;
+        button{
+          line-height: 25px;
+          padding: 4px 15px;
+        }
+      }
     }
   }
 </style>

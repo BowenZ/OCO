@@ -2,7 +2,8 @@ let devMode = true
 if(process.env.NODE_ENV === 'production'){
   devMode = false
 }
-const ip = devMode ? 'http://localhost:3000/' : ''
+// devMode = false
+const ip = devMode ? 'http://localhost:3000/' : 'http://192.168.101.100:9898/WQB_economy_responsibility_audit/'
 
 const urls = {
   // 多方法执行
@@ -54,7 +55,9 @@ const urls = {
   approveMethod: ip + 'auditMethodModel/pass.do',
   queryParamKeyValues: ip + 'paramModel/queryParamKeyValues.do',
 
-  stopJob: ip + 'auditJob/stopJob.do'
+  stopJob: ip + 'auditJob/stopJob.do',
+
+  findAllListWithAuditItemAndAuditMethodModel: ip + 'auditCategory/findAllListWithAuditItemAndAuditMethodModel.do'
 }
 
 export default urls

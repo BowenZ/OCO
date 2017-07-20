@@ -228,7 +228,7 @@ export default {
       }
     },
     selectedData: function(newVal){
-      newVal && this.updateExeStatus(null, newVal.id)
+      // newVal && this.updateExeStatus(null, newVal.id)
     }
   }
 }

@@ -1,19 +1,19 @@
 <template>
-  <div class="table-box">
-    <el-table v-if="tableData && tableData.length" :data="tableData" border style="width: 100%" height="100%" @row-contextmenu="handleClickTableCell" @cell-mouse-enter="handleHoverCell" @cell-mouse-leave="handleLeaveCell" :summary-method="getSummaries" show-summary @cell-dblclick="handleDbClickCell" @header-click="handleHeaderClick">
-      <el-table-column fixed prop="method" label="审计方法" show-overflow-tooltip width="140">
+  <div class="table-box" v-loading="tableLoading">
+    <el-table v-if="tableData && tableData.length" :data="tableData" border style="width: 100%" height="100%" @row-contextmenu="handleClickTableCell" @cell-mouse-enter="handleHoverCell" @cell-mouse-leave="handleLeaveCell" :summary-method="getSummaries" show-summary @cell-dblclick="handleDbClickCell">
+      <el-table-column fixed prop="method" label="" show-overflow-tooltip width="140">
         <template scope="scope">
           <span>{{scope.row.method.methodName}}</span>
         </template>
       </el-table-column>
-      <el-table-column v-for="(company, index) in tableData[0].companies" :key="index" :prop="'company-'+company.companyId" :label="company.companyName">
-        <el-table-column :prop="'company-'+company.companyId" :label="company.subCompany?company.subCompany.label:''" show-overflow-tooltip min-width="100">
+      <el-table-column v-for="(company, index) in tableData[0].companies" :key="index" :prop="'company-'+company.companyId" :label="company.companyName" :render-header="renderHeaderFunction">
+        <el-table-column :prop="'company-'+company.companyId" :label="company.subCompany?company.subCompany.label:''" show-overflow-tooltip min-width="100" :render-header="renderHeaderFunction2">
           <template scope="scope">
             <span>{{scope.row.companies[index].issues}}</span>
           </template>
         </el-table-column>
       </el-table-column>
-      <el-table-column prop="sum" fixed="right" label="汇总" show-overflow-tooltip width="150">
+      <el-table-column prop="sum" fixed="right" label="" show-overflow-tooltip width="150">
       </el-table-column>
     </el-table>
     <p v-if="!tableData || !tableData.length" style="text-align:center">请从上方添加审计方法和单位数据</p>
@@ -108,6 +108,7 @@
 </template>
 <script>
 import $ from 'webpack-zepto'
+import renderFunctions from './renderFunctions'
 export default {
   props: {
     tableData: {
@@ -131,6 +132,9 @@ export default {
       }, {
         value: 3,
         label: '各单位汇总（三）'
+      }, {
+        value: -1,
+        label: '自定义'
       }],
       selectedLevel: 0,
 
@@ -175,7 +179,9 @@ export default {
         label: 'label'
       },
 
-      dropdownMenuVisible: false
+      dropdownMenuVisible: false,
+
+      tableLoading: false
     }
   },
   watch: {
@@ -203,14 +209,13 @@ export default {
         this.methodSecondaryMenuVisible1 = false
         this.methodSecondaryMenuVisible2 = true
       })
-      $('body').append('<div class="el-tooltip__popper is-dark el-fade-in-linear-enter-to table-head-tooltip"></div>')
+      // $('body').append('<div class="el-tooltip__popper is-dark el-fade-in-linear-enter-to table-head-tooltip"></div>')
     }, 100)
   },
   methods: {
     resizeFixedTableCol() {
       let height = $(this.$el).find('.el-table__fixed .el-table__fixed-header-wrapper').height() + $(this.$el).find('.el-table__fixed .el-table__fixed-body-wrapper').height()
       $(this.$el).find('.el-table__fixed-right, .el-table__fixed').height(height)
-      console.log('====resize====')
     },
     // +++++++搜索单位++++++++
     searchCompany() {
@@ -225,9 +230,11 @@ export default {
     },
     confirmChangeCompany() {
       this.headCompanyVisible = false
+      console.log(this.selectedTreeCompany)
       if (!this.selectedTreeCompany) {
         return
       }
+      this.selectedLevel = -1
       this.$emit('changeCompany', this.currentHeadCompany, this.selectedTreeCompany)
     },
     // ++++++++++++++++++++++
@@ -240,11 +247,11 @@ export default {
 
       columns.forEach((column, index) => {
         if (index === 0) {
-          sums[0] = '各方法汇总'
+          sums[0] = ''
           return
         }
         if (index === columns.length - 1) {
-          sums[index] = '菜单'
+          sums[index] = ''
           return
         }
         const values = data.map(item => {
@@ -282,8 +289,9 @@ export default {
       })
       $table.off()
       $table.on('contextmenu', (event) => {
+        let $target = $(event.target)
         event.preventDefault()
-        if ($(event.target).parents('.el-table__fixed-header-wrapper').length) {
+        if ($target.parents('.el-table__fixed-header-wrapper').length) {
           this.righeMenuVisible = false
           return
         }
@@ -302,7 +310,7 @@ export default {
             return
           }
         } else if (!this.currentHoverCell) {
-          if ($(event.target).hasClass('el-table__fixed') || $(event.target).hasClass('el-table__fixed-right') || $(event.target).parents('.el-table__fixed, .el-table__footer-wrapper, .el-table__fixed-right').length) {
+          if ($target.hasClass('el-table__fixed') || $target.hasClass('el-table__fixed-right') || $target.parents('.el-table__fixed, .el-table__footer-wrapper, .el-table__fixed-right').length || $target.hasClass('header2-wrapper') || $target.parents('.header2-wrapper').length) {
             this.righeMenuVisible = false
             return
           }
@@ -310,13 +318,7 @@ export default {
           this.issueMenuVisible = false
           this.companyMenuVisible = true
 
-          let companyName = ''
-          let $target = $(event.target)
-          if ($target.hasClass('cell')) {
-            companyName = $target.text()
-          } else if ($target.children('.cell').length) {
-            companyName = $target.children('.cell').text()
-          }
+          let companyName = event.target.innerText
           this.currentRightCompany = companyName
         }
         $menu.css({
@@ -326,32 +328,30 @@ export default {
         this.righeMenuVisible = true
       })
 
-      let $tooltip = $('.table-head-tooltip')
-      let $tableHeader = $(this.$el).find('.el-table__header-wrapper')
-      $tableHeader.off()
-      $tableHeader.on('mouseenter', 'th .cell', (event) => {
-        event.preventDefault();
-        let txt = $(event.target).text()
-        if (txt) {
-          let targetPosition = event.target.getClientRects()[0]
-          $tooltip.text(txt).css({
-            top: `${targetPosition.top - targetPosition.height - 25}px`,
-            left: `${targetPosition.left + (targetPosition.width/2)}px`,
-            display: 'block'
-          });
-        }
-      }).on('mouseleave', 'th .cell', (event) => {
-        event.preventDefault();
-        $tooltip.css('display', 'none');
-      });
+      // let $tooltip = $('.table-head-tooltip')
+      // let $tableHeader = $(this.$el).find('.el-table__header-wrapper')
+      // $tableHeader.off()
+      // $tableHeader.on('mouseenter', 'th .cell', (event) => {
+      //   event.preventDefault();
+      //   let txt = $(event.target).text()
+      //   if (txt) {
+      //     let targetPosition = event.target.getClientRects()[0]
+      //     $tooltip.text(txt).css({
+      //       top: `${targetPosition.top - targetPosition.height - 25}px`,
+      //       left: `${targetPosition.left + (targetPosition.width/2)}px`,
+      //       display: 'block'
+      //     });
+      //   }
+      // }).on('mouseleave', 'th .cell', (event) => {
+      //   event.preventDefault();
+      //   $tooltip.css('display', 'none');
+      // });
     },
     changeYear() {
       this.popVisible = false
       this.$emit('changeYear', this.selectedYear)
     },
-    handleClickTableCell(row, event) {
-      // console.log(row, event)
-    },
+    handleClickTableCell(row, event) {},
     handleHoverCell(row, col, cell, event) {
       this.currentHoverCell = {
         row,
@@ -378,26 +378,6 @@ export default {
           sum: sum
         }
         this.$emit('showDetail', data)
-      }
-    },
-    handleHeaderClick(column, event) {
-      if (column.property.match('company')) {
-        let $head
-        let $target = $(event.target)
-        if ($target.hasClass('cell')) {
-          $head = $target.parent('th')
-        } else {
-          $head = $target
-        }
-        let index
-        if ($head.hasClass('is-leaf')) {
-          index = $head.index()
-        } else {
-          index = $head.index() - 1
-        }
-
-        this.currentHeadCompany = column.property.split('-').pop()
-        this.headCompanyVisible = true
       }
     },
     removeCompany() {
@@ -445,7 +425,16 @@ export default {
       } else {
         this.dropdownMenuVisible = false
       }
-    }
+    },
+    drillingData(companyId, level) {
+      this.$emit('drillingData', companyId, level)
+    },
+    showSearchCompany(column, index) {
+      this.currentHeadCompany = column.property.split('-').pop()
+      this.headCompanyVisible = true
+    },
+    renderHeaderFunction: renderFunctions.renderHeaderFunction,
+    renderHeaderFunction2: renderFunctions.renderHeaderFunction2
   }
 }
 
@@ -475,6 +464,7 @@ export default {
     }
     .el-table__fixed,
     .el-table__fixed-right {
+      overflow: hidden;
       thead .cell {
         padding: 0 18px;
       }
@@ -497,27 +487,72 @@ export default {
       }
     }
     .el-table__header-wrapper {
+      tr .cell {
+        padding: 0;
+        height: 40px;
+        .header-wrapper {
+          display: inline-block;
+          width: 100%;
+          line-height: 40px;
+          padding: 0 3px;
+          box-sizing: border-box;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          >span{
+          	cursor: pointer;
+          }
+        }
+      }
       tr:first-of-type {
         cursor: context-menu;
+        padding: 0;
+        .el-tooltip {
+          display: inline-block;
+          width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          word-wrap: normal;
+          white-space: nowrap;
+          vertical-align: bottom;
+          line-height: 40px;
+          padding: 0 3px;
+          box-sizing: border-box;
+        }
       }
       tr:last-of-type {
-        cursor: pointer;
-        th .cell:before {
-          content: "\E61D";
-          font-family: element-icons!important;
-          speak: none;
-          font-style: normal;
-          font-weight: 400;
-          font-variant: normal;
-          text-transform: none;
-          line-height: 1;
-          vertical-align: baseline;
+        // cursor: pointer;
+        // th .cell:before {
+        //   content: "\E61D";
+        //   font-family: element-icons!important;
+        //   speak: none;
+        //   font-style: normal;
+        //   font-weight: 400;
+        //   font-variant: normal;
+        //   text-transform: none;
+        //   line-height: 1;
+        //   vertical-align: baseline;
+        //   display: inline-block;
+        //   -webkit-font-smoothing: antialiased;
+        //   -moz-osx-font-smoothing: grayscale;
+        //   display: inline-block;
+        //   font-size: 15px;
+        //   color: #8492a6;
+        // }
+        .header-wrapper {
           display: inline-block;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-          display: inline-block;
-          font-size: 15px;
-          color: #8492a6;
+          width: 100%;
+          line-height: 40px;
+          padding: 0 3px;
+          box-sizing: border-box;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          .el-tooltip {
+            cursor: pointer;
+          }
+          button {
+            padding-left: 8px;
+            padding-right: 8px;
+          }
         }
       }
     }
@@ -631,6 +666,14 @@ export default {
     width: 0px;
     height: 0px;
     top: 100%;
+  }
+}
+
+.el-message-box__header {
+  button {
+    border: none;
+    background: transparent;
+    font-size: 14px;
   }
 }
 

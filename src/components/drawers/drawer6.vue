@@ -64,6 +64,9 @@ export default {
 
   mounted() {
     this.$drawerPane = $(this.$el).parents('.drawer-pane')[0]
+    if (this.currentDrawerIndex == 5 && !this.treeLoaded) {
+      this.loadTreeData()
+    }
   },
 
   computed: {
@@ -87,49 +90,50 @@ export default {
   watch: {
     currentDrawerIndex: function(newVal) {
       if (newVal == 5 && !this.treeLoaded) {
-        console.log('=====go====')
-        this.treeLoaded = true
-        this.$http.get(urlStore.getAllTree, {
-          params: {
-            userId: this.currentUser.userId
-          }
-        }).then(res => {
-          if (res.ok && res.body.status == 'success') {
-            this.$store.commit('setModelTreeData', res.body.tree)
-            let self = this
-            $('.tree-container').on('contextmenu', function(event) {
-              event.preventDefault()
-              self.rightClick = true
-              $(event.target).parents('.el-tree-node').eq(0).trigger('click')
-              self.$menus.css({
-                left: `${event.clientX - 80 > 182 ? 182 : event.clientX - 80}px`,
-                top: `${event.clientY + self.$drawerPane.scrollTop - self.$drawerPane.getClientRects()[0].top}px`
-              })
-              return false
-            })
-            $(document).click(function(event) {
-              self.$menus.hide()
-            })
-            this.$categoryMenu = $('.category-menu')
-            this.$issueMenu = $('.issue-menu')
-            this.$methodMenu = $('.method-menu')
-            this.$menus = $('.right-menu')
-          } else {
-            Message({
-              message: res.body.msg || '请求模型树数据失败',
-              type: 'info'
-            })
-          }
-        })
+        this.loadTreeData()
       }
     }
   },
 
   methods: {
+    loadTreeData(){
+      this.treeLoaded = true
+      this.$http.get(urlStore.getAllTree, {
+        params: {
+          userId: this.currentUser.userId
+        }
+      }).then(res => {
+        if (res.ok && res.body.status == 'success') {
+          this.$store.commit('setModelTreeData', res.body.tree)
+          let self = this
+          $('.tree-container').on('contextmenu', function(event) {
+            event.preventDefault()
+            self.rightClick = true
+            $(event.target).parents('.el-tree-node').eq(0).trigger('click')
+            self.$menus.css({
+              left: `${event.clientX - 80 > 182 ? 182 : event.clientX - 80}px`,
+              top: `${event.clientY + self.$drawerPane.scrollTop - self.$drawerPane.getClientRects()[0].top}px`
+            })
+            return false
+          })
+          $(document).click(function(event) {
+            self.$menus.hide()
+          })
+          this.$categoryMenu = $('.category-menu')
+          this.$issueMenu = $('.issue-menu')
+          this.$methodMenu = $('.method-menu')
+          this.$menus = $('.right-menu')
+        } else {
+          Message({
+            message: res.body.msg || '请求模型树数据失败',
+            type: 'info'
+          })
+        }
+      })
+    },
     currentChange: function(data, node) {
       this.currentData = data
       this.currentNode = node
-      console.log('+++++++++++', data)
       if(data.type == 'method'){
         this.editAudit(3)
       }
