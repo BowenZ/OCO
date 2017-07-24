@@ -98,8 +98,13 @@ http.createServer(function(req, res) {
   }
 
   else if(pathname == '/auditJob/stopJob.do'){
-    console.log(mock.stopJob)
     res.write(JSON.stringify(mock.stopJob))
+  }
+
+  else if(pathname == '/auditCategory/findAllListWithAuditItemAndAuditMethodModel.do'){
+    res.write(JSON.stringify(mock.findAllListWithAuditItemAndAuditMethodModel))
+  }else if(pathname == '/unitsBasicInfo/findList.do'){
+    res.write(JSON.stringify(mock.findUnitsList))
   }
 
   res.end()

@@ -14,6 +14,7 @@
     "mock": "nodemon test_server.js"
   },
   "dependencies": {
+    "element-dialog2": "0.0.5",
     "element-ui": "^1.2.3",
     "lodash": "^4.17.4",
     "v-charts": "^1.3.0",

@@ -3,7 +3,7 @@
     <header>
       <v-search title="外部数据" @message="handleMessage"></v-search>
     </header>
-    <section class="drawer-content">
+    <section class="drawer-content" v-loading="methodListLoading">
       <!-- <p>当前选中方法：<strong v-if="singleMethods && singleMethods.length && singleMethods[currentIndex]">{{singleMethods[currentIndex].title}}</strong> <strong v-else>无</strong></p> -->
       <ul class="audit-methods" v-if="singleMethods && singleMethods.length">
         <li v-for="(method, index) in singleMethods" :key="method.id"><a href="#" @click.prevent="clickMethod($event, index)" :data-id="method.id">{{method.title}}</a></li>
@@ -23,10 +23,11 @@ export default {
     return {
       currentIndex: null,
       loading: false,
-      query: ''
+      query: '',
+      methodListLoading: true
     }
   },
-  mounted: function() {
+  created: function() {
     // this.$store.dispatch('getSingleMethods')
     this.loadMethods()
   },
@@ -52,8 +53,10 @@ export default {
             this.$store.commit('setContinueAudit', true)
           }
         }
+        this.methodListLoading = false
       }, res => {
         this.$store.commit('setSingleMethods', [])
+        this.methodListLoading = false
       })
     },
     clickMethod: function(event, index) {
@@ -109,6 +112,7 @@ export default {
     height: 71px;
   }
   .drawer-content {
+    min-height: 100px;
     color: rgb(214, 216, 219);
   }
   .audit-methods {

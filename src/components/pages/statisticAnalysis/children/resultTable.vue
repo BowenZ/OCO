@@ -1,13 +1,13 @@
 <template>
   <div class="table-box" v-loading="tableLoading">
-    <el-table v-if="tableData && tableData.length" :data="tableData" border style="width: 100%" height="100%" @row-contextmenu="handleClickTableCell" @cell-mouse-enter="handleHoverCell" @cell-mouse-leave="handleLeaveCell" :summary-method="getSummaries" show-summary @cell-dblclick="handleDbClickCell">
+    <el-table ref="resultTable" v-if="tableData && tableData.length" :data="tableData" border style="width: 100%" height="100%" @row-contextmenu="handleClickTableCell" @cell-mouse-enter="handleHoverCell" @cell-mouse-leave="handleLeaveCell" :summary-method="getSummaries" show-summary @cell-dblclick="handleDbClickCell">
       <el-table-column fixed prop="method" label="" show-overflow-tooltip width="140">
         <template scope="scope">
           <span>{{scope.row.method.methodName}}</span>
         </template>
       </el-table-column>
       <el-table-column v-for="(company, index) in tableData[0].companies" :key="index" :prop="'company-'+company.companyId" :label="company.companyName" :render-header="renderHeaderFunction">
-        <el-table-column :prop="'company-'+company.companyId" :label="company.subCompany?company.subCompany.label:''" show-overflow-tooltip min-width="100" :render-header="renderHeaderFunction2">
+        <el-table-column :prop="'company-'+company.companyId" :label="company.subCompany?company.subCompany.unitName:''" show-overflow-tooltip min-width="100" :render-header="renderHeaderFunction2">
           <template scope="scope">
             <span>{{scope.row.companies[index].issues}}</span>
           </template>
@@ -57,14 +57,17 @@
     <div class="right-menu" v-show="righeMenuVisible">
       <div class="company-menu el-cascader-menus" v-show="companyMenuVisible">
         <ul class="el-cascader-menu">
-          <li class="el-cascader-menu__item" @click="removeCompany">移除该单位</li>
+          <li class="el-cascader-menu__item" @click="removeCompany('this')">移除该单位</li>
+          <li class="el-cascader-menu__item" @click="removeCompany('left')">移除左侧所有单位</li>
+          <li class="el-cascader-menu__item" @click="removeCompany('right')">移除右侧所有单位</li>
+          <li class="el-cascader-menu__item" @click="removeCompany('others')">移除其他所有单位</li>
           <li class="el-cascader-menu__item el-cascader-menu__item--extensible secondary-item">导出该单位数据</li>
         </ul>
         <ul class="el-cascader-menu" v-show="companySecondaryMenuVisible">
-          <li class="el-cascader-menu__item">所有单位</li>
-          <li class="el-cascader-menu__item">一级单位</li>
-          <li class="el-cascader-menu__item">二级单位</li>
-          <li class="el-cascader-menu__item">三级单位</li>
+          <li class="el-cascader-menu__item">导出所有单位</li>
+          <li class="el-cascader-menu__item">导出一级单位</li>
+          <li class="el-cascader-menu__item">导出二级单位</li>
+          <li class="el-cascader-menu__item">导出三级单位</li>
         </ul>
       </div>
       <div class="method-menu el-cascader-menus" v-show="methodMenuVisible">
@@ -74,10 +77,10 @@
           <li class="el-cascader-menu__item el-cascader-menu__item--extensible secondary-item2">生成该方法图形报表</li>
         </ul>
         <ul class="el-cascader-menu" v-show="methodSecondaryMenuVisible1">
-          <li class="el-cascader-menu__item">所有单位数据</li>
-          <li class="el-cascader-menu__item">一级单位数据</li>
-          <li class="el-cascader-menu__item">二级单位数据</li>
-          <li class="el-cascader-menu__item">三级单位数据</li>
+          <li class="el-cascader-menu__item">导出所有单位数据</li>
+          <li class="el-cascader-menu__item">导出一级单位数据</li>
+          <li class="el-cascader-menu__item">导出二级单位数据</li>
+          <li class="el-cascader-menu__item">导出三级单位数据</li>
         </ul>
         <ul class="el-cascader-menu" v-show="methodSecondaryMenuVisible2">
           <li class="el-cascader-menu__item" @click="createChart(0)">所有单位报表</li>
@@ -147,7 +150,7 @@ export default {
       methodSecondaryMenuVisible2: false,
 
       currentHoverCell: null,
-      currentRightCompany: null,
+      currentRightCompanyId: null,
       currentRightMethod: null,
 
       // 点击表头搜索单位
@@ -156,32 +159,34 @@ export default {
       filterText: '',
       selectedTreeCompany: null,
       companyData: [{
-        id: 1,
-        label: '一级单位',
-        level: 1,
+        unitCode: 1,
+        unitName: '一级单位',
+        unitLevel: 1,
         children: [{
-          id: 4,
-          label: '二级单位',
-          level: 2,
+          unitCode: 4,
+          unitName: '二级单位',
+          unitLevel: 2,
           children: [{
-            id: 9,
-            level: 3,
-            label: '三级单位 1',
+            unitCode: 9,
+            unitLevel: 3,
+            unitName: '三级单位 1',
           }, {
-            id: 10,
-            level: 3,
-            label: '三级单位 2'
+            unitCode: 10,
+            unitLevel: 3,
+            unitName: '三级单位 2'
           }]
         }]
       }],
       defaultProps: {
         children: 'children',
-        label: 'label'
+        label: 'unitName'
       },
 
       dropdownMenuVisible: false,
 
-      tableLoading: false
+      tableLoading: false,
+
+      scrollBarWidth: 0
     }
   },
   watch: {
@@ -193,6 +198,7 @@ export default {
     }
   },
   mounted() {
+  	this.scrollBarWidth = this._getScrollbarWidth()
     setTimeout(() => {
       this.addEventListener()
       $(this.$el).find('.company-menu .secondary-item').on('mouseenter', (event) => {
@@ -213,9 +219,26 @@ export default {
     }, 100)
   },
   methods: {
+    _getScrollbarWidth() {
+      var oP = document.createElement('p'),
+        styles = {
+          width: '100px',
+          height: '100px',
+          overflowY: 'scroll'
+        },
+        i, scrollbarWidth;
+      for (i in styles) oP.style[i] = styles[i];
+      document.body.appendChild(oP);
+      scrollbarWidth = oP.offsetWidth - oP.clientWidth;
+      oP.remove();
+      return scrollbarWidth;
+    },
     resizeFixedTableCol() {
+      this.$refs.resultTable && this.$refs.resultTable.doLayout()
       let height = $(this.$el).find('.el-table__fixed .el-table__fixed-header-wrapper').height() + $(this.$el).find('.el-table__fixed .el-table__fixed-body-wrapper').height()
       $(this.$el).find('.el-table__fixed-right, .el-table__fixed').height(height)
+      $(this.$el).find('.el-table__fixed-right').css('right', `${this.scrollBarWidth}px`)
+      $(this.$el).find('.el-table__fixed-right-patch').width(this.scrollBarWidth)
     },
     // +++++++搜索单位++++++++
     searchCompany() {
@@ -230,7 +253,6 @@ export default {
     },
     confirmChangeCompany() {
       this.headCompanyVisible = false
-      console.log(this.selectedTreeCompany)
       if (!this.selectedTreeCompany) {
         return
       }
@@ -269,6 +291,7 @@ export default {
       return sums;
     },
     getYearArr() {
+      return [2016]
       let ret = []
       let currentYear = (new Date()).getFullYear()
       let n = 20
@@ -300,7 +323,7 @@ export default {
             this.companyMenuVisible = false
             this.issueMenuVisible = false
             this.methodMenuVisible = true
-            this.currentRightMethod = this.currentHoverCell.row.method.methodId
+            this.currentRightMethod = this.currentHoverCell.row.method
           } else if (this.currentHoverCell.col.property.match('company')) {
             this.companyMenuVisible = false
             this.methodMenuVisible = false
@@ -309,7 +332,7 @@ export default {
             this.righeMenuVisible = false
             return
           }
-        } else if (!this.currentHoverCell) {
+        } else if (!this.currentHoverCell && $(event.target).data('id')) {
           if ($target.hasClass('el-table__fixed') || $target.hasClass('el-table__fixed-right') || $target.parents('.el-table__fixed, .el-table__footer-wrapper, .el-table__fixed-right').length || $target.hasClass('header2-wrapper') || $target.parents('.header2-wrapper').length) {
             this.righeMenuVisible = false
             return
@@ -318,8 +341,8 @@ export default {
           this.issueMenuVisible = false
           this.companyMenuVisible = true
 
-          let companyName = event.target.innerText
-          this.currentRightCompany = companyName
+          let companyId = $(event.target).data('id')
+          this.currentRightCompanyId = companyId
         }
         $menu.css({
           left: `${event.clientX}px`,
@@ -380,14 +403,14 @@ export default {
         this.$emit('showDetail', data)
       }
     },
-    removeCompany() {
-      this.$emit('removeCompany', this.currentRightCompany)
+    removeCompany(param) {
+    	this.$emit('removeCompany', this.currentRightCompanyId, param)
     },
     removeMethod() {
-      this.$emit('removeMethod', this.currentRightMethod)
+      this.$emit('removeMethod', this.currentRightMethod.methodId)
     },
     createChart(level) {
-      this.$emit('createChart', level, this.currentRightMethod)
+      this.$emit('createChart', level, this.currentRightMethod.methodId, this.currentRightMethod.methodName)
     },
 
     // 右上菜单
@@ -498,8 +521,8 @@ export default {
           box-sizing: border-box;
           overflow: hidden;
           text-overflow: ellipsis;
-          >span{
-          	cursor: pointer;
+          >span {
+            cursor: pointer;
           }
         }
       }

@@ -15,7 +15,7 @@
             <span>新建审计项目</span>
           </p>
         </div>
-        <div class="project-list">
+        <div class="project-list" v-loading="findListLoading">
           <div class="project-item" v-if="projectList" v-for="(project, index) in projectList">
             <h5 class="tree-title">
               <span class="open-tree el-icon-plus" @click.stop="toggleTree($event, index)"></span>
@@ -65,7 +65,8 @@ export default {
       renameInput: '',
       oldName: null,
       newProjectName: null,
-      popVisiable: false
+      popVisiable: false,
+      findListLoading: true
     }
   },
   mounted() {
@@ -107,6 +108,9 @@ export default {
         this.$store.commit('setContinueAudit', true)
       }
       this.projectList = res.body.jobs
+      this.findListLoading = false
+    }).catch(err => {
+      this.findListLoading = false
     })
   },
   computed: {
@@ -410,6 +414,7 @@ export default {
     }
   }
   .project-list {
+    min-height: 80px;
     .project-item {
       .tree-title {
         cursor: pointer;

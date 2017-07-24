@@ -6,7 +6,7 @@
       </span>
     </v-search>
     <div class="method-tree">
-      <el-tree ref="tree" :data="data" :render-content="renderContent" node-key="id" :default-expand-all="false" :props="methodProps" :filter-node-method="filterNode">
+      <el-tree ref="tree" :data="data" :render-content="renderContent" node-key="id" :default-expand-all="false" :props="defaultProps" :filter-node-method="filterNode">
       </el-tree>
     </div>
   </div>
@@ -23,51 +23,57 @@ export default {
     },
     data: {
       type: Array
-    }
-  },
-  data(){
-    return {
-      methodProps: {
-        children: 'children',
-        label: 'title'
+    },
+    defaultProps: {
+      type: Object,
+      default: function(){
+        return {
+          children: 'children',
+          label: 'title'
+        }
       }
     }
   },
+  data() {
+    return {
+
+    }
+  },
   methods: {
-    appendTreeNode(data){
+    appendTreeNode(data) {
       this.$refs.tree.store.append(data, this.$refs.tree.data)
     },
     filterNode(value, data) {
       if (!value) return true;
-      return data.title.indexOf(value) !== -1;
+      return data[this.defaultProps.label].indexOf(value) !== -1;
     },
     handleSearch(msg) {
       this.$refs.tree.filter(msg)
     },
-    add(node, data){
+    add(node, data) {
       // node.parent.removeChildByData(data)
-      if(data.type){
+      if (data.type) {
         this.$emit('add', this.getMethods(data))
-      }else{
+      } else {
         this.$emit('add', data)
       }
       return false
     },
-    getMethods(data){
-      if(!data){
+    getMethods(data) {
+      if (!data) {
         return
       }
       let ret = []
-      if(data.type == 'method'){
+      if (data.type == 'method') {
         ret.push(data)
-      }else if(data.children && data.children.length){
+      } else if (data.children && data.children.length) {
         data.children.forEach(item => {
           ret = ret.concat(this.getMethods(item))
         })
       }
       return ret
     },
-    addAll(){
+    addAll() {
       this.$emit('addAll')
     },
     renderContent(h, { node, data, store }) {
@@ -84,19 +90,21 @@ export default {
     }
   }
 }
+
 </script>
 <style lang="scss">
-  .tree-box{
-    .el-tree {
-      height: 100%;
-      overflow: auto;
-      .tree-btn{
-        padding: 0;
-        button{
-          line-height: 25px;
-          padding: 4px 15px;
-        }
+.tree-box {
+  .el-tree {
+    height: 100%;
+    overflow: auto;
+    .tree-btn {
+      padding: 0;
+      button {
+        line-height: 25px;
+        padding: 4px 15px;
       }
     }
   }
+}
+
 </style>

@@ -26,13 +26,13 @@ export default {
   },
   data() {
     return {
-    	chartType: this.defaultType?this.defaultType:'bar',
+    	chartType: this.defaultType?this.defaultType:'pie',
       chartSettings: {
-        type: this.defaultType?this.defaultType:'bar'
+        type: this.defaultType?this.defaultType:'pie'
       },
       chartEvents: {
       	click: (event) => {
-      		console.log('chart click: ', event)
+          this.$emit('click', event.data, event.dataIndex)
       	}
       }
     }
