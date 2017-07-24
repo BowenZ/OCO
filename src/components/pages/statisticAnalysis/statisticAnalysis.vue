@@ -342,25 +342,28 @@ export default {
       this.dialogVisibleDetail = true
     },
     handleChangeCompany(parentCompanyId, childCompany) {
+      console.log(childCompany)
       this.selectedCompany.every(item => {
         if (item.unitCode == parentCompanyId) {
-          if (item.subCompany && childCompany.id == item.subCompany.id) {
+          if (item.subCompany && childCompany.unitCode == item.subCompany.unitCode) {
             return false
           }
-          if (childCompany.level == 1 && !item.subCompany) {
+          if (childCompany.unitLevel == 1 && !item.subCompany) {
             return false
           }
-          if (childCompany.level == 1) {
+          if (childCompany.unitLevel == 1) {
             item.subCompany = null
             this.tableData = this.getResult()
             return false
           }
           item.subCompany = childCompany
+          console.log('========', item.subCompany)
           this.tableData = this.getResult()
           return false
         }
         return true
       })
+      console.log(this.selectedCompany)
     },
     handleCreateChart(level, methodId, methodName) {
       this.drillingDataInfo.method = {

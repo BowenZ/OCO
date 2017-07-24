@@ -38,8 +38,8 @@
       <div class="menu">
         <el-dropdown trigger="click" @command="handleMenuCommand" @visible-change="handleMenuVisible">
           <span class="el-dropdown-link">
-		        菜单<i class="el-icon-caret-bottom el-icon--right"></i>
-		      </span>
+            菜单<i class="el-icon-caret-bottom el-icon--right"></i>
+          </span>
           <el-dropdown-menu slot="dropdown" class="table-menu">
             <el-dropdown-item command="clearData" class="hide-trigger">清空数据</el-dropdown-item>
             <el-dropdown-item command="exportData" class="hide-trigger">导出到前数据</el-dropdown-item>
@@ -103,9 +103,9 @@
       <el-tree class="company-tree" :data="companyData" :props="defaultProps" default-expand-all :filter-node-method="filterNode" ref="companyTree" node-key="id" highlight-current @current-change="handleCompanyTreeChange">
       </el-tree>
       <span slot="footer" class="dialog-footer">
-		    <el-button @click="headCompanyVisible = false">取 消</el-button>
-		    <el-button type="primary" @click="confirmChangeCompany">确 定</el-button>
-		  </span>
+        <el-button @click="headCompanyVisible = false">取 消</el-button>
+        <el-button type="primary" @click="confirmChangeCompany">确 定</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
@@ -198,7 +198,7 @@ export default {
     }
   },
   mounted() {
-  	this.scrollBarWidth = this._getScrollbarWidth()
+    this.scrollBarWidth = this._getScrollbarWidth()
     setTimeout(() => {
       this.addEventListener()
       $(this.$el).find('.company-menu .secondary-item').on('mouseenter', (event) => {
@@ -332,8 +332,9 @@ export default {
             this.righeMenuVisible = false
             return
           }
+          this.righeMenuVisible = true
         } else if (!this.currentHoverCell && $(event.target).data('id')) {
-          if ($target.hasClass('el-table__fixed') || $target.hasClass('el-table__fixed-right') || $target.parents('.el-table__fixed, .el-table__footer-wrapper, .el-table__fixed-right').length || $target.hasClass('header2-wrapper') || $target.parents('.header2-wrapper').length) {
+          if ($target.hasClass('el-table__fixed') || $target.hasClass('el-table__fixed-right') || $target.parents('.el-table__fixed, .el-table__footer-wrapper, .el-table__fixed-right').length || $target.hasClass('header2-wrapper') || $target.parents('.header2-wrapper, .el-table__footer-wrapper').length) {
             this.righeMenuVisible = false
             return
           }
@@ -343,12 +344,12 @@ export default {
 
           let companyId = $(event.target).data('id')
           this.currentRightCompanyId = companyId
+          this.righeMenuVisible = true
         }
         $menu.css({
           left: `${event.clientX}px`,
           top: `${event.clientY}px`
         })
-        this.righeMenuVisible = true
       })
 
       // let $tooltip = $('.table-head-tooltip')
@@ -404,7 +405,7 @@ export default {
       }
     },
     removeCompany(param) {
-    	this.$emit('removeCompany', this.currentRightCompanyId, param)
+      this.$emit('removeCompany', this.currentRightCompanyId, param)
     },
     removeMethod() {
       this.$emit('removeMethod', this.currentRightMethod.methodId)
@@ -626,7 +627,10 @@ export default {
     .el-cascader-menu {
       height: 180px;
     }
-    .company-menu {}
+    .company-menu {
+      min-width: 180px;
+      height: 192px;
+    }
   }
   .left-bottom-copy {
     position: absolute;
