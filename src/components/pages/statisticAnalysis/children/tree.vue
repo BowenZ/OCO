@@ -32,11 +32,14 @@ export default {
           label: 'title'
         }
       }
+    },
+    type: {
+      type: String
     }
   },
   data() {
     return {
-
+      searchVal: ''
     }
   },
   methods: {
@@ -48,6 +51,7 @@ export default {
       return data[this.defaultProps.label].indexOf(value) !== -1;
     },
     handleSearch(msg) {
+      this.searchVal = msg
       this.$refs.tree.filter(msg)
     },
     add(node, data) {
@@ -74,7 +78,7 @@ export default {
       return ret
     },
     addAll() {
-      this.$emit('addAll')
+      this.$emit('addAll', this.type, this.searchVal)
     },
     renderContent(h, { node, data, store }) {
       return (

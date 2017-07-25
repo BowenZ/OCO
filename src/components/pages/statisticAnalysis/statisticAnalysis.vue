@@ -4,10 +4,10 @@
       <el-collapse-item title="统计分析" name="1" class="top-box opened">
         <el-row :gutter="30">
           <el-col :span="12">
-            <v-tree v-loading="methodTreeLoading" class="method-container" :data="methodTree" title="审计方法" @add="addMethod" @addAll="handleAddAll('method')"></v-tree>
+            <v-tree v-loading="methodTreeLoading" class="method-container" :data="methodTree" title="审计方法" @add="addMethod" :type="'method'" @addAll="handleAddAll"></v-tree>
           </el-col>
           <el-col :span="12">
-            <v-tree v-loading="companyListLoading" ref="companyList" class="company-container" :data="companyList" title="被审单位" @add="addCompany" @addAll="handleAddAll('company')" :defaultProps="{children: 'children', label: 'unitName'}"></v-tree>
+            <v-tree v-loading="companyListLoading" ref="companyList" class="company-container" :data="companyList" title="被审计单位" @add="addCompany" type="company" @addAll="handleAddAll" :defaultProps="{children: 'children', label: 'unitName'}"></v-tree>
           </el-col>
         </el-row>
       </el-collapse-item>
@@ -87,7 +87,32 @@ export default {
         label: 'title'
       },
       selectedMethods: [{ "id": 261, "type": "method", "title": "01 部门违规收取协会、学会的“赞助费”或“管理费”", "selected": 0, "description": "", "params": [] }, { "id": 262, "type": "method", "title": "02 部门在协会、学会私设“小金库”和报销各类费用", "selected": 0, "description": "", "params": [] }, { "id": 263, "type": "method", "title": "03 部门工作人员违规兼职取酬", "selected": 0, "description": "", "params": [] }, { "id": 264, "type": "method", "title": "04 协会、学会等中介机构利用部门的影响力违规收费", "selected": 0, "description": "", "params": [] }],
-      selectedCompany: [{ "unitGroupNum": "49", "unitCode": "906101", "unitName": "河南省安全生产监督管理局 ", "unitLevel": 1, "subCompany": { "unitGroupNum": "49", "unitCode": "906102", "unitName": "河南省安全生产执法监察总队", "pCode": "906101", "unitLevel": 2, "unitCode4LevelOne": "906101" } }, { "unitGroupNum": "48", "unitCode": "108101", "unitName": "河南省新闻出版广电局 ", "unitLevel": 1, "subCompany": { "unitGroupNum": "48", "unitCode": "108503", "unitName": "河南省广电局电影审片专项资金（新）", "pCode": "108101", "unitLevel": 2, "unitCode4LevelOne": "108101" } }],
+      selectedCompany: [{
+        "unitGroupNum": "82",
+        "unitCode": "902101",
+        "unitName": "河南省国土资源厅 ",
+        "unitLevel": 1
+      }, {
+        "unitGroupNum": "83",
+        "unitCode": "024101",
+        "unitName": "河南省民建 ",
+        "unitLevel": 1
+      }, {
+        "unitGroupNum": "84",
+        "unitCode": "041101",
+        "unitName": "河南省统计局 ",
+        "unitLevel": 1
+      }, {
+        "unitGroupNum": "85",
+        "unitCode": "019101",
+        "unitName": "河南省农工民主党 ",
+        "unitLevel": 1
+      }, {
+        "unitGroupNum": "86",
+        "unitCode": "036101",
+        "unitName": "河南省民族事务委员会 ",
+        "unitLevel": 1
+      }],
       tableData: [],
       tableLoading: false,
 
@@ -174,7 +199,7 @@ export default {
   mounted() {
     this.loadMethodTree()
     this.loadCompanyList()
-    this.tableData = this.getResult()
+    this.getResult()
   },
   methods: {
     loadMethodTree() {
@@ -220,7 +245,7 @@ export default {
       })
       if (filteredData.length) {
         this.selectedMethods = this.selectedMethods.concat(filteredData)
-        this.tableData = this.getResult()
+        this.getResult()
       }
     },
     addCompany(data) {
@@ -248,7 +273,7 @@ export default {
         }
 
         let replacedCompany = this.selectedCompany.splice(index, 1, dataToReplace)
-        this.tableData = this.getResult()
+        this.getResult()
         this.$message({
           message: `存在相同一级单位的“${replacedCompany[0].unitName}”，已替换为当前选择单位“${data.unitName}”`,
           type: 'info'
@@ -269,81 +294,142 @@ export default {
           parentCompany.subCompany = data
           this.selectedCompany.push(parentCompany)
         }
-        this.tableData = this.getResult()
+        this.getResult()
       }
     },
     getResult() {
+      this.tableLoading = true
       let ret = []
-      this.selectedMethods.forEach(method => {
-        let obj = {}
-        let sum = 0
-        obj.method = {
-          methodId: method.id,
-          methodName: method.title
+      this.$http.get(urlStore.statisticQuery, {
+        params: {
+          year: 2016,
+          unitCodes: this.selectedCompany.map(item => item.subCompany ? item.subCompany.unitCode : item.unitCode).join(','),
+          methodIds: this.selectedMethods.map(item => item.id).join(','),
+          type: this.$refs.resultTable.selectedLevel
         }
-        obj.companies = []
-        this.selectedCompany.forEach((company, index) => {
-          let issuesNum = Math.ceil(Math.random() * 10)
-          obj.companies.push({
-            companyId: company.unitCode,
-            companyName: company.unitName,
-            issues: issuesNum,
-            subCompany: company.subCompany
+      }).then(res => {
+        if (res.ok && res.body.success) {
+          let tmpCompany = []
+          let tmpData = res.body.data.find(item => item.units.length > 0)
+          if (!tmpData) {
+            this.selectedCompany.forEach((company, index) => {
+              tmpCompany.push({
+                companyId: company.unitCode,
+                companyName: company.unitName,
+                issues: 0,
+                subCompany: company.subCompany
+              })
+            })
+          } else {
+            tmpData.units.forEach(item => {
+              if (item.unitLevel == 1) {
+                tmpCompany.push({
+                  companyId: item.unitCode,
+                  companyName: item.unitName,
+                  issues: 0,
+                  subCompany: null
+                })
+              } else {
+                console.log(this.selectedCompany)
+                let targetCompany = this.selectedCompany.find(item2 => {
+                  console.log(item2,'+++')
+                  return item2.subCompany && item2.subCompany.unitCode == item.unitCode
+                })
+                tmpCompany.push({
+                  companyId: targetCompany.unitCode,
+                  companyName: targetCompany.unitName,
+                  issues: null,
+                  subCompany: targetCompany.subCompany
+                })
+              }
+            })
+          }
+
+          res.body.data.forEach(item => {
+            let obj = {}
+            obj.method = {
+              methodId: item.methodId,
+              methodName: item.methodName
+            }
+            obj.companies = JSON.parse(JSON.stringify(tmpCompany))
+            item.units.length && item.units.forEach((unit, index) => {
+              obj.companies[index].issues = unit.resultCount
+            })
+            obj.sum = item.resultCount
+            ret.push(obj)
           })
-          sum += issuesNum
-        })
-        obj.sum = sum
-        ret.push(obj)
+          this.tableData = ret
+        }
+        this.tableLoading = false
       })
-      return ret
+      // console.log(this.selectedMethods, this.selectedCompany)
+
+      // this.selectedMethods.forEach(method => {
+      //   let obj = {}
+      //   let sum = 0
+      //   obj.method = {
+      //     methodId: method.id,
+      //     methodName: method.title
+      //   }
+      //   obj.companies = []
+      //   this.selectedCompany.forEach((company, index) => {
+      //     let issuesNum = Math.ceil(Math.random() * 10)
+      //     obj.companies.push({
+      //       companyId: company.unitCode,
+      //       companyName: company.unitName,
+      //       issues: issuesNum,
+      //       subCompany: company.subCompany
+      //     })
+      //     sum += issuesNum
+      //   })
+      //   obj.sum = sum
+      //   ret.push(obj)
+      // })
+      // this.tableLoading = false
+      // return ret
     },
     handleRemoveCompany(companyId, param) {
       this.tableLoading = true
+      let index = this.selectedCompany.findIndex(item => item.unitCode == companyId)
       if (param == 'this') {
-        let noMatch = this.selectedCompany.every((item, index) => {
-          if (item.unitCode == companyId) {
-            this.selectedCompany.splice(index, 1)
-            return false
-          }
-          return true
-        })
-        if (noMatch) {
-          this.tableLoading = false
-          return
-        }
-      } else {
-        let index = this.selectedCompany.findIndex(item => item.unitCode == companyId)
-        if (param == 'left') {
-          this.selectedCompany = this.selectedCompany.slice(index)
-        } else if (param == 'right') {
-          this.selectedCompany = this.selectedCompany.slice(0, index + 1)
-        } else if (param == 'others') {
-          this.selectedCompany = [this.selectedCompany[index]]
-        }
+        this.selectedCompany.splice(index, 1)
+      } else if (param == 'left') {
+        this.selectedCompany = this.selectedCompany.slice(index)
+      } else if (param == 'right') {
+        this.selectedCompany = this.selectedCompany.slice(0, index + 1)
+      } else if (param == 'others') {
+        this.selectedCompany = [this.selectedCompany[index]]
       }
       this.tableData = []
       setTimeout(() => {
-        this.tableData = this.getResult()
+        this.getResult()
         this.tableLoading = false
         // this.$refs.resultTable.$forceUpdate()
       }, 300)
     },
-    handleRemoveMethod(methodId) {
-      this.selectedMethods.every((item, index) => {
-        if (item.id == methodId) {
-          this.selectedMethods.splice(index, 1)
-          this.tableData = this.getResult()
-          return false
-        }
-        return true
-      })
+    handleRemoveMethod(methodId, param) {
+      this.tableLoading = true
+      let index = this.selectedMethods.findIndex(item => item.id == methodId)
+      if (param == 'this') {
+        this.selectedMethods.splice(index, 1)
+        this.tableData.splice(index, 1)
+      } else if (param == 'top') {
+        this.selectedMethods = this.selectedMethods.slice(index)
+        this.tableData = this.tableData.slice(index)
+      } else if (param == 'bottom') {
+        this.selectedMethods = this.selectedMethods.slice(0, index + 1)
+        this.tableData = this.tableData.slice(0, index + 1)
+      } else if (param == 'others') {
+        this.selectedMethods = [this.selectedMethods[index]]
+        this.tableData = [this.tableData[index]]
+      }
+      this.tableLoading = false
     },
     handleShowDetail(data) {
       this.dialogVisibleDetail = true
     },
     handleChangeCompany(parentCompanyId, childCompany) {
-      console.log(childCompany)
-      this.selectedCompany.every(item => {
+      this.selectedCompany.every((item, index) => {
         if (item.unitCode == parentCompanyId) {
           if (item.subCompany && childCompany.unitCode == item.subCompany.unitCode) {
             return false
@@ -353,17 +439,17 @@ export default {
           }
           if (childCompany.unitLevel == 1) {
             item.subCompany = null
-            this.tableData = this.getResult()
+            this.getResult()
             return false
           }
-          item.subCompany = childCompany
-          console.log('========', item.subCompany)
-          this.tableData = this.getResult()
+          this.selectedCompany[index].subCompany = childCompany
+          setTimeout(() => {
+            this.getResult()
+          }, 10)
           return false
         }
         return true
       })
-      console.log(this.selectedCompany)
     },
     handleCreateChart(level, methodId, methodName) {
       this.drillingDataInfo.method = {
@@ -401,10 +487,10 @@ export default {
       this.selectedCompany.forEach(item => {
         item.subCompany = null
       })
-      this.tableData = this.getResult()
+      this.getResult()
     },
     handleChangeYear(year) {
-      this.tableData = this.getResult()
+      this.getResult()
     },
     getMethods(data) {
       if (!data) {
@@ -427,19 +513,34 @@ export default {
       })
       return ret
     },
-    handleAddAll(target) {
+    handleAddAll(target, searchVal) {
       if (target == 'method') {
-        this.selectedMethods = this.getAllMethods()
-        this.tableData = this.getResult()
+        if (searchVal) {
+          let methodsToAdd = this.getAllMethods().filter(item => (item.title.indexOf(searchVal) > -1 && !this.selectedMethods.some(seMethod => seMethod.id == item.id)))
+          this.selectedMethods = this.selectedMethods.concat(methodsToAdd)
+        } else {
+          this.selectedMethods = this.getAllMethods()
+        }
+        this.getResult()
       } else if (target == 'company') {
         this.tableLoading = true
 
         setTimeout(() => {
-          let companyListToAdd = this.companyList.filter(item => {
-            return item.unitLevel == 1 && this.selectedCompany.findIndex(c => c.unitCode == item.unitCode) < 0
-          })
-          this.selectedCompany = this.selectedCompany.concat(companyListToAdd)
-          this.tableData = this.getResult()
+          if (searchVal) {
+            let companyListToAdd = this.companyList.filter(item => {
+              return item.unitName.indexOf(searchVal) > -1
+            })
+            companyListToAdd.forEach(item => {
+              this.addCompany(item)
+            })
+          } else {
+            let companyListToAdd = this.companyList.filter(item => {
+              return item.unitLevel == 1 && this.selectedCompany.findIndex(c => c.unitCode == item.unitCode) < 0
+            })
+            this.selectedCompany = (this.selectedCompany.concat(companyListToAdd))
+          }
+
+          this.getResult()
           this.$nextTick(() => {
             setTimeout(() => {
               this.$refs.resultTable.resizeFixedTableCol()

@@ -105,6 +105,10 @@ http.createServer(function(req, res) {
     res.write(JSON.stringify(mock.findAllListWithAuditItemAndAuditMethodModel))
   }else if(pathname == '/unitsBasicInfo/findList.do'){
     res.write(JSON.stringify(mock.findUnitsList))
+  }else if(pathname == '/unitsBasicInfo/findUnitTreeByPcode.do'){
+    res.write(JSON.stringify(mock.findUnitTreeByPcode))
+  }else if(pathname == '/auditResultStore/statisticQuery.do'){
+    res.write(JSON.stringify(mock.statisticQuery))
   }
 
   res.end()

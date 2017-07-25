@@ -19,7 +19,7 @@
                 <span class="row-info" v-if="method.data && (isNaN(method.data.rowCount) || method.data.rowCount==0)"> | ({{method.data.rowCount}})</span><!-- 返回中文提示 -->
                 <span class="row-count" v-if="method.data && !isNaN(method.data.rowCount) && method.data.rowCount!=0" @click="shwoMoreData($event)"> | ({{method.data.rowCount}})</span><!-- 数据量 -->
                 <span class="row-count" v-if="method.status == 'error'" @click="shwoMoreData($event)"> | (查看错误详情)</span>
-                <span class="accord" v-if="method.accord"  @click="shwoMoreData($event, 1)">| (定性依据)</span>
+                <!-- <span class="accord" v-if="method.accord"  @click="shwoMoreData($event, 1)">| (定性依据)</span> -->
                 <span @click="showDocuementManagement(index)">| 资料管理</span>
               </h4>
               <a v-if="method.outputLink" :href="urlStore.root+method.outputLink" target="_blank" class="el-button el-button--primary output-link">导出数据</a>

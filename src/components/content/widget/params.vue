@@ -167,6 +167,7 @@ export default {
     },
     handleClose: function() {
       this.popupSearch = []
+      this.paramList = []
     },
     confirmParam: function() {
       let tmpObj = {}

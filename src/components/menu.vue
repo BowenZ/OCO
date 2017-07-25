@@ -8,28 +8,28 @@
             <span class="nav-title">审计项目</span>
           </a>
         </li>
-        <li :class="{active: showDrawer(1)}">
-          <a href="" title="审计方法" @click.prevent="toggleDrawer(1, $event)">
-            <span class="el-icon-star-off"></span>
-            <span class="nav-title">审计方法</span>
-          </a>
-        </li>
         <li :class="{active: showDrawer(2)}">
           <a href="" title="基础数据" @click.prevent="toggleDrawer(2, $event)">
             <span class="el-icon-document"></span>
             <span class="nav-title">基础数据</span>
           </a>
         </li>
-        <li :class="{active: showDrawer(5)}">
-          <a href="" title="模型维护" @click.prevent="toggleDrawer(5, $event)">
-            <span class="el-icon-edit"></span>
-            <span class="nav-title">模型维护</span>
+        <li :class="{active: showDrawer(1)}">
+          <a href="" title="个性化分析" @click.prevent="toggleDrawer(1, $event)">
+            <span class="el-icon-star-off"></span>
+            <span class="nav-title">个性化分析</span>
           </a>
         </li>
         <li :class="{active: showDrawer(6)}">
           <a href="" title="决策分析" @click.prevent="toggleDrawer(6, $event)">
             <span class="el-icon-share"></span>
             <span class="nav-title">决策分析</span>
+          </a>
+        </li>
+        <li :class="{active: showDrawer(5)}">
+          <a href="" title="模型维护" @click.prevent="toggleDrawer(5, $event)">
+            <span class="el-icon-edit"></span>
+            <span class="nav-title">模型维护</span>
           </a>
         </li>
       </ul>

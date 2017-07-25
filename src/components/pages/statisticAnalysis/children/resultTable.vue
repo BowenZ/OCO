@@ -1,6 +1,6 @@
 <template>
   <div class="table-box" v-loading="tableLoading">
-    <el-table ref="resultTable" v-if="tableData && tableData.length" :data="tableData" border style="width: 100%" height="100%" @row-contextmenu="handleClickTableCell" @cell-mouse-enter="handleHoverCell" @cell-mouse-leave="handleLeaveCell" :summary-method="getSummaries" show-summary @cell-dblclick="handleDbClickCell">
+    <el-table ref="resultTable" v-if="tableData && tableData.length" :data="tableData" border style="width: 100%" height="100%" @cell-mouse-enter="handleHoverCell" @cell-mouse-leave="handleLeaveCell" :summary-method="getSummaries" show-summary @cell-click="handleClickCell">
       <el-table-column fixed prop="method" label="" show-overflow-tooltip width="140">
         <template scope="scope">
           <span>{{scope.row.method.methodName}}</span>
@@ -17,7 +17,7 @@
       </el-table-column>
     </el-table>
     <p v-if="!tableData || !tableData.length" style="text-align:center">请从上方添加审计方法和单位数据</p>
-    <div class="covers" v-if="tableData.length && tableData[0].companies.length">
+    <div class="covers" v-if="tableData && tableData.length && tableData[0].companies.length">
       <div class="year-selector">
         <el-popover ref="popover" placement="top" width="200" v-model="popVisible">
           <el-select style="width:120px;" v-model="selectedYear" multiple placeholder="请选择年份" size="small">
@@ -42,7 +42,7 @@
           </span>
           <el-dropdown-menu slot="dropdown" class="table-menu">
             <el-dropdown-item command="clearData" class="hide-trigger">清空数据</el-dropdown-item>
-            <el-dropdown-item command="exportData" class="hide-trigger">导出到前数据</el-dropdown-item>
+            <el-dropdown-item command="exportData" class="hide-trigger">导出当前数据</el-dropdown-item>
             <el-dropdown-item class="dropdown-item-chart">生成统计方法图形报表<i class="el-icon-caret-right"></i></el-dropdown-item>
             <ul class="el-dropdown-menu" x-placement="top-end" v-show="dropdownMenuVisible">
               <li class="el-dropdown-menu__item" @click="showChart(0)">所有单位</li>
@@ -72,7 +72,10 @@
       </div>
       <div class="method-menu el-cascader-menus" v-show="methodMenuVisible">
         <ul class="el-cascader-menu">
-          <li class="el-cascader-menu__item" @click="removeMethod">移除该方法</li>
+          <li class="el-cascader-menu__item" @click="removeMethod('this')">移除该方法</li>
+          <li class="el-cascader-menu__item" @click="removeMethod('top')">移除上方所有方法</li>
+          <li class="el-cascader-menu__item" @click="removeMethod('bottom')">移除下方所有方法</li>
+          <li class="el-cascader-menu__item" @click="removeMethod('others')">移除其他所有方法</li>
           <li class="el-cascader-menu__item el-cascader-menu__item--extensible secondary-item1">导出该方法数据</li>
           <li class="el-cascader-menu__item el-cascader-menu__item--extensible secondary-item2">生成该方法图形报表</li>
         </ul>
@@ -95,12 +98,12 @@
         </ul>
       </div>
     </div>
-    <el-dialog title="搜索单位" :visible.sync="headCompanyVisible" size="small">
+    <el-dialog class="search-company" title="搜索单位" :visible.sync="headCompanyVisible" size="small">
       <div @keyup.enter.stop="searchCompany">
         <el-input placeholder="输入关键字进行过滤" v-model="filterText">
         </el-input>
       </div>
-      <el-tree class="company-tree" :data="companyData" :props="defaultProps" default-expand-all :filter-node-method="filterNode" ref="companyTree" node-key="id" highlight-current @current-change="handleCompanyTreeChange">
+      <el-tree v-loading="searchCompanyLoading" class="company-tree" :data="companyData" :props="defaultProps" default-expand-all :filter-node-method="filterNode" ref="companyTree" node-key="id" highlight-current @current-change="handleCompanyTreeChange">
       </el-tree>
       <span slot="footer" class="dialog-footer">
         <el-button @click="headCompanyVisible = false">取 消</el-button>
@@ -112,6 +115,7 @@
 <script>
 import $ from 'webpack-zepto'
 import renderFunctions from './renderFunctions'
+import urlStore from '@/api/urlStore.js'
 export default {
   props: {
     tableData: {
@@ -136,7 +140,7 @@ export default {
         value: 3,
         label: '各单位汇总（三）'
       }, {
-        value: -1,
+        value: 4,
         label: '自定义'
       }],
       selectedLevel: 0,
@@ -154,29 +158,12 @@ export default {
       currentRightMethod: null,
 
       // 点击表头搜索单位
+      searchCompanyLoading: false,
       currentHeadCompany: null,
       headCompanyVisible: null,
       filterText: '',
       selectedTreeCompany: null,
-      companyData: [{
-        unitCode: 1,
-        unitName: '一级单位',
-        unitLevel: 1,
-        children: [{
-          unitCode: 4,
-          unitName: '二级单位',
-          unitLevel: 2,
-          children: [{
-            unitCode: 9,
-            unitLevel: 3,
-            unitName: '三级单位 1',
-          }, {
-            unitCode: 10,
-            unitLevel: 3,
-            unitName: '三级单位 2'
-          }]
-        }]
-      }],
+      companyData: [],
       defaultProps: {
         children: 'children',
         label: 'unitName'
@@ -195,6 +182,28 @@ export default {
         this.addEventListener()
         this.resizeFixedTableCol()
       }, 100)
+    },
+    currentHeadCompany: function(newVal) {
+      this.searchCompanyLoading = true
+      this.companyData = []
+      this.$http.post(urlStore.findUnitTreeByPcode, {
+        pCode: this.currentHeadCompany
+      }, {
+        emulateJSON: true
+      }).then(res => {
+        console.log(res)
+        if (res.ok && res.body.status) {
+          this.companyData = res.body.data
+        } else {
+          this.$message({
+            message: '请求出现错误：' + res.body.msg,
+            type: 'warning'
+          })
+        }
+        this.searchCompanyLoading = false
+      }).then(err => {
+        this.searchCompanyLoading = false
+      })
     }
   },
   mounted() {
@@ -234,19 +243,20 @@ export default {
       return scrollbarWidth;
     },
     resizeFixedTableCol() {
+      let $el = $(this.$el)
       this.$refs.resultTable && this.$refs.resultTable.doLayout()
-      let height = $(this.$el).find('.el-table__fixed .el-table__fixed-header-wrapper').height() + $(this.$el).find('.el-table__fixed .el-table__fixed-body-wrapper').height()
-      $(this.$el).find('.el-table__fixed-right, .el-table__fixed').height(height)
-      $(this.$el).find('.el-table__fixed-right').css('right', `${this.scrollBarWidth}px`)
-      $(this.$el).find('.el-table__fixed-right-patch').width(this.scrollBarWidth)
+      let height = $el.find('.el-table__fixed .el-table__fixed-header-wrapper').height() + $el.find('.el-table__fixed .el-table__fixed-body-wrapper').height()
+      $el.find('.el-table__fixed-right, .el-table__fixed').height(height)
+      $el.find('.el-table__fixed-right').css('right', `${this.scrollBarWidth}px`)
+      $el.find('.el-table__fixed-right-patch').width(this.scrollBarWidth)
     },
     // +++++++搜索单位++++++++
     searchCompany() {
-      this.$refs.companyTree.filter(this.filterText);
+      this.$refs.companyTree.filter(this.filterText)
     },
     filterNode(value, data) {
       if (!value) return true;
-      return data.label.indexOf(value) !== -1;
+      return data.unitName.indexOf(value) !== -1;
     },
     handleCompanyTreeChange(data, node) {
       this.selectedTreeCompany = data
@@ -256,7 +266,7 @@ export default {
       if (!this.selectedTreeCompany) {
         return
       }
-      this.selectedLevel = -1
+      this.selectedLevel = 4
       this.$emit('changeCompany', this.currentHeadCompany, this.selectedTreeCompany)
     },
     // ++++++++++++++++++++++
@@ -314,6 +324,10 @@ export default {
       $table.on('contextmenu', (event) => {
         let $target = $(event.target)
         event.preventDefault()
+        this.righeMenuVisible = false
+        this.companySecondaryMenuVisible = false
+        this.methodSecondaryMenuVisible1 = false
+        this.methodSecondaryMenuVisible2 = false
         if ($target.parents('.el-table__fixed-header-wrapper').length) {
           this.righeMenuVisible = false
           return
@@ -333,17 +347,16 @@ export default {
             return
           }
           this.righeMenuVisible = true
-        } else if (!this.currentHoverCell && $(event.target).data('id')) {
-          if ($target.hasClass('el-table__fixed') || $target.hasClass('el-table__fixed-right') || $target.parents('.el-table__fixed, .el-table__footer-wrapper, .el-table__fixed-right').length || $target.hasClass('header2-wrapper') || $target.parents('.header2-wrapper, .el-table__footer-wrapper').length) {
-            this.righeMenuVisible = false
-            return
-          }
+        } else if ($target.data('id')) {
+          // if ($target.hasClass('el-table__fixed') || $target.hasClass('el-table__fixed-right') || $target.parents('.el-table__fixed, .el-table__footer-wrapper, .el-table__fixed-right, .header2-wrapper').length || $target.hasClass('header2-wrapper')) {
+          //   this.righeMenuVisible = false
+          //   return
+          // }
           this.methodMenuVisible = false
           this.issueMenuVisible = false
           this.companyMenuVisible = true
 
-          let companyId = $(event.target).data('id')
-          this.currentRightCompanyId = companyId
+          this.currentRightCompanyId = $target.data('id')
           this.righeMenuVisible = true
         }
         $menu.css({
@@ -351,31 +364,11 @@ export default {
           top: `${event.clientY}px`
         })
       })
-
-      // let $tooltip = $('.table-head-tooltip')
-      // let $tableHeader = $(this.$el).find('.el-table__header-wrapper')
-      // $tableHeader.off()
-      // $tableHeader.on('mouseenter', 'th .cell', (event) => {
-      //   event.preventDefault();
-      //   let txt = $(event.target).text()
-      //   if (txt) {
-      //     let targetPosition = event.target.getClientRects()[0]
-      //     $tooltip.text(txt).css({
-      //       top: `${targetPosition.top - targetPosition.height - 25}px`,
-      //       left: `${targetPosition.left + (targetPosition.width/2)}px`,
-      //       display: 'block'
-      //     });
-      //   }
-      // }).on('mouseleave', 'th .cell', (event) => {
-      //   event.preventDefault();
-      //   $tooltip.css('display', 'none');
-      // });
     },
     changeYear() {
       this.popVisible = false
       this.$emit('changeYear', this.selectedYear)
     },
-    handleClickTableCell(row, event) {},
     handleHoverCell(row, col, cell, event) {
       this.currentHoverCell = {
         row,
@@ -385,7 +378,7 @@ export default {
     handleLeaveCell(row, col, cell, event) {
       this.currentHoverCell = null
     },
-    handleDbClickCell(row, col, cell, event) {
+    handleClickCell(row, col, cell, event) {
       if (col.property.match('company')) {
         let companyId = col.property.split('-').pop()
         let sum = 0
@@ -407,8 +400,8 @@ export default {
     removeCompany(param) {
       this.$emit('removeCompany', this.currentRightCompanyId, param)
     },
-    removeMethod() {
-      this.$emit('removeMethod', this.currentRightMethod.methodId)
+    removeMethod(param) {
+      this.$emit('removeMethod', this.currentRightMethod.methodId, param)
     },
     createChart(level) {
       this.$emit('createChart', level, this.currentRightMethod.methodId, this.currentRightMethod.methodName)
@@ -544,24 +537,6 @@ export default {
         }
       }
       tr:last-of-type {
-        // cursor: pointer;
-        // th .cell:before {
-        //   content: "\E61D";
-        //   font-family: element-icons!important;
-        //   speak: none;
-        //   font-style: normal;
-        //   font-weight: 400;
-        //   font-variant: normal;
-        //   text-transform: none;
-        //   line-height: 1;
-        //   vertical-align: baseline;
-        //   display: inline-block;
-        //   -webkit-font-smoothing: antialiased;
-        //   -moz-osx-font-smoothing: grayscale;
-        //   display: inline-block;
-        //   font-size: 15px;
-        //   color: #8492a6;
-        // }
         .header-wrapper {
           display: inline-block;
           width: 100%;
@@ -628,8 +603,10 @@ export default {
       height: 180px;
     }
     .company-menu {
-      min-width: 180px;
-      height: 192px;
+      .el-cascader-menu {
+        min-width: 180px;
+        height: 192px;
+      }
     }
   }
   .left-bottom-copy {
@@ -650,6 +627,12 @@ export default {
     padding: 8px 59px;
     .el-dropdown-link {
       cursor: pointer;
+    }
+  }
+  .search-company {
+    .company-tree {
+      max-height: 300px;
+      overflow: auto;
     }
   }
 }
@@ -694,6 +677,8 @@ export default {
     height: 0px;
     top: 100%;
   }
+
+
 }
 
 .el-message-box__header {
