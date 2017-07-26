@@ -12,48 +12,40 @@
         </el-row>
       </el-collapse-item>
       <el-collapse-item title="结果" name="2" class="table-container opened">
-        <v-table ref="resultTable" v-loading="tableLoading" :tableData="tableData" @removeCompany="handleRemoveCompany" @removeMethod="handleRemoveMethod" @showDetail="handleShowDetail" @changeCompany="handleChangeCompany" @createChart="handleCreateChart" @clearData="handleClearData" @showChart="handleShowChart" @changeLevel="handleChangeLevel" @changeYear="handleChangeYear" @drillingData="handleDrillingData"></v-table>
+        <v-table ref="resultTable" v-loading="tableLoading" :element-loading-text="tableLoadingText" :tableData="tableData" @removeCompany="handleRemoveCompany" @removeMethod="handleRemoveMethod" @showDetail="handleShowDetail" @changeCompany="handleChangeCompany" @showCompanyChart="handleShowCompanyChart" @clearData="handleClearData" @showMethodChart="handleShowMethodChart" @changeLevel="handleChangeLevel" @changeYear="handleChangeYear" @drillingData="handleDrillingData" @exportDataByMethod="handleExportDataByMethod" @exportDataByCell="handleExportDataByCell"></v-table>
       </el-collapse-item>
     </el-collapse>
     <el-dialog title="数据钻取" :visible.sync="dialogVisibleDetail" size="large">
-      <el-table :data="detailData" style="width: 100%">
-        <el-table-column prop="date" label="日期" width="180">
-        </el-table-column>
-        <el-table-column prop="name" label="姓名" width="180">
-        </el-table-column>
-        <el-table-column prop="address" label="地址">
-        </el-table-column>
-      </el-table>
+      <div class="detail-data-table" v-loading="detailDataLoading" element-loading-text="正在加载数据，请稍后...">
+        <el-table v-if="detailTableData" :data="detailTableData" max-height="400" border style="width: 100%">
+          <el-table-column type="index" width="60">
+          </el-table-column>
+          <el-table-column v-for="(key, index) in Object.keys(detailTableHeader)" :show-overflow-tooltip="true" :key="index" :prop="key" :label="key">
+          </el-table-column>
+        </el-table>
+      </div>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="dialogVisibleDetail = false">确 定</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="图表" :visible.sync="singleMethodChartVisible" size="large" class="chart-data">
+    <el-dialog title="图表" :visible.sync="showCompanyChart" size="large" class="chart-data">
       <p v-if="drillingDataInfo.method">当前方法：{{drillingDataInfo.method.methodName}}</p>
-      <v-chart :chartData="singleMethodChartData" defaultType="pie" @click="handleClickSingleChart"></v-chart>
+      <v-chart :chartData="companyChartData" defaultType="pie" @click="handleClickCompanyChart"></v-chart>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="singleMethodChartVisible = false">确 定</el-button>
+        <el-button type="primary" @click="showCompanyChart = false">确 定</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="图表" :visible.sync="dialogVisiblePieChart" size="large">
-      <v-chart :chartData="multipleMethodCharData" defaultType="pie" @click="handleClickMultipleChart"></v-chart>
+    <el-dialog title="图表" :visible.sync="showMethodChart" size="large">
+      <v-chart :chartData="methodCharData" defaultType="pie" @click="handleClickMethodChart"></v-chart>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogVisiblePieChart = false">确 定</el-button>
+        <el-button type="primary" @click="showMethodChart = false">确 定</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="数据钻取" :visible.sync="showChartData" size="large" class="chart-data" @close="handleCloseDrillingData">
-      <p v-if="drillingDataInfo.method">当前方法：{{drillingDataInfo.method.methodName}}</p>
-      <p v-if="drillingDataInfo.company">当前单位：{{drillingDataInfo.company.companyName}}</p>
-      <el-table :data="detailData" style="width: 100%">
-        <el-table-column prop="date" label="日期" width="180">
-        </el-table-column>
-        <el-table-column prop="name" label="姓名" width="180">
-        </el-table-column>
-        <el-table-column prop="address" label="地址">
-        </el-table-column>
-      </el-table>
+    <el-dialog title="根据单位钻取数据" :visible.sync="showDrillTable" size="large">
+      <v-drill-table :data="drillData" :drillParent="drillParent" :drillLevel="drillLevel"></v-drill-table>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="showChartData = false">确 定</el-button>
+        <el-button type="success" @click="handleExportDataByPcode">导出数据</el-button>
+        <el-button type="primary" @click="showDrillTable = false">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -67,13 +59,15 @@ import vTable from './children/resultTable'
 import vBarChart from './children/barChart'
 import vPieChart from './children/pieChart'
 import vChart from './children/vChart'
+import vDrillTable from './children/drillTable'
 export default {
   components: {
     vTree,
     vTable,
     vBarChart,
     vPieChart,
-    vChart
+    vChart,
+    vDrillTable
   },
   data() {
     return {
@@ -115,85 +109,27 @@ export default {
       }],
       tableData: [],
       tableLoading: false,
+      tableLoadingText: '',
 
       // 钻取数据
       dialogVisibleDetail: false,
-      detailData: [{
-        date: '2016-05-02',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-04',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1517 弄'
-      }, {
-        date: '2016-05-01',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1519 弄'
-      }, {
-        date: '2016-05-03',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1516 弄'
-      }],
+      detailTableData: null,
+      detailTableHeader: null,
+      detailDataLoading: false,
 
       // 图表
-      singleMethodChartVisible: false,
-      dialogVisiblePieChart: false,
-      singleMethodChartData: {
-        columns: ['单位', '问题数'],
-        rows: [{
-          '单位': '安阳市工商局',
-          '问题数': 5,
-          id: 123
-        }, {
-          '单位': '濮阳市工商局',
-          '问题数': 9,
-          id: 123
-        }, {
-          '单位': '河南省财政厅',
-          '问题数': 6,
-          id: 123
-        }, {
-          '单位': '河南省农业综合开发公司',
-          '问题数': 4,
-          id: 123
-        }, {
-          '单位': '开封市工商局机关',
-          '问题数': 12,
-          id: 123
-        }, {
-          '单位': '开封市经济检查支队',
-          '问题数': 3,
-          id: 123
-        }]
-      },
-      multipleMethodCharData: {
-        columns: ['审计方法', '问题数'],
-        rows: [{
-          '审计方法': '部门预算执行总体情况和执行率',
-          '问题数': 15
-        }, {
-          '审计方法': '预算项目执行情况',
-          '问题数': 29
-        }, {
-          '审计方法': '年底向宾馆培训中心招待所等大额转款',
-          '问题数': 36
-        }, {
-          '审计方法': '工会经费实际支出超预算',
-          '问题数': 14
-        }, {
-          '审计方法': '福利费支出超预算',
-          '问题数': 12
-        }, {
-          '审计方法': '财政供养人员经商办企业',
-          '问题数': 3
-        }]
-      },
-      showChartData: false,
+      showCompanyChart: false,
+      showMethodChart: false,
+      companyChartData: null,
+      methodCharData: null,
       drillingDataInfo: {
         method: null,
         company: null
-      }
+      },
+      showDrillTable: false,
+      drillData: null,
+      drillParent: null,
+      drillLevel: 1
     }
   },
   mounted() {
@@ -211,6 +147,10 @@ export default {
         }
         this.methodTreeLoading = false
       }).catch(err => {
+        this.$message({
+          message: '请求审计方法数据出错',
+          type: 'error'
+        })
         this.methodTreeLoading = false
       })
     },
@@ -223,6 +163,10 @@ export default {
         }
         this.companyListLoading = false
       }).catch(err => {
+        this.$message({
+          message: '请求被审计单位数据出错',
+          type: 'error'
+        })
         this.companyListLoading = false
       })
     },
@@ -299,11 +243,17 @@ export default {
     },
     getResult() {
       this.tableLoading = true
+      this.tableLoadingText = '正在请求数据...'
       let ret = []
       this.$http.get(urlStore.statisticQuery, {
         params: {
-          year: 2016,
-          unitCodes: this.selectedCompany.map(item => item.subCompany ? item.subCompany.unitCode : item.unitCode).join(','),
+          year: this.$refs.resultTable.selectedYear.join(','),
+          unitCodes: this.selectedCompany.map(item => {
+            if (this.$refs.resultTable.selectedLevel == 4) {
+              return item.subCompany ? item.subCompany.unitCode : item.unitCode
+            }
+            return item.unitCode
+          }).join(','),
           methodIds: this.selectedMethods.map(item => item.id).join(','),
           type: this.$refs.resultTable.selectedLevel
         }
@@ -330,9 +280,7 @@ export default {
                   subCompany: null
                 })
               } else {
-                console.log(this.selectedCompany)
                 let targetCompany = this.selectedCompany.find(item2 => {
-                  console.log(item2,'+++')
                   return item2.subCompany && item2.subCompany.unitCode == item.unitCode
                 })
                 tmpCompany.push({
@@ -362,7 +310,6 @@ export default {
         }
         this.tableLoading = false
       })
-      // console.log(this.selectedMethods, this.selectedCompany)
 
       // this.selectedMethods.forEach(method => {
       //   let obj = {}
@@ -390,6 +337,7 @@ export default {
     },
     handleRemoveCompany(companyId, param) {
       this.tableLoading = true
+      this.tableLoadingText = '正在加载中...'
       let index = this.selectedCompany.findIndex(item => item.unitCode == companyId)
       if (param == 'this') {
         this.selectedCompany.splice(index, 1)
@@ -426,7 +374,27 @@ export default {
       this.tableLoading = false
     },
     handleShowDetail(data) {
-      this.dialogVisibleDetail = true
+      console.log(data)
+      if (data.type == 0) {
+        let pCompany = this.selectedCompany.find(item => item.unitCode == data.unitCodes)
+        if (pCompany.subCompany) {
+          data.unitCodes = pCompany.subCompany.unitCode
+        }
+      }
+      this.tableLoading = true
+      this.tableLoadingText = '正在加载数据，请稍后...'
+      this.$http.post(urlStore.viewResultData, data, {
+        emulateJSON: true
+      }).then(res => {
+        if (res.ok) {
+          this.dialogVisibleDetail = true
+          this.detailTableHeader = res.body.tableHeader
+          this.detailTableData = res.body.tableData
+        }
+        this.tableLoading = false
+      }).catch(err => {
+        this.tableLoading = false
+      })
     },
     handleChangeCompany(parentCompanyId, childCompany) {
       this.selectedCompany.every((item, index) => {
@@ -444,6 +412,9 @@ export default {
           }
           this.selectedCompany[index].subCompany = childCompany
           setTimeout(() => {
+            if (!this.selectedCompany[index].subCompany) {
+              this.selectedCompany[index].subCompany = childCompany
+            }
             this.getResult()
           }, 10)
           return false
@@ -451,12 +422,51 @@ export default {
         return true
       })
     },
-    handleCreateChart(level, methodId, methodName) {
-      this.drillingDataInfo.method = {
-        methodId,
-        methodName
-      }
-      this.singleMethodChartVisible = true
+    handleShowCompanyChart(level, methodId, methodName) {
+      this.tableLoading = true
+      this.tableLoadingText = '正在生成图表，请稍后'
+      this.$http.get(urlStore.statisticQuery, {
+        params: {
+          year: this.$refs.resultTable.selectedYear.join(','),
+          unitCodes: this.selectedCompany.map(item => item.unitCode).join(','),
+          methodIds: methodId,
+          type: level,
+          topRow: 10,
+          topType: 'unit'
+        }
+      }).then(res => {
+        if (res.ok) {
+
+          let tmpData = {
+            columns: ['单位', '问题数'],
+            rows: []
+          }
+
+          res.body.data[0].units.forEach(item => {
+            tmpData.rows.push({
+              '单位': item.unitName,
+              '问题数': item.resultCount,
+              unitCode: item.unitCode
+            })
+          })
+
+          this.drillingDataInfo.method = {
+            methodId,
+            methodName
+          }
+          this.drillingDataInfo.level = level
+          this.drillingDataInfo.resultCount = res.body.data[0].resultCount
+          this.companyChartData = tmpData
+          this.showCompanyChart = true
+        }
+        this.tableLoading = false
+      }).catch(err => {
+        this.$message({
+          message: '请求出错',
+          type: 'warning'
+        })
+        this.tableLoading = false
+      })
     },
     handleClearData() {
       this.$confirm('是否清空当前表格?', '提示', {
@@ -477,11 +487,49 @@ export default {
 
       })
     },
-    handleShowChart() {
-      this.dialogVisiblePieChart = true
+    handleShowMethodChart(level) {
+      this.tableLoading = true
+      this.tableLoadingText = '正在生成图表，请稍后'
+      this.$http.get(urlStore.statisticQuery, {
+        params: {
+          year: this.$refs.resultTable.selectedYear.join(','),
+          unitCodes: this.selectedCompany.map(item => item.unitCode).join(','),
+          methodIds: this.selectedMethods.map(item => item.id).join(','),
+          type: level,
+          topRow: 10,
+          topType: 'method'
+        }
+      }).then(res => {
+        if (res.ok) {
+          let tmpData = {
+            columns: ['审计方法', '问题数'],
+            rows: []
+          }
+
+          res.body.data.forEach(item => {
+            tmpData.rows.push({
+              '审计方法': item.methodName,
+              '问题数': item.resultCount,
+              methodId: item.methodId
+            })
+          })
+
+          this.methodCharData = tmpData
+          this.showMethodChart = true
+
+          this.drillingDataInfo.level = level
+        }
+        this.tableLoading = false
+      }).catch(err => {
+        this.$message({
+          message: '请求出错',
+          type: 'warning'
+        })
+        this.tableLoading = false
+      })
     },
     handleChangeLevel(level) {
-      if (level == -1) {
+      if (level == 4) {
         return
       }
       this.selectedCompany.forEach(item => {
@@ -524,6 +572,7 @@ export default {
         this.getResult()
       } else if (target == 'company') {
         this.tableLoading = true
+        this.tableLoading = '正在请求数据...'
 
         setTimeout(() => {
           if (searchVal) {
@@ -535,7 +584,7 @@ export default {
             })
           } else {
             let companyListToAdd = this.companyList.filter(item => {
-              return item.unitLevel == 1 && this.selectedCompany.findIndex(c => c.unitCode == item.unitCode) < 0
+              return item.unitLevel == 1 && !this.selectedCompany.some(c => c.unitCode == item.unitCode)
             })
             this.selectedCompany = (this.selectedCompany.concat(companyListToAdd))
           }
@@ -550,26 +599,165 @@ export default {
         }, 300)
       }
     },
-    handleDrillingData(companyId, level) {},
-    handleClickSingleChart(data, index) {
-      let company = this.singleMethodChartData.rows[index]
+    handleDrillingData(companyId, level) {
+      if (level == 3) {
+        this.$message({
+          message: '无法继续钻取：该单位为三级单位',
+          type: 'warning'
+        })
+        return
+      }
+      this.tableLoading = true
+      this.tableLoadingText = '正在钻取数据，请稍后...'
+      this.$http.post(urlStore.dataDrillByPcode, {
+        year: this.$refs.resultTable.selectedYear.join(','),
+        pCode: companyId,
+        methodIds: this.selectedMethods.map(item => item.id).join(',')
+      }, {
+        emulateJSON: true
+      }).then(res => {
+        if (res.ok && res.body.success) {
+          if (!res.body.data.length || !res.body.data[0].units.length) {
+            this.$message({
+              message: '无法继续钻取：该单位没有下属单位',
+              type: 'info'
+            })
+          } else {
+            this.drillData = res.body.data
+            this.drillParent = this.companyList.find(item => item.unitCode == companyId)
+            this.drillLevel = level
+            this.showDrillTable = true
+          }
+        } else {
+          this.$message({
+            message: res.body.msg || '请求出错',
+            type: 'warning'
+          })
+        }
+        this.tableLoading = false
+      }).catch(err => {
+        this.tableLoading = false
+        this.$message({
+          message: '请求出错',
+          type: 'warning'
+        })
+      })
+    },
+    handleClickCompanyChart(data, index) {
+      let company = this.companyChartData.rows[index]
       this.drillingDataInfo.company = {
-        companyId: company.id,
+        companyId: company.unitCode,
         companyName: company['单位']
       }
-      this.showChartData = true
+      this.detailTableHeader = null
+      this.detailTableData = null
+      this.detailDataLoading = true
+      this.dialogVisibleDetail = true
+      this.$http.post(urlStore.viewResultData, {
+        unitCodes: this.drillingDataInfo.company.companyId,
+        type: this.drillingDataInfo.level == 0 ? '' : this.drillingDataInfo.level,
+        methodId: this.drillingDataInfo.method.methodId,
+        year: this.$refs.resultTable.selectedYear.join(',')
+      }, {
+        emulateJSON: true
+      }).then(res => {
+        if (res.ok) {
+          this.detailTableHeader = res.body.tableHeader
+          this.detailTableData = res.body.tableData
+        }
+        this.detailDataLoading = false
+      }).catch(err => {
+        this.detailDataLoading = false
+      })
     },
-    handleClickMultipleChart(data, index) {
+    handleClickMethodChart(data, index) {
+      console.log(data, this.selectedMethods)
       this.drillingDataInfo.method = {
+        methodId: this.selectedMethods.find(item => item.title == data.name).id,
         methodName: data.name
       }
-      this.showChartData = true
+      this.drillingDataInfo.company = null
+      this.detailTableHeader = null
+      this.detailTableData = null
+      this.detailDataLoading = true
+      this.dialogVisibleDetail = true
+      this.$http.post(urlStore.viewResultData, {
+        unitCodes: this.selectedCompany.map(item => item.unitCode).join(','),
+        type: this.drillingDataInfo.level == 0 ? '' : this.drillingDataInfo.level,
+        methodId: this.drillingDataInfo.method.methodId,
+        year: this.$refs.resultTable.selectedYear.join(',')
+      }, {
+        emulateJSON: true
+      }).then(res => {
+        if (res.ok) {
+          this.detailTableHeader = res.body.tableHeader
+          this.detailTableData = res.body.tableData
+        } else {
+          this.$message({
+            message: '未查询到数据',
+            type: 'info'
+          })
+        }
+        this.detailDataLoading = false
+      }).catch(err => {
+        this.$message({
+          message: '请求出错',
+          type: 'warning'
+        })
+        this.detailDataLoading = false
+      })
     },
     handleCloseDrillingData() {
       this.drillingDataInfo = {
         method: null,
         company: null
       }
+    },
+    handleExportDataByMethod(level, methodId) {
+      let companies = this.selectedCompany.map(item => item.unitCode)
+      let param = {
+        methodIds: methodId,
+        year: this.$refs.resultTable.selectedYear.join(','),
+        level1unitCodes: companies.join(','),
+        unitLevel: ''
+      }
+      if (level != 0) {
+        if (level == 4) {
+          pararm.unitLevel = 0
+        } else {
+          param.unitLevel = level
+        }
+      }
+      window.open(`${urlStore.export}?methodIds=${param.methodIds}&year=${param.year}&level1unitCodes=${param.level1unitCodes}&unitLevel=${param.unitLevel}`)
+    },
+    handleExportDataByCell(methodId, companyId) {
+      let param = {
+        methodIds: methodId,
+        year: this.$refs.resultTable.selectedYear.join(','),
+        level1unitCodes: companyId,
+        unitLevel: ''
+      }
+      if (this.selectedLevel != 0) {
+        if (this.selectedLevel == 4) {
+          let company = this.selectedCompany.find(item => item.unitCode == companyId)
+          if (company && company.subCompany) {
+            prarm.level1unitCodes = company.subCompany.unitCode
+            param.unitLevel = 0
+          }
+        } else {
+          prarm.unitLevel = this.selectedLevel
+        }
+      }
+      window.open(`${urlStore.export}?methodIds=${param.methodIds}&year=${param.year}&level1unitCodes=${param.level1unitCodes}&unitLevel=${param.unitLevel}`)
+    },
+    handleExportDataByPcode() {
+      let param = {
+        methodIds: this.drillData.map(item => item.methodId).join(','),
+        year: this.$refs.resultTable.selectedYear.join(','),
+        unitLevel: 0,
+        level1unitCodes: this.drillData[0].units.map(item => item.unitCode).join(',')
+      }
+      window.open(`${urlStore.export}?methodIds=${param.methodIds}&year=${param.year}&level1unitCodes=${param.level1unitCodes}&unitLevel=${param.unitLevel}`)
     }
   }
 }
@@ -654,6 +842,18 @@ export default {
   }
   .el-loading-mask {
     background-color: rgba(255, 255, 255, .9);
+  }
+  .detail-data-table {
+    min-height: 200px;
+  }
+  // .el-table td {
+  //   height: 30px;
+  //   min-width: 0;
+  //   text-overflow: ellipsis;
+  //   vertical-align: middle;
+  // }
+  .el-dialog{
+    top: 6%!important;
   }
 }
 

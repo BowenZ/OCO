@@ -45,10 +45,10 @@
             <el-dropdown-item command="exportData" class="hide-trigger">导出当前数据</el-dropdown-item>
             <el-dropdown-item class="dropdown-item-chart">生成统计方法图形报表<i class="el-icon-caret-right"></i></el-dropdown-item>
             <ul class="el-dropdown-menu" x-placement="top-end" v-show="dropdownMenuVisible">
-              <li class="el-dropdown-menu__item" @click="showChart(0)">所有单位</li>
-              <li class="el-dropdown-menu__item" @click="showChart(1)">一级单位</li>
-              <li class="el-dropdown-menu__item" @click="showChart(2)">二级单位</li>
-              <li class="el-dropdown-menu__item" @click="showChart(3)">三级单位</li>
+              <li class="el-dropdown-menu__item" @click="showMethodChart(0)">所有单位</li>
+              <li class="el-dropdown-menu__item" @click="showMethodChart(1)">一级单位</li>
+              <li class="el-dropdown-menu__item" @click="showMethodChart(2)">二级单位</li>
+              <li class="el-dropdown-menu__item" @click="showMethodChart(3)">三级单位</li>
             </ul>
           </el-dropdown-menu>
         </el-dropdown>
@@ -80,21 +80,21 @@
           <li class="el-cascader-menu__item el-cascader-menu__item--extensible secondary-item2">生成该方法图形报表</li>
         </ul>
         <ul class="el-cascader-menu" v-show="methodSecondaryMenuVisible1">
-          <li class="el-cascader-menu__item">导出所有单位数据</li>
-          <li class="el-cascader-menu__item">导出一级单位数据</li>
-          <li class="el-cascader-menu__item">导出二级单位数据</li>
-          <li class="el-cascader-menu__item">导出三级单位数据</li>
+          <li class="el-cascader-menu__item" @click="exportDataByMethod(0)">导出所有单位数据</li>
+          <li class="el-cascader-menu__item" @click="exportDataByMethod(1)">导出一级单位数据</li>
+          <li class="el-cascader-menu__item" @click="exportDataByMethod(2)">导出二级单位数据</li>
+          <li class="el-cascader-menu__item" @click="exportDataByMethod(3)">导出三级单位数据</li>
         </ul>
         <ul class="el-cascader-menu" v-show="methodSecondaryMenuVisible2">
-          <li class="el-cascader-menu__item" @click="createChart(0)">所有单位报表</li>
-          <li class="el-cascader-menu__item" @click="createChart(1)">一级单位报表</li>
-          <li class="el-cascader-menu__item" @click="createChart(2)">二级单位报表</li>
-          <li class="el-cascader-menu__item" @click="createChart(3)">三级单位报表</li>
+          <li class="el-cascader-menu__item" @click="showCompanyChart(0)">所有单位报表</li>
+          <li class="el-cascader-menu__item" @click="showCompanyChart(1)">一级单位报表</li>
+          <li class="el-cascader-menu__item" @click="showCompanyChart(2)">二级单位报表</li>
+          <li class="el-cascader-menu__item" @click="showCompanyChart(3)">三级单位报表</li>
         </ul>
       </div>
       <div class="issue-menu el-cascader-menus" v-show="issueMenuVisible">
         <ul class="el-cascader-menu">
-          <li class="el-cascader-menu__item">导出该疑点数据</li>
+          <li class="el-cascader-menu__item" @click="exportDataByCell">导出该疑点数据</li>
         </ul>
       </div>
     </div>
@@ -103,7 +103,7 @@
         <el-input placeholder="输入关键字进行过滤" v-model="filterText">
         </el-input>
       </div>
-      <el-tree v-loading="searchCompanyLoading" class="company-tree" :data="companyData" :props="defaultProps" default-expand-all :filter-node-method="filterNode" ref="companyTree" node-key="id" highlight-current @current-change="handleCompanyTreeChange">
+      <el-tree v-loading="searchCompanyLoading" class="company-tree" :data="companyData" :props="defaultProps" default-expand-all empty-text="无数据：该单位无下属单位" :filter-node-method="filterNode" ref="companyTree" node-key="id" highlight-current @current-change="handleCompanyTreeChange">
       </el-tree>
       <span slot="footer" class="dialog-footer">
         <el-button @click="headCompanyVisible = false">取 消</el-button>
@@ -125,7 +125,7 @@ export default {
   data() {
     return {
       years: this.getYearArr(),
-      selectedYear: [],
+      selectedYear: [2016],
       popVisible: false,
       levelOptions: [{
         value: 0,
@@ -191,7 +191,6 @@ export default {
       }, {
         emulateJSON: true
       }).then(res => {
-        console.log(res)
         if (res.ok && res.body.status) {
           this.companyData = res.body.data
         } else {
@@ -267,7 +266,8 @@ export default {
         return
       }
       this.selectedLevel = 4
-      this.$emit('changeCompany', this.currentHeadCompany, this.selectedTreeCompany)
+      this.$emit('changeCompany', this.currentHeadCompany, _.clone(this.selectedTreeCompany))
+      this.selectedTreeCompany = null
     },
     // ++++++++++++++++++++++
     getSummaries(param) {
@@ -342,6 +342,8 @@ export default {
             this.companyMenuVisible = false
             this.methodMenuVisible = false
             this.issueMenuVisible = true
+            this.currentRightMethod = this.currentHoverCell.row.method
+            this.currentRightCompanyId = this.currentHoverCell.col.property.split('-').pop()
           } else if (this.currentHoverCell.col.property == 'sum') {
             this.righeMenuVisible = false
             return
@@ -359,10 +361,18 @@ export default {
           this.currentRightCompanyId = $target.data('id')
           this.righeMenuVisible = true
         }
-        $menu.css({
-          left: `${event.clientX}px`,
-          top: `${event.clientY}px`
-        })
+        let menuHeight = 230
+        if(menuHeight + event.clientY > window.innerHeight){
+          $menu.css({
+            left: `${event.clientX}px`,
+            top: `${event.clientY - menuHeight}px`
+          })
+        }else{
+          $menu.css({
+            left: `${event.clientX}px`,
+            top: `${event.clientY}px`
+          })
+        }
       })
     },
     changeYear() {
@@ -379,21 +389,30 @@ export default {
       this.currentHoverCell = null
     },
     handleClickCell(row, col, cell, event) {
+      if($(event.target).text() == 0){
+        this.$message({
+          message: '无疑点数据',
+          type: 'info'
+        })
+        return
+      }
       if (col.property.match('company')) {
         let companyId = col.property.split('-').pop()
-        let sum = 0
-        row.companies.every(item => {
-          if (item.companyId == companyId) {
-            sum = item.issues
-            return false
-          }
-          return true
-        })
         let data = {
           methodId: row.method.methodId,
-          companyId: companyId,
-          sum: sum
+          unitCodes: companyId,
+          year: this.selectedYear.join(',')
         }
+        if(this.selectedLevel == 4){
+          let company = row.companies.find(item => item.companyId == companyId)
+          if(company && company.subCompany){
+            data.type = 0
+          }
+        }else if(this.selectedLevel > 0){
+          data.type = this.selectedLevel
+        }
+        
+        
         this.$emit('showDetail', data)
       }
     },
@@ -403,8 +422,16 @@ export default {
     removeMethod(param) {
       this.$emit('removeMethod', this.currentRightMethod.methodId, param)
     },
-    createChart(level) {
-      this.$emit('createChart', level, this.currentRightMethod.methodId, this.currentRightMethod.methodName)
+    showCompanyChart(level) {
+      this.$emit('showCompanyChart', level, this.currentRightMethod.methodId, this.currentRightMethod.methodName)
+    },
+
+    // 导出数据
+    exportDataByMethod(level){
+      this.$emit('exportDataByMethod', level, this.currentRightMethod.methodId)
+    },
+    exportDataByCell(){
+      this.$emit('exportDataByCell', this.currentRightMethod.methodId, this.currentRightCompanyId)
     },
 
     // 右上菜单
@@ -418,12 +445,12 @@ export default {
         this.$emit('clearData')
       } else if (command == 'exportData') {
 
-      } else if (command == 'showChart') {
-        this.$emit('showChart')
+      } else if (command == 'showMethodChart') {
+        this.$emit('showMethodChart')
       }
     },
-    showChart(level) {
-      this.$emit('showChart', level)
+    showMethodChart(level) {
+      this.$emit('showMethodChart', level)
     },
     handleMenuVisible(visible) {
       if (visible) {
@@ -600,7 +627,7 @@ export default {
     position: fixed;
     z-index: 99;
     .el-cascader-menu {
-      height: 180px;
+      height: auto;
     }
     .company-menu {
       .el-cascader-menu {

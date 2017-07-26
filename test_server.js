@@ -109,6 +109,8 @@ http.createServer(function(req, res) {
     res.write(JSON.stringify(mock.findUnitTreeByPcode))
   }else if(pathname == '/auditResultStore/statisticQuery.do'){
     res.write(JSON.stringify(mock.statisticQuery))
+  }else if(pathname == '/auditResultStore/dataDrillByPcode.do'){
+    res.write(JSON.stringify(mock.dataDrillByPcode))
   }
 
   res.end()
