@@ -276,6 +276,8 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
+          $(this.$el).find('.tree-content').hide()
+          $(this.$el).find('.open-tree').removeClass('active')
           let targetJobId = this.projectList[this.dropdownIndex].jobId
           this.$http.get(`${urlStore.deleteById}?jobId=${targetJobId}`).then(res => {
             if (res.body.status == 'success') {
@@ -342,6 +344,8 @@ export default {
       $(event.target).parent('.rename-input').hide().find('input').off()
     },
     newProject: function() {
+      $(this.$el).find('.tree-content').hide()
+      $(this.$el).find('.open-tree').removeClass('active')
       this.popVisiable = false
       let name = $.trim(this.newProjectName)
       if (name.length != 0) {

@@ -1,3 +1,4 @@
+<!-- 基础数据 -->
 <template>
   <div class="content content3">
     <v-step :steps="steps" :currentStep="currentStep"></v-step>
@@ -8,7 +9,7 @@
         <el-button type="primary" size="large" @click="doAudint" :loading="disableInput || auditing">执行查询</el-button>
       </div>
       <!-- <v-result-item></v-result-item> -->
-      <v-result :single="true" :data="1" :executeStatus="baseDataExecuteStatus"></v-result>
+      <v-result :single="true" :data="1" :executeStatus="baseDataExecuteStatus" :showProgress="showProgress" :progress="progress" :progressMsg="progressMsg"></v-result>
     </div>
   </div>
 </template>
@@ -40,7 +41,10 @@ export default {
       finished: false,
       baseDataExecuteStatus: null,
       showResult: false,
-      currentBaseJobId: null
+      currentBaseJobId: null,
+      showProgress: false,
+      progress: 0,
+      progressMsg: null,
     }
   },
   methods: {
@@ -60,6 +64,11 @@ export default {
           userId: this.$store.getters.user.userId
         }
       }).then(res => {
+        if (res.body.progressMsg) {
+          this.progressMsg = res.body.progressMsg
+          this.progress = res.body.progress
+          this.showProgress = true
+        }
         this.$store.commit('setCurrentBaseJobId', res.body.jobId)
         this.$store.commit('setAuditingBaseMethodId', res.body.data[0].children[0].methodId)
         this.currentBaseJobId = res.body.jobId
@@ -115,6 +124,11 @@ export default {
       // 开始执行审计
       this.$store.commit('setAuditStatus', true)
       let formData = []
+
+      this.progressMsg = null
+      this.progress = 0
+      this.showProgress = false
+
       this.currentStep = 2
       this.disableInput = true
       $(this.$el).find('form .el-form-item').each(function(index, el) {

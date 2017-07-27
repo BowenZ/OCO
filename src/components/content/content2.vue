@@ -1,3 +1,4 @@
+<!-- 个性化分析 -->
 <template>
   <div class="content content2">
     <v-step :steps="steps" :currentStep="currentStep"></v-step>
@@ -9,7 +10,7 @@
         <el-button type="primary" size="large" @click="doAudint" :loading="disableInput || auditing">执行审计</el-button>
       </div>
       <!-- <v-result-item></v-result-item> -->
-      <v-result :single="true" :data="1" :executeStatus="singleExecuteStatus"></v-result>
+      <v-result :single="true" :data="1" :executeStatus="singleExecuteStatus" :showProgress="showProgress" :progress="progress" :progressMsg="progressMsg"></v-result>
     </div>
   </div>
 </template>
@@ -42,7 +43,10 @@ export default {
       disableInput: false,
       uploadFinished: false,
       externalFiles: null,
-      finished: false
+      finished: false,
+      showProgress: false,
+      progress: 0,
+      progressMsg: null
     }
   },
   methods: {
@@ -62,6 +66,11 @@ export default {
           userId: this.$store.getters.user.userId
         }
       }).then(res => {
+        if (res.body.progressMsg) {
+          this.progressMsg = res.body.progressMsg
+          this.progress = res.body.progress
+          this.showProgress = true
+        }
         this.$store.commit('setCurrentSingleJobId', res.body.jobId)
         this.$store.commit('setAuditingMethodId', res.body.data[0].children[0].methodId)
         this.$store.commit('setSingleExecuteStatus', res.body)
@@ -126,6 +135,11 @@ export default {
       // 开始执行审计
       this.$store.commit('setAuditStatus', true)
       let formData = []
+
+      this.progressMsg = null
+      this.progress = 0
+      this.showProgress = false
+
       this.currentStep = 2
       $(this.$el).find('.result-container').addClass('active')
       this.disableInput = true
@@ -167,7 +181,7 @@ export default {
           let timer = setInterval(function() {
             if (self.finished) {
               clearInterval(timer)
-              this.$store.commit('setContinueAudit', false)
+              self.$store.commit('setContinueAudit', false)
             } else {
               console.log('====single continue====')
               self.updateExeStatus(res.body.jobId, auditParams.methodId)

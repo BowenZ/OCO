@@ -32,7 +32,6 @@ export default {
       },
       chartEvents: {
       	click: (event) => {
-          console.log('=====event===', event)
           this.$emit('click', {
             name: event.name,
             value: event.value

@@ -8,6 +8,10 @@
         <el-progress :percentage="progress"></el-progress>
         <p style="text-align: center;">{{progressMsg}}</p>
       </div>
+      <!-- <div v-if="single && ((selectedMethodId && auditingMethodId == selectedMethodId) || (selectedBasicId && auditingBaseMethodId == selectedBasicId)) && executeStatus" class="progress-container">
+        <el-progress :percentage="progress"></el-progress>
+        <p style="text-align: center;">{{progressMsg}}</p>
+      </div> -->
       <!-- {{executeStatus}} -->
       <!-- <p v-if="!executeStatus" v-loading="!executeStatus">正在加载中......</p> -->
       <p v-if="executeStatus && executeStatus.status == 'error'">{{executeStatus.msg}}</p>
@@ -18,8 +22,8 @@
           </div>
         </el-collapse-item>
       </el-collapse>
-      <!-- {{auditingMethodId}}/{{selectedMethodId}} -->
-      <div class="result-list" v-if="single && ((selectedMethodId && auditingMethodId == selectedMethodId) || (selectedBasicId && auditingBaseMethodId == selectedBasicId)) && executeStatus && executeStatus.status == 'success'">
+      <!-- {{currentDrawerIndex}}:{{auditingMethodId}}/{{selectedMethodId}}/{{selectedBasicId}}/{{auditingBaseMethodId}} -->
+      <div class="result-list" v-if="single && ((currentDrawerIndex == 1 && auditingMethodId == selectedMethodId) || (currentDrawerIndex == 2 && auditingBaseMethodId == selectedBasicId)) && executeStatus && executeStatus.status == 'success'">
         <v-result-item v-if="executeStatus.data.length" v-for="(item, index) in executeStatus.data" :key="index" :item="item"></v-result-item>
       </div>
       <div class="batch-output clearfix" v-if="executeStatus && finished && currentJobId == selectedJobId">
@@ -50,6 +54,9 @@ export default {
     }
   },
   computed: {
+    currentDrawerIndex: function(){
+      return this.$store.getters.currentDrawerIndex
+    },
     auditing: function() {
       return this.$store.getters.auditing
     },
@@ -128,6 +135,9 @@ export default {
 }
 </script>
 <style lang="scss">
+.result-container{
+  margin-bottom: 50px;
+}
 .box-card {
   h2 {
     padding-left: 10px;

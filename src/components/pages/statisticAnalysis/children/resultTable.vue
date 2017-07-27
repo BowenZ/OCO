@@ -16,7 +16,6 @@
       <el-table-column prop="sum" fixed="right" label="" show-overflow-tooltip width="150">
       </el-table-column>
     </el-table>
-    <p v-if="!tableData || !tableData.length" style="text-align:center">请从上方添加审计方法和单位数据</p>
     <div class="covers" v-if="tableData && tableData.length && tableData[0].companies.length">
       <div class="year-selector">
         <el-popover ref="popover" placement="top" width="200" v-model="popVisible">
@@ -42,7 +41,8 @@
           </span>
           <el-dropdown-menu slot="dropdown" class="table-menu">
             <el-dropdown-item command="clearData" class="hide-trigger">清空数据</el-dropdown-item>
-            <el-dropdown-item command="exportData" class="hide-trigger">导出当前数据</el-dropdown-item>
+            <el-dropdown-item command="exportData" class="hide-trigger">导出当前疑点数据</el-dropdown-item>
+            <el-dropdown-item command="exportData" class="hide-trigger">导出当前统计信息</el-dropdown-item>
             <el-dropdown-item class="dropdown-item-chart">生成统计方法图形报表<i class="el-icon-caret-right"></i></el-dropdown-item>
             <ul class="el-dropdown-menu" x-placement="top-end" v-show="dropdownMenuVisible">
               <li class="el-dropdown-menu__item" @click="showMethodChart(0)">所有单位</li>
@@ -155,6 +155,7 @@ export default {
 
       currentHoverCell: null,
       currentRightCompanyId: null,
+      currentRightCompanyIndex: 0,
       currentRightMethod: null,
 
       // 点击表头搜索单位
@@ -310,6 +311,9 @@ export default {
       }
       return ret.reverse()
     },
+    getSelectedYear(){
+      return this.selectedYear.join(',')
+    },
     addEventListener() {
       let $table = $(this.$el).find('.el-table')
       let $menu = $(this.$el).find('.right-menu')
@@ -359,6 +363,7 @@ export default {
           this.companyMenuVisible = true
 
           this.currentRightCompanyId = $target.data('id')
+          this.currentRightCompanyIndex = $target.data('index')
           this.righeMenuVisible = true
         }
         let menuHeight = 230
@@ -389,13 +394,13 @@ export default {
       this.currentHoverCell = null
     },
     handleClickCell(row, col, cell, event) {
-      if($(event.target).text() == 0){
-        this.$message({
-          message: '无疑点数据',
-          type: 'info'
-        })
-        return
-      }
+      // if($(event.target).text() == 0){
+      //   this.$message({
+      //     message: '无疑点数据',
+      //     type: 'info'
+      //   })
+      //   return
+      // }
       if (col.property.match('company')) {
         let companyId = col.property.split('-').pop()
         let data = {
@@ -413,11 +418,11 @@ export default {
         }
         
         
-        this.$emit('showDetail', data)
+        this.$emit('showDetail', data, $(event.target).text())
       }
     },
     removeCompany(param) {
-      this.$emit('removeCompany', this.currentRightCompanyId, param)
+      this.$emit('removeCompany', this.currentRightCompanyId, this.currentRightCompanyIndex, param)
     },
     removeMethod(param) {
       this.$emit('removeMethod', this.currentRightMethod.methodId, param)

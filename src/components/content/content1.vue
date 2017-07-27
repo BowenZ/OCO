@@ -74,6 +74,7 @@ export default {
           jobId = ''
         }
       }
+      console.log('====content1 updateExeStatus====')
       this.$http.get(urlStore.getExecuteMethods, {
         params: {
           jobId: jobId,
@@ -232,6 +233,7 @@ export default {
     doContinueAudit: function() {
       let self = this
       let jobId = this.$store.getters.currentJobId
+      console.log('====content1 doContinueAudit====')
       this.$http.get(urlStore.getExecuteMethods, {
         params: {
           jobId: jobId ? jobId : '',
@@ -305,7 +307,7 @@ export default {
       }
     },
     selectedJobId: function(newId) {
-      this.updateExeStatus(newId)
+      // this.updateExeStatus(newId)
     }
   }
 }
