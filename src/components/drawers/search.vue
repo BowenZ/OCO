@@ -7,7 +7,7 @@
       </span>
     </h4>
     <form action="" autocomplete="on">
-      <input name="search" type="text" placeholder="请输入内容，按回车搜索" autocomplete="off" @keydown.enter.prevent="submit($event)">
+      <input name="search" type="text" v-model="searchVal" placeholder="请输入内容，按回车搜索" autocomplete="off" @keydown.enter.prevent="submit($event)">
       <a href="javascript: void(0)" class="search-btn el-icon-search"></a>
     </form>
   </div>
@@ -15,10 +15,19 @@
 <script>
 export default {
   props: ['title'],
+  data: function(){
+    return {
+      searchVal: ''
+    }
+  },
   methods: {
-    submit() {
-      let searchVal = event.target.value
-      this.$emit('message', searchVal)
+    submit(event) {
+      this.$emit('message', this.searchVal)
+    }
+  },
+  watch: {
+    searchVal: function(newVal){
+      this.$emit('message', this.searchVal)
     }
   }
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="login">
     <div class="login-wrapper">
-      <div class="form">
+      <div class="form" @keyup.enter="submitForm('loginForm')">
         <el-card>
           <div class="color-bar"></div>
           <h2 class="login-title">智能审计分析系统</h2>

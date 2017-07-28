@@ -15,7 +15,7 @@
             <span>新建审计项目</span>
           </p>
         </div>
-        <div class="project-list" v-loading="findListLoading">
+        <div class="project-list" v-loading="findListLoading || locked" :class="{locked: locked}">
           <div class="project-item" v-if="projectList" v-for="(project, index) in projectList">
             <h5 class="tree-title">
               <span class="open-tree el-icon-plus" @click.stop="toggleTree($event, index)"></span>
@@ -125,6 +125,9 @@ export default {
     },
     continueAudit: function() {
       return this.$store.getters.continueAudit
+    },
+    locked: function(){
+      return this.$store.getters.locked
     }
   },
   watch: {
@@ -190,6 +193,9 @@ export default {
       }
     },
     checkChange: function(index, obj, isSelected, hasSChildren) {
+      if(this.locked){
+        return
+      }
       this.currentProjectIndex = index
       let jobId = this.projectList[index].jobId
       this.$store.commit('setSelectedJobId', jobId)
@@ -254,6 +260,9 @@ export default {
         // }
     },
     toggleTree: function(event, index) {
+      if(this.locked){
+        return
+      }
       let $target = $(event.target)
       let self = this
       if (!$target.hasClass('active')) {
@@ -419,6 +428,15 @@ export default {
   }
   .project-list {
     min-height: 80px;
+    &.locked{
+      cursor: not-allowed;
+      .project-item .tree-title{
+        cursor: not-allowed;
+        .open-tree{
+          cursor: not-allowed;
+        }
+      }
+    }
     .project-item {
       .tree-title {
         cursor: pointer;

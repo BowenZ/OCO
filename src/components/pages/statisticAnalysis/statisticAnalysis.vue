@@ -148,6 +148,9 @@ export default {
       exportDetailInfo: {}
     }
   },
+  created(){
+    this.$store.commit('updateCurrentDrawerIndex', 6)
+  },
   mounted() {
     this.loadMethodTree()
     this.loadCompanyList()
@@ -240,9 +243,8 @@ export default {
 
           this.$refs.resultTable.selectedLevel = 4
         }
-
         let replacedCompany = this.selectedCompany.splice(index, 1, dataToReplace)
-          (!noResult && this.selectedMethods.length) && this.getResult()
+        ;(!noResult && this.selectedMethods.length) && this.getResult()
         this.$message({
           message: `存在相同一级单位的“${replacedCompany[0].unitName}”，已替换为当前选择单位“${data.unitName}”`,
           type: 'info'
@@ -435,7 +437,7 @@ export default {
 
           this.exportDetailInfo = {
             level1unitCodes: data.unitCodes,
-            unitLevel: data.type,
+            unitLevel: data.type || '',
             methodIds: data.methodId,
             year: data.year
           }
@@ -466,7 +468,7 @@ export default {
 
           this.exportDetailInfo = {
             level1unitCodes: data.unitCodes,
-            unitLevel: data.type,
+            unitLevel: data.type || '',
             methodIds: data.methodId,
             year: data.year
           }

@@ -1,7 +1,7 @@
 <template>
   <div class="content content1">
     <v-step :steps="steps" :currentStep="currentStep"></v-step>
-    <div class="content-block" element-loading-text="正在加载数据">
+    <div class="content-block" element-loading-text="正在查询执行摘要，请稍后..." v-loading="locked">
       <v-params @doAudit="doAudit" ref="params" :showExecuteButton="true" :multiple="true" :disableInput="disableInput || auditing" :params="selectedParams"></v-params>
       <div class="execute-button clearfix" v-if="selectedMethods">
         <el-button type="primary" size="large" v-if="!auditing" @click="doAudint" :loading="disableInput || auditing">执行审计</el-button>
@@ -65,7 +65,7 @@ export default {
     doAudint: function() {
       this.$refs.params.execute()
     },
-    updateExeStatus: function(jobId) {
+    updateExeStatus: function(jobId, isCheck, callback) {
       if (!jobId) {
         let currentJobId = this.$store.getters.currentJobId
         if (currentJobId) {
@@ -108,7 +108,10 @@ export default {
         let lastStatus = getLast(getLast(res.body.data).children).status
         if ((lastStatus == 'success' || lastStatus == 'error') && count == total) {
           console.log('====multiple finished====')
-          this.finishAudit()
+          callback && callback(true)
+          this.finishAudit(isCheck)
+        }else{
+          callback && callback(false)
         }
       }, res => {
         Message({
@@ -119,7 +122,7 @@ export default {
         })
       })
     },
-    finishAudit: function() {
+    finishAudit: function(isCheck) {
       this.$store.commit('setAuditStatus', false)
       this.$store.commit('setContinueAudit', false)
       this.finished = true
@@ -129,7 +132,7 @@ export default {
       this.currentStep = 2
         // this.$store.commit('setCurrentJobId', '')
       this.stoping = false
-      Message({
+      !isCheck && Message({
         message: '审计执行完毕',
         type: 'success'
       })
@@ -298,6 +301,9 @@ export default {
     },
     selectedMethods: function() {
       return this.$store.getters.selectedMethods
+    },
+    locked: function(){
+      return this.$store.getters.locked
     }
   },
   watch: {
@@ -307,7 +313,10 @@ export default {
       }
     },
     selectedJobId: function(newId) {
-      // this.updateExeStatus(newId)
+      this.$store.commit('lockOperation')
+      this.updateExeStatus(newId, true, (finished) => {
+        this.$store.commit('unlockOperation')
+      })
     }
   }
 }
@@ -325,5 +334,9 @@ export default {
     width: 180px;
     float: right;
   }
+}
+
+.content1 .content-block .el-loading-mask{
+  background-color: rgba(255, 255, 255, .9);
 }
 </style>

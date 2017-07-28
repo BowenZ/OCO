@@ -1,3 +1,4 @@
+<!-- 个性化分析 -->
 <template>
   <div class="drawer-inner drawer2" v-loading="!singleMethods || loading" element-loading-text="正在加载数据">
     <header>
@@ -8,6 +9,7 @@
       <ul class="audit-methods" v-if="singleMethods && singleMethods.length">
         <li v-for="(method, index) in singleMethods" :key="method.id"><a href="#" @click.prevent="clickMethod($event, index)" :data-id="method.id">{{method.title}}</a></li>
       </ul>
+      <p v-else style="text-align:center">暂无数据</p>
     </section>
   </div>
 </template>

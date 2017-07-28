@@ -82,9 +82,9 @@
 // import drawer1 from "./drawer1"
 import $ from 'webpack-zepto'
 export default {
-  data: function() {
-    return {
-      currentIndex: Number(sessionStorage.getItem('currentDrawerIndex'))
+  computed: {
+    currentIndex: function(){
+      return this.$store.getters.currentDrawerIndex
     }
   },
   methods: {

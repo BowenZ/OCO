@@ -11,7 +11,8 @@ const state = {
   localAuditingMethods: [],
   auditParams: [],
   selectedJobId: null,
-  currentJobId: null
+  currentJobId: null,
+  locked: false
 }
 
 const getters = {
@@ -41,7 +42,8 @@ const getters = {
   localAuditingMethods: state => state.localAuditingMethods,
   auditParams: state => state.auditParams,
   selectedJobId: state => state.selectedJobId,
-  currentJobId: state => state.currentJobId
+  currentJobId: state => state.currentJobId,
+  locked: state => state.locked
 }
 
 const actions = {
@@ -111,6 +113,12 @@ const mutations = {
   },
   setCurrentJobId(state, id) {
     state.currentJobId = id
+  },
+  lockOperation(state){
+    state.locked = true
+  },
+  unlockOperation(state){
+    state.locked = false
   }
 }
 
