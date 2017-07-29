@@ -4,8 +4,8 @@
     <div class="content-block" element-loading-text="正在查询执行摘要，请稍后..." v-loading="locked">
       <v-params @doAudit="doAudit" ref="params" :showExecuteButton="true" :multiple="true" :disableInput="disableInput || auditing" :params="selectedParams"></v-params>
       <div class="execute-button clearfix" v-if="selectedMethods">
-        <el-button type="primary" size="large" v-if="!auditing" @click="doAudint" :loading="disableInput || auditing">执行审计</el-button>
-        <el-button type="danger" size="large" v-if="(auditing && continueAudit == 'multi') || multiAuditing" @click="stopAudit" :loading="stoping">停止执行</el-button>
+        <el-button type="primary" size="large" v-if="!(auditing && currentJobId == selectedJobId)" @click="doAudint" :loading="disableInput || auditing">执行审计</el-button>
+        <el-button type="danger" size="large" v-if="((auditing && continueAudit == 'multi') || multiAuditing) && currentJobId == selectedJobId" @click="stopAudit" :loading="stoping">停止执行</el-button>
       </div>
       <v-result :single="false" :executeStatus="multipleExecuteStatus" :finished="finished" :showProgress="showProgress" :progress="progress" :progressMsg="progressMsg"></v-result>
     </div>
@@ -304,6 +304,9 @@ export default {
     },
     locked: function(){
       return this.$store.getters.locked
+    },
+    currentJobId: function(){
+      return this.$store.getters.currentJobId
     }
   },
   watch: {

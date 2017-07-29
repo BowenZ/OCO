@@ -38,7 +38,7 @@
         <el-table v-if="detailTableHeader" :data="detailTableData" max-height="400" border style="width: 100%">
           <el-table-column type="index" width="40">
           </el-table-column>
-          <el-table-column v-for="(key, index) in Object.keys(detailTableHeader)" :show-overflow-tooltip="true" :key="index" :prop="key" :label="key">
+          <el-table-column v-for="(key, index) in Object.keys(detailTableHeader)" :show-overflow-tooltip="true" :key="index" :prop="key" :label="key" sortable>
           </el-table-column>
         </el-table>
       </div>

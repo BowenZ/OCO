@@ -13,6 +13,9 @@
       <div class="content-container" v-show="currentIndex == 5">
         <v-content4></v-content4>
       </div>
+      <div class="content-container" v-show="currentIndex == 6">
+        <v-content5></v-content5>
+      </div>
     </div>
     <transition name="view-fade">
       <router-view class="view-fade"></router-view>
@@ -24,12 +27,14 @@ import vContent1 from './content/content1'
 import vContent2 from './content/content2'
 import vContent3 from './content/content3'
 import vContent4 from './content/content4'
+import vContent5 from './pages/statisticAnalysis/statisticAnalysis'
 export default {
   components: {
     vContent1,
     vContent2,
     vContent3,
-    vContent4
+    vContent4,
+    vContent5
   },
   data: function() {
     return {
@@ -81,7 +86,7 @@ div {
     width: 100%;
     height: 100%;
     position: relative;
-    max-width: 1000px;
+    // max-width: 1000px;
     margin: 0 auto;
     .content-container {
       position: absolute;
@@ -103,7 +108,7 @@ div {
           }
         }
         .content-block {
-          position: absolute;
+          position: absolute!important;
           top: 80px;
           bottom: 0;
           left: 0;

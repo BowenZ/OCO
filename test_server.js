@@ -4,7 +4,7 @@ var mock = require('./mock.js')
 
 function getRandomStatus() {
   let rdm = Math.random()
-  if (rdm > 0.6)
+  if (rdm > 0.9)
     return 'error'
   return 'loading'
 }
@@ -111,6 +111,8 @@ http.createServer(function(req, res) {
     res.write(JSON.stringify(mock.statisticQuery))
   }else if(pathname == '/auditResultStore/dataDrillByPcode.do'){
     res.write(JSON.stringify(mock.dataDrillByPcode))
+  }else if(pathname == '/auditResult/viewResultData.do'){
+    res.write(JSON.stringify(mock.viewResultData))
   }
 
   res.end()

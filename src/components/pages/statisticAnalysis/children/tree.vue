@@ -81,6 +81,25 @@ export default {
       this.$emit('addAll', this.type, this.searchVal)
     },
     renderContent(h, { node, data, store }) {
+      if(data.description !== undefined){
+        return (
+          <el-popover
+            placement="top-start"
+            // title="标题"
+            width="600"
+            trigger="hover">
+            <span slot="reference">
+              <span>
+                <span>{node.label}</span>
+              </span>
+              <span class="tree-btn">
+                <el-button size="mini" type="text" on-click={ () => this.add(node, data) } icon="plus"></el-button>
+                <i style="display:none"></i>
+              </span>
+            </span>
+            <p domPropsInnerHTML={data.description}></p>
+          </el-popover>)
+      }
       return (
         <span>
           <span>

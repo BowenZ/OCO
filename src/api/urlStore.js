@@ -2,7 +2,7 @@ let devMode = true
 if(process.env.NODE_ENV === 'production'){
   devMode = false
 }
-devMode = false
+// devMode = false
 const ip = devMode ? 'http://localhost:3000/' : 'http://192.168.101.105:9898/WQB_economy_responsibility_audit/'
 
 const urls = {

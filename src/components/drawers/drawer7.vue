@@ -7,9 +7,9 @@
       <div class="drawer-box" v-if="user">
         <ul class="menu">
           <li>
-            <router-link tag="span" :to="{path: 'statisticAnalysis'}">
+            <!-- <router-link tag="span" :to="{path: 'statisticAnalysis'}"> -->
               <el-button type="text">统计分析</el-button>
-            </router-link>
+            <!-- </router-link> -->
           </li>
           <li>
             <el-button type="text">数据仓库</el-button>

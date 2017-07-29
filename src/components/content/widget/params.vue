@@ -74,7 +74,7 @@
     <el-dialog title="选择参数" v-model="dialogVisible" size="tiny" @close="handleClose" :close-on-click-modal="false">
       <div class="popup-param" @keyup.enter="searchParam('pressEnter')">
         <p>请输入要搜索的单位名称</p>
-        <el-select v-model="popupSearch" multiple filterable remote placeholder="搜索关键词" :remote-method="searchParam" :loading="loading" loading-text="正在加载参数信息，请稍后..." :no-data-text="searchTips">
+        <el-select v-model="popupSearch" multiple filterable remote placeholder="搜索关键词" :remote-method="searchParam" :loading="loading" loading-text="正在加载参数信息，请稍后..." :no-data-text="searchTips" @change="handleSelectChange">
           <el-option v-for="(item, index) in paramList" :key="index" :label="item.label" :value="item.value+index">
           </el-option>
         </el-select>
@@ -170,6 +170,11 @@ export default {
       this.paramList = []
     },
     confirmParam: function() {
+      console.log()
+      if(!this.popupSearch.length){
+        this.dialogVisible = false
+        return
+      }
       let tmpObj = {}
       this.popupSearch.forEach(item => {
         item = item.substring(0, item.length - 1)
@@ -184,6 +189,19 @@ export default {
       } else {
         this.formModel[this.currentParamName] = Object.keys(tmpObj).join(',')
       }
+      this.dialogVisible = false
+    },
+    handleSelectChange(val){
+      if(!val.length){
+        this.dialogVisible = false
+        return
+      }
+      if (this.formModel[this.currentParamName]) {
+        this.formModel[this.currentParamName] += (',' + val[0])
+      } else {
+        this.formModel[this.currentParamName] = val[0]
+      }
+      $('body .el-select-dropdown').css('display', 'none')
       this.dialogVisible = false
     }
   },
