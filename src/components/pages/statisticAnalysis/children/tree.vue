@@ -83,6 +83,7 @@ export default {
     renderContent(h, { node, data, store }) {
       if(data.description !== undefined){
         return (
+          <span>
           <el-popover
             placement="top-start"
             // title="标题"
@@ -92,13 +93,16 @@ export default {
               <span>
                 <span>{node.label}</span>
               </span>
-              <span class="tree-btn">
-                <el-button size="mini" type="text" on-click={ () => this.add(node, data) } icon="plus"></el-button>
-                <i style="display:none"></i>
-              </span>
+              
             </span>
             <p domPropsInnerHTML={data.description}></p>
-          </el-popover>)
+          </el-popover>
+          <span class="tree-btn">
+            <el-button size="mini" type="text" on-click={ () => this.add(node, data) } icon="plus"></el-button>
+            <i style="display:none"></i>
+          </span>
+          </span>
+          )
       }
       return (
         <span>

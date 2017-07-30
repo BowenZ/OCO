@@ -2,8 +2,8 @@ let devMode = true
 if(process.env.NODE_ENV === 'production'){
   devMode = false
 }
-// devMode = false
-const ip = devMode ? 'http://localhost:3000/' : 'http://192.168.101.105:9898/WQB_economy_responsibility_audit/'
+devMode = false
+const ip = devMode ? 'http://localhost:3000/' : 'http://192.168.101.100:9898/WQB_economy_responsibility_audit/'
 
 const urls = {
   // 多方法执行
@@ -64,7 +64,8 @@ const urls = {
   dataDrillByPcode: ip + 'auditResultStore/dataDrillByPcode.do',
   viewResultData: ip + 'auditResult/viewResultData.do',
   export: ip + 'auditResultStore/export.do',
-  findLevel3ByLevel2: ip + 'auditResult/findLevel3ByLevel2.do'
+  findLevel3ByLevel2: ip + 'auditResult/findLevel3ByLevel2.do',
+  exportStatisticData: ip + 'auditResultStore/exportStatisticData.do'
 }
 
 export default urls

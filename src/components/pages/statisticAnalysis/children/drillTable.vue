@@ -1,7 +1,7 @@
 <template>
   <div class="dril-table">
   	<p>根据 <strong>{{levelTable[drillLevel]}}</strong> <strong>{{drillParent.unitName}}</strong>钻取其下属所有 <strong>{{levelTable[drillLevel + 1]}}</strong></p>
-    <el-table ref="resultTable" v-if="tableData && tableData.length" :data="tableData" border style="width: 100%" height="100%" @header-click="handleHeaderClick" @cell-click="handleCellClick">
+    <el-table ref="resultTable" v-if="tableData && tableData.length" :data="tableData" border style="width: 100%" max-height="400" @header-click="handleHeaderClick" @cell-click="handleCellClick">
       <el-table-column fixed prop="methodName" label="方法名" show-overflow-tooltip width="140">
         <template scope="scope">
           <span>{{scope.row.methodName}}</span>
@@ -60,7 +60,7 @@ export default {
         let cellData = {
           unitCodes: column.property.split('-').pop(),
           methodId: row.methodId,
-          type: 0
+          type: this.drillLevel - 0 + 1
         }
         this.$emit('showDrillDataDetail', cellData, cell.innerText)
       }

@@ -29,12 +29,14 @@
             </li>
           </ul>
         </div>
-        <v-table ref="resultTable" v-loading="tableLoading" :element-loading-text="tableLoadingText" :tableData="tableData" @removeCompany="handleRemoveCompany" @removeMethod="handleRemoveMethod" @showDetail="handleShowDetail" @changeCompany="handleChangeCompany" @showCompanyChart="handleShowCompanyChart" @clearData="handleClearData" @showMethodChart="handleShowMethodChart" @changeLevel="handleChangeLevel" @changeYear="handleChangeYear" @drillingData="handleDrillData" @exportDataByMethod="handleExportDataByMethod" @exportDataByCell="handleExportDataByCell"></v-table>
+        <v-table ref="resultTable" v-loading="tableLoading" :element-loading-text="tableLoadingText" :tableData="tableData" @removeCompany="handleRemoveCompany" @removeMethod="handleRemoveMethod" @showDetail="handleShowDetail" @changeCompany="handleChangeCompany" @showCompanyChart="handleShowCompanyChart" @clearData="handleClearData" @showMethodChart="handleShowMethodChart" @changeLevel="handleChangeLevel" @changeYear="handleChangeYear" @drillingData="handleDrillData" @exportDataByMethod="handleExportDataByMethod" @exportDataByCell="handleExportDataByCell" @exportDoubtData="handleExportDoubtData" @exportStatisticData="handleExportStatisticData"></v-table>
       </el-collapse-item>
     </el-collapse>
     <el-dialog title="疑点明细数据" :visible.sync="dialogVisibleDetail" size="large">
       <div class="detail-data-table" v-loading="detailDataLoading" element-loading-text="正在加载数据，请稍后...">
-        <p>查询出总记录数为：<strong>{{ drillingDataInfo.resultCount }}</strong> 条<span v-if="drillingDataInfo.viewCount">，显示记录数为：<strong>{{ drillingDataInfo.viewCount }}</strong>条</span></p>
+        <p v-if="drillingDataInfo.method && drillingDataInfo.method.methodName">审计方法：{{drillingDataInfo.method.methodName}}</p>
+        <p v-if="drillingDataInfo.company && drillingDataInfo.company.companyName">被审计单位：{{drillingDataInfo.company.companyName}}</p>
+        <p><span v-if="drillingDataInfo.resultCount">查询出总记录数为：<strong>{{ drillingDataInfo.resultCount }}</strong> 条<span v-if="drillingDataInfo.viewCount">，</span></span>显示记录数为：<strong>{{ drillingDataInfo.viewCount }}</strong>条</p>
         <el-table v-if="detailTableHeader" :data="detailTableData" max-height="400" border style="width: 100%">
           <el-table-column type="index" width="40">
           </el-table-column>
@@ -49,13 +51,13 @@
     </el-dialog>
     <el-dialog title="图表" :visible.sync="showCompanyChart" size="large" class="chart-data">
       <p v-if="drillingDataInfo.method">当前方法：{{drillingDataInfo.method.methodName}}</p>
-      <v-chart :chartData="companyChartData" defaultType="pie" @click="handleClickCompanyChart"></v-chart>
+      <v-chart :chartData="companyChartData" defaultType="pie" @click="handleClickCompanyChart" @search="handleSearchAnotherCompany"></v-chart>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="showCompanyChart = false">确 定</el-button>
       </span>
     </el-dialog>
     <el-dialog title="图表" :visible.sync="showMethodChart" size="large">
-      <v-chart :chartData="methodCharData" defaultType="pie" @click="handleClickMethodChart"></v-chart>
+      <v-chart :chartData="methodCharData" defaultType="pie" @click="handleClickMethodChart" @search="handleSearchAnotherMethod"></v-chart>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="showMethodChart = false">确 定</el-button>
       </span>
@@ -74,6 +76,18 @@
         <el-button type="primary" @click="showDrillTable2 = false">确 定</el-button>
       </span>
     </el-dialog>
+    <el-dialog title="搜索方法" :visible.sync="showSearchMethod" size="large">
+      <v-search-method :methodList="methodTree" @commitData="handleCommitSearchMethod"></v-search-method>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showSearchMethod = false">取消</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog title="搜索单位" :visible.sync="showSearchCompany" size="large">
+      <v-search-company :companyList="companyList" :searchLevel="drillingDataInfo.level" @commitData="handleCommitSearchCompany"></v-search-company>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showSearchCompany = false">取消</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -86,6 +100,8 @@ import vBarChart from './children/barChart'
 import vPieChart from './children/pieChart'
 import vChart from './children/vChart'
 import vDrillTable from './children/drillTable'
+import vSearchCompany from './children/searchCompany'
+import vSearchMethod from './children/searchMethod'
 export default {
   components: {
     vTree,
@@ -93,7 +109,9 @@ export default {
     vBarChart,
     vPieChart,
     vChart,
-    vDrillTable
+    vDrillTable,
+    vSearchCompany,
+    vSearchMethod
   },
   data() {
     return {
@@ -111,6 +129,7 @@ export default {
       tableData: [],
       tableLoading: false,
       tableLoadingText: '',
+      publicLevel: 0,
 
       // 钻取数据
       dialogVisibleDetail: false,
@@ -123,6 +142,9 @@ export default {
       showMethodChart: false,
       companyChartData: null,
       methodCharData: null,
+      chartMethodId: null,
+      showSearchCompany: false,
+      showSearchMethod: false,
 
       // 一级钻取二级
       drillingDataInfo: {
@@ -148,7 +170,7 @@ export default {
       exportDetailInfo: {}
     }
   },
-  created(){
+  created() {
     this.$store.commit('updateCurrentDrawerIndex', 6)
   },
   mounted() {
@@ -243,8 +265,8 @@ export default {
 
           this.$refs.resultTable.selectedLevel = 4
         }
-        let replacedCompany = this.selectedCompany.splice(index, 1, dataToReplace)
-        ;(!noResult && this.selectedMethods.length) && this.getResult()
+        let replacedCompany = this.selectedCompany.splice(index, 1, dataToReplace);
+        (!noResult && this.selectedMethods.length) && this.getResult()
         this.$message({
           message: `存在相同一级单位的“${replacedCompany[0].unitName}”，已替换为当前选择单位“${data.unitName}”`,
           type: 'info'
@@ -273,17 +295,24 @@ export default {
       this.tableLoading = true
       this.tableLoadingText = '正在请求数据...'
       let ret = []
+      let level = this.$refs.resultTable.selectedLevel
+      let unitCodes = this.selectedCompany.map(item => {
+        if (item.subCompany && level == 4) {
+          return {
+            unitCode: item.subCompany.unitCode,
+            unitLevel: 4
+          }
+        }
+        return {
+          unitCode: item.unitCode,
+          unitLevel: this.publicLevel
+        }
+      })
       this.$http.get(urlStore.statisticQuery, {
         params: {
           year: this.$refs.resultTable.getSelectedYear(),
-          unitCodes: this.selectedCompany.map(item => {
-            if (this.$refs.resultTable.selectedLevel == 4) {
-              return item.subCompany ? item.subCompany.unitCode : item.unitCode
-            }
-            return item.unitCode
-          }).join(','),
-          methodIds: this.selectedMethods.map(item => item.id).join(','),
-          type: this.$refs.resultTable.selectedLevel
+          unitCodes: JSON.stringify(unitCodes),
+          methodIds: this.selectedMethods.map(item => item.id).join(',')
         }
       }).then(res => {
         if (res.ok && res.body.success) {
@@ -348,30 +377,6 @@ export default {
         })
         this.tableLoading = false
       })
-
-      // this.selectedMethods.forEach(method => {
-      //   let obj = {}
-      //   let sum = 0
-      //   obj.method = {
-      //     methodId: method.id,
-      //     methodName: method.title
-      //   }
-      //   obj.companies = []
-      //   this.selectedCompany.forEach((company, index) => {
-      //     let issuesNum = Math.ceil(Math.random() * 10)
-      //     obj.companies.push({
-      //       companyId: company.unitCode,
-      //       companyName: company.unitName,
-      //       issues: issuesNum,
-      //       subCompany: company.subCompany
-      //     })
-      //     sum += issuesNum
-      //   })
-      //   obj.sum = sum
-      //   ret.push(obj)
-      // })
-      // this.tableLoading = false
-      // return ret
     },
     handleRemoveCompany(companyId, companyIndex, param) {
       this.tableLoading = true
@@ -413,12 +418,6 @@ export default {
     },
     handleShowDetail(data, resultCount) {
       this.drillingDataInfo.resultCount = resultCount
-      if (data.type == 0) {
-        let pCompany = this.selectedCompany.find(item => item.unitCode == data.unitCodes)
-        if (pCompany.subCompany) {
-          data.unitCodes = pCompany.subCompany.unitCode
-        }
-      }
 
       this.detailTableHeader = null
       this.detailTableData = null
@@ -437,7 +436,7 @@ export default {
 
           this.exportDetailInfo = {
             level1unitCodes: data.unitCodes,
-            unitLevel: data.type || '',
+            unitLevel: data.type,
             methodIds: data.methodId,
             year: data.year
           }
@@ -458,17 +457,29 @@ export default {
 
       this.detailDataLoading = true
       this.dialogVisibleDetail = true
-      this.$http.post(urlStore.viewResultData, data, {
+      this.$http.post(urlStore.viewResultData, {
+        methodId: data.methodId,
+        year: data.year,
+        unitCodes: JSON.stringify([{
+          unitCode: data.unitCodes,
+          unitLevel: 4
+        }])
+      }, {
         emulateJSON: true
       }).then(res => {
         if (res.ok && res.body.tableHeader) {
           this.detailTableHeader = res.body.tableHeader
           this.detailTableData = res.body.tableData
           this.drillingDataInfo.viewCount = res.body.tableData.length
-
+          this.drillingDataInfo.methodId = data.methodId
+          this.drillingDataInfo.unitCodes = JSON.stringify([{
+            unitCode: data.unitCodes,
+            unitLevel: 4
+          }])
+          this.drillingDataInfo.year = data.year
           this.exportDetailInfo = {
             level1unitCodes: data.unitCodes,
-            unitLevel: data.type || '',
+            unitLevel: data.type,
             methodIds: data.methodId,
             year: data.year
           }
@@ -513,18 +524,22 @@ export default {
     handleShowCompanyChart(level, methodId, methodName) {
       this.tableLoading = true
       this.tableLoadingText = '正在生成图表，请稍后'
+      let unitCodes = this.selectedCompany.map(item => {
+        return {
+          unitCode: item.unitCode,
+          unitLevel: level
+        }
+      })
       this.$http.get(urlStore.statisticQuery, {
         params: {
           year: this.$refs.resultTable.getSelectedYear(),
-          unitCodes: this.selectedCompany.map(item => item.unitCode).join(','),
+          unitCodes: JSON.stringify(unitCodes),
           methodIds: methodId,
-          type: level,
           topRow: 10,
           topType: 'unit'
         }
       }).then(res => {
         if (res.ok) {
-
           let tmpData = {
             columns: ['单位', '问题数'],
             rows: []
@@ -578,12 +593,17 @@ export default {
     handleShowMethodChart(level) {
       this.tableLoading = true
       this.tableLoadingText = '正在生成图表，请稍后'
+      let unitCodes = this.selectedCompany.map(item => {
+        return {
+          unitCode: item.unitCode,
+          unitLevel: level
+        }
+      })
       this.$http.get(urlStore.statisticQuery, {
         params: {
           year: this.$refs.resultTable.getSelectedYear(),
-          unitCodes: this.selectedCompany.map(item => item.unitCode).join(','),
+          unitCodes: JSON.stringify(unitCodes),
           methodIds: this.selectedMethods.map(item => item.id).join(','),
-          type: level,
           topRow: 10,
           topType: 'method'
         }
@@ -620,6 +640,7 @@ export default {
       if (level == 4) {
         return
       }
+      this.publicLevel = level
       this.selectedCompany.forEach(item => {
         item.subCompany = null
       })
@@ -695,8 +716,10 @@ export default {
       this.detailDataLoading = true
       this.dialogVisibleDetail = true
       this.$http.post(urlStore.viewResultData, {
-        unitCodes: this.drillingDataInfo.company.companyId,
-        type: this.drillingDataInfo.level == 0 ? '' : this.drillingDataInfo.level,
+        unitCodes: JSON.stringify([{
+          unitCode: this.drillingDataInfo.company.companyId,
+          unitLevel: this.drillingDataInfo.level
+        }]),
         methodId: this.drillingDataInfo.method.methodId,
         year: this.$refs.resultTable.getSelectedYear()
       }, {
@@ -724,8 +747,12 @@ export default {
       this.detailDataLoading = true
       this.dialogVisibleDetail = true
       this.$http.post(urlStore.viewResultData, {
-        unitCodes: this.selectedCompany.map(item => item.unitCode).join(','),
-        type: this.drillingDataInfo.level == 0 ? '' : this.drillingDataInfo.level,
+        unitCodes: JSON.stringify(this.selectedCompany.map(item => {
+          return {
+            unitCode: item.unitCode,
+            unitLevel: this.drillingDataInfo.level
+          }
+        })),
         methodId: this.drillingDataInfo.method.methodId,
         year: this.$refs.resultTable.getSelectedYear()
       }, {
@@ -840,62 +867,187 @@ export default {
       })
     },
     handleExportDataByMethod(level, methodId) {
-      let companies = this.selectedCompany.map(item => item.unitCode)
+      let unitCodes = this.selectedCompany.map(item => {
+        return {
+          unitCode: item.unitCode,
+          unitLevel: level
+        }
+      })
       let param = {
         methodIds: methodId,
         year: this.$refs.resultTable.getSelectedYear(),
-        level1unitCodes: companies.join(','),
-        unitLevel: ''
+        unitCodes: JSON.stringify(unitCodes)
       }
-      if (level != 0) {
-        if (level == 4) {
-          pararm.unitLevel = 0
-        } else {
-          param.unitLevel = level
-        }
-      }
-      window.open(`${urlStore.export}?methodIds=${param.methodIds}&year=${param.year}&level1unitCodes=${param.level1unitCodes}&unitLevel=${param.unitLevel}`)
+
+      window.open(`${urlStore.export}?methodIds=${param.methodIds}&year=${param.year}&unitCodes=${encodeURIComponent(param.unitCodes)}`)
     },
     handleExportDataByCell(methodId, companyId) {
       let param = {
         methodIds: methodId,
         year: this.$refs.resultTable.getSelectedYear(),
-        level1unitCodes: companyId,
-        unitLevel: ''
+        unitCodes: [{
+          unitCode: companyId,
+          unitLevel: 0
+        }]
       }
       if (this.$refs.resultTable.selectedLevel != 0) {
         if (this.$refs.resultTable.selectedLevel == 4) {
           let company = this.selectedCompany.find(item => item.unitCode == companyId)
           if (company && company.subCompany) {
-            param.level1unitCodes = company.subCompany.unitCode
-            param.unitLevel = 0
+            param.unitCodes = [{
+              unitCode: company.subCompany.unitCode,
+              unitLevel: 4
+            }]
           }
         } else {
-          param.unitLevel = this.$refs.resultTable.selectedLevel
+          param.unitCodes[0].unitLevel = this.$refs.resultTable.selectedLevel
         }
       }
-      window.open(`${urlStore.export}?methodIds=${param.methodIds}&year=${param.year}&level1unitCodes=${param.level1unitCodes}&unitLevel=${param.unitLevel}`)
+      param.unitCodes = JSON.stringify(param.unitCodes)
+
+      window.open(`${urlStore.export}?methodIds=${param.methodIds}&year=${param.year}&unitCodes=${encodeURIComponent(param.unitCodes)}`)
     },
     handleExportDataByPcode(drillLevel) {
       let methodIds
-      let level1unitCodes
+      let unitCodes
       if (drillLevel == 1) {
         methodIds = this.drillData.map(item => item.methodId).join(',')
-        level1unitCodes = this.drillData[0].units.map(item => item.unitCode).join(',')
+        unitCodes = this.drillData[0].units.map(item => {
+          return {
+            unitCode: item.unitCode,
+            unitLevel: 2
+          }
+        })
       } else {
         methodIds = this.drillData2.map(item => item.methodId).join(',')
-        level1unitCodes = this.drillData2[0].units.map(item => item.unitCode).join(',')
+        unitCodes = this.drillData2[0].units.map(item => {
+          return {
+            unitCode: item.unitCode,
+            unitLevel: 3
+          }
+        })
       }
       let param = {
         methodIds: methodIds,
         year: this.$refs.resultTable.getSelectedYear(),
-        unitLevel: 0,
-        level1unitCodes: level1unitCodes
+        unitCodes: JSON.stringify(unitCodes)
       }
-      window.open(`${urlStore.export}?methodIds=${param.methodIds}&year=${param.year}&level1unitCodes=${param.level1unitCodes}&unitLevel=${param.unitLevel}`)
+      window.open(`${urlStore.export}?methodIds=${param.methodIds}&year=${param.year}&unitCodes=${encodeURIComponent(param.unitCodes)}`)
     },
-    exportDataFromDetail(){
-      window.open(`${urlStore.export}?methodIds=${this.exportDetailInfo.methodIds}&year=${this.exportDetailInfo.year}&level1unitCodes=${this.exportDetailInfo.level1unitCodes}&unitLevel=${this.exportDetailInfo.unitLevel}`)
+    exportDataFromDetail() {
+      let companyInfo
+      if (this.showMethodChart) {
+        companyInfo = JSON.stringify(this.selectedCompany.map(item => {
+          return {
+            unitCode: item.unitCode,
+            unitLevel: this.drillingDataInfo.level
+          }
+        }))
+      } else if (this.showDrillTable) {
+        window.open(`${urlStore.export}?methodIds=${this.drillingDataInfo.methodId}&year=${this.drillingDataInfo.year}&unitCodes=${encodeURIComponent(this.drillingDataInfo.unitCodes)}`)
+      } else {
+        companyInfo = JSON.stringify([{
+          unitCode: this.exportDetailInfo.level1unitCodes,
+          unitLevel: this.exportDetailInfo.unitLevel
+        }])
+      }
+console.log(this.drillingDataInfo)
+      window.open(`${urlStore.export}?methodIds=${this.drillingDataInfo.methodId}&year=${this.$refs.resultTable.getSelectedYear()}&unitCodes=${encodeURIComponent(companyInfo)}`)
+    },
+    handleExportDoubtData() {
+      let param = {
+        methodIds: this.selectedMethods.map(item => item.id).join(','),
+        year: this.$refs.resultTable.getSelectedYear()
+      }
+      let level = this.$refs.resultTable.selectedLevel
+      let units
+      if (level == 4) {
+        units = this.selectedCompany.map(item => {
+          if (item.subCompany) {
+            return {
+              unitCode: item.subCompany.unitCode,
+              unitLevel: 4
+            }
+          }
+          return {
+            unitCode: item.unitCode,
+            unitLevel: 0
+          }
+        })
+      } else {
+        units = this.selectedCompany.map(item => {
+          return {
+            unitCode: item.unitCode,
+            unitLevel: level
+          }
+        })
+      }
+      window.open(`${urlStore.export}?methodIds=${param.methodIds}&year=${param.year}&unitCodes=${encodeURIComponent(JSON.stringify(units))}`)
+    },
+    handleExportStatisticData() {
+      let param = {
+        methodIds: this.selectedMethods.map(item => item.id).join(','),
+        year: this.$refs.resultTable.getSelectedYear()
+      }
+      let level = this.$refs.resultTable.selectedLevel
+      let units
+      if (level == 4) {
+        units = this.selectedCompany.map(item => {
+          if (item.subCompany) {
+            return {
+              unitCode: item.subCompany.unitCode,
+              unitLevel: 4
+            }
+          }
+          return {
+            unitCode: item.unitCode,
+            unitLevel: 0
+          }
+        })
+      } else {
+        units = this.selectedCompany.map(item => {
+          return {
+            unitCode: item.unitCode,
+            unitLevel: level
+          }
+        })
+      }
+      window.open(`${urlStore.exportStatisticData}?methodIds=${param.methodIds}&year=${param.year}&unitCodes=${encodeURIComponent(JSON.stringify(units))}`)
+    },
+    handleSearchAnotherCompany() {
+      this.showSearchCompany = true
+    },
+    handleSearchAnotherMethod() {
+      this.showSearchMethod = true
+    },
+    handleCommitSearchCompany(company) {
+      if (!company) {
+        return
+      }
+      this.handleShowDetail({
+        methodId: this.drillingDataInfo.method.methodId,
+        unitCodes: JSON.stringify([{
+          unitCode: company.unitCode,
+          unitLevel: this.drillingDataInfo.level
+        }]),
+        year: this.$refs.resultTable.getSelectedYear()
+      })
+    },
+    handleCommitSearchMethod(method) {
+      if (!method) {
+        return
+      }
+      let codes = this.selectedCompany.map(item => {
+        return {
+          unitCode: item.unitCode,
+          unitLevel: this.drillingDataInfo.level
+        }
+      })
+      this.handleShowDetail({
+        methodId: method.id,
+        unitCodes: JSON.stringify(codes),
+        year: this.$refs.resultTable.getSelectedYear()
+      })
     }
   }
 }

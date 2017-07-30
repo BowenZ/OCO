@@ -41,8 +41,8 @@
           </span>
           <el-dropdown-menu slot="dropdown" class="table-menu">
             <el-dropdown-item command="clearData" class="hide-trigger">清空数据</el-dropdown-item>
-            <el-dropdown-item command="exportData" class="hide-trigger">导出当前疑点数据</el-dropdown-item>
-            <el-dropdown-item command="exportData" class="hide-trigger">导出当前统计信息</el-dropdown-item>
+            <el-dropdown-item command="exportDoubtData" class="hide-trigger">导出当前疑点数据</el-dropdown-item>
+            <el-dropdown-item command="exportStatisticData" class="hide-trigger">导出当前统计信息</el-dropdown-item>
             <el-dropdown-item class="dropdown-item-chart">生成统计方法图形报表<i class="el-icon-caret-right"></i></el-dropdown-item>
             <ul class="el-dropdown-menu" x-placement="top-end" v-show="dropdownMenuVisible">
               <li class="el-dropdown-menu__item" @click="showMethodChart(0)">所有单位</li>
@@ -98,7 +98,7 @@
         </ul>
       </div>
     </div>
-    <el-dialog class="search-company" title="搜索单位" :visible.sync="headCompanyVisible" size="small">
+    <el-dialog class="search-company" title="搜索单位" :visible.sync="headCompanyVisible" size="small" @close="handleCloseSearch">
       <div @keyup.enter.stop="searchCompany">
         <el-input placeholder="输入关键字进行过滤" v-model="filterText">
         </el-input>
@@ -311,7 +311,7 @@ export default {
       }
       return ret.reverse()
     },
-    getSelectedYear(){
+    getSelectedYear() {
       return this.selectedYear.join(',')
     },
     addEventListener() {
@@ -367,12 +367,12 @@ export default {
           this.righeMenuVisible = true
         }
         let menuHeight = 230
-        if(menuHeight + event.clientY > window.innerHeight){
+        if (menuHeight + event.clientY > window.innerHeight && this.methodMenuVisible) {
           $menu.css({
             left: `${event.clientX}px`,
             top: `${event.clientY - menuHeight}px`
           })
-        }else{
+        } else {
           $menu.css({
             left: `${event.clientX}px`,
             top: `${event.clientY}px`
@@ -405,19 +405,20 @@ export default {
         let companyId = col.property.split('-').pop()
         let data = {
           methodId: row.method.methodId,
-          unitCodes: companyId,
+          unitCodes: [{
+            unitCode: companyId,
+            unitLevel: this.selectedLevel
+          }],
           year: this.selectedYear.join(',')
         }
-        if(this.selectedLevel == 4){
+        if (this.selectedLevel == 4) {
           let company = row.companies.find(item => item.companyId == companyId)
-          if(company && company.subCompany){
-            data.type = 0
+          if (company && company.subCompany) {
+            data.unitLevel = 4
+            data.unitCodes[0].unitCode = company.subCompany.unitCode
           }
-        }else if(this.selectedLevel > 0){
-          data.type = this.selectedLevel
         }
-        
-        
+        data.unitCodes = JSON.stringify(data.unitCodes)
         this.$emit('showDetail', data, $(event.target).text())
       }
     },
@@ -432,10 +433,10 @@ export default {
     },
 
     // 导出数据
-    exportDataByMethod(level){
+    exportDataByMethod(level) {
       this.$emit('exportDataByMethod', level, this.currentRightMethod.methodId)
     },
-    exportDataByCell(){
+    exportDataByCell() {
       this.$emit('exportDataByCell', this.currentRightMethod.methodId, this.currentRightCompanyId)
     },
 
@@ -446,13 +447,7 @@ export default {
 
     // 右下菜单
     handleMenuCommand(command) {
-      if (command == 'clearData') {
-        this.$emit('clearData')
-      } else if (command == 'exportData') {
-
-      } else if (command == 'showMethodChart') {
-        this.$emit('showMethodChart')
-      }
+      this.$emit(command)
     },
     showMethodChart(level) {
       this.$emit('showMethodChart', level)
@@ -481,6 +476,9 @@ export default {
     showSearchCompany(column, index) {
       this.currentHeadCompany = column.property.split('-').pop()
       this.headCompanyVisible = true
+    },
+    handleCloseSearch(){
+      $(this.$refs.companyTree.$el).find('.el-tree-node.is-current').removeClass('is-current')
     },
     renderHeaderFunction: renderFunctions.renderHeaderFunction,
     renderHeaderFunction2: renderFunctions.renderHeaderFunction2
@@ -709,8 +707,6 @@ export default {
     height: 0px;
     top: 100%;
   }
-
-
 }
 
 .el-message-box__header {
