@@ -3,7 +3,7 @@ if(process.env.NODE_ENV === 'production'){
   devMode = false
 }
 devMode = false
-const ip = devMode ? 'http://localhost:3000/' : 'http://192.168.101.100:9898/WQB_economy_responsibility_audit/'
+const ip = devMode ? 'http://localhost:3000/' : 'http://192.168.101.101:9898/WQB_economy_responsibility_audit/'
 
 const urls = {
   // 多方法执行

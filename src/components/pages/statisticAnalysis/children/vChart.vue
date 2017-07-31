@@ -7,7 +7,7 @@
       <el-radio-button label="line">折线图</el-radio-button>
     </el-radio-group>
     <el-button type="primary" style="float:right" @click="$emit('search')">其他</el-button>
-    <ve-chart :data="chartData" :settings="chartSettings" :events="chartEvents" tooltip-visible legend-visible></ve-chart>
+    <ve-chart :data="chartData" :settings="chartSettings" :legend-visible="false" :events="chartEvents" tooltip-visible></ve-chart>
   </div>
 </template>
 <script>

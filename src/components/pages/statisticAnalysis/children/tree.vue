@@ -103,6 +103,16 @@ export default {
           </span>
           </span>
           )
+        // return (
+        //   <span>
+        //     <span>
+        //       <span title={data.description}>{node.label}</span>
+        //     </span>
+        //     <span class="tree-btn">
+        //       <el-button size="mini" type="text" on-click={ () => this.add(node, data) } icon="plus"></el-button>
+        //       <i style="display:none"></i>
+        //     </span>
+        //   </span>)
       }
       return (
         <span>
@@ -113,7 +123,7 @@ export default {
             <el-button size="mini" type="text" on-click={ () => this.add(node, data) } icon="plus"></el-button>
             <i style="display:none"></i>
           </span>
-        </span>);
+        </span>)
     }
   }
 }

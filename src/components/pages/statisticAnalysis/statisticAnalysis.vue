@@ -29,15 +29,15 @@
             </li>
           </ul>
         </div>
-        <v-table ref="resultTable" v-loading="tableLoading" :element-loading-text="tableLoadingText" :tableData="tableData" @removeCompany="handleRemoveCompany" @removeMethod="handleRemoveMethod" @showDetail="handleShowDetail" @changeCompany="handleChangeCompany" @showCompanyChart="handleShowCompanyChart" @clearData="handleClearData" @showMethodChart="handleShowMethodChart" @changeLevel="handleChangeLevel" @changeYear="handleChangeYear" @drillingData="handleDrillData" @exportDataByMethod="handleExportDataByMethod" @exportDataByCell="handleExportDataByCell" @exportDoubtData="handleExportDoubtData" @exportStatisticData="handleExportStatisticData"></v-table>
+        <v-table ref="resultTable" v-loading="tableLoading" :element-loading-text="tableLoadingText" :tableData="tableData" @removeCompany="handleRemoveCompany" @removeMethod="handleRemoveMethod" @showDetail="handleShowDetail" @changeCompany="handleChangeCompany" @showCompanyChart="handleShowCompanyChart" @clearData="handleClearData" @showMethodChart="handleShowMethodChart" @changeLevel="handleChangeLevel" @changeYear="handleChangeYear" @drillingData="handleDrillData" @exportDataByMethod="handleExportDataByMethod" @exportDataByCell="handleExportDataByCell" @exportDoubtData="handleExportDoubtData" @exportStatisticData="handleExportStatisticData" @exportDataByCompany="handleExportDataByCompany" @showMethodChartMulti="handleShowMethodChartMulti"></v-table>
       </el-collapse-item>
     </el-collapse>
-    <el-dialog title="疑点明细数据" :visible.sync="dialogVisibleDetail" size="large">
+    <el-dialog title="疑点明细数据" :visible.sync="dialogVisibleDetail" size="full">
       <div class="detail-data-table" v-loading="detailDataLoading" element-loading-text="正在加载数据，请稍后...">
         <p v-if="drillingDataInfo.method && drillingDataInfo.method.methodName">审计方法：{{drillingDataInfo.method.methodName}}</p>
         <p v-if="drillingDataInfo.company && drillingDataInfo.company.companyName">被审计单位：{{drillingDataInfo.company.companyName}}</p>
         <p><span v-if="drillingDataInfo.resultCount">查询出总记录数为：<strong>{{ drillingDataInfo.resultCount }}</strong> 条<span v-if="drillingDataInfo.viewCount">，</span></span>显示记录数为：<strong>{{ drillingDataInfo.viewCount }}</strong>条</p>
-        <el-table v-if="detailTableHeader" :data="detailTableData" max-height="400" border style="width: 100%">
+        <el-table v-if="detailTableHeader" :data="detailTableData" max-height="500" border style="width: 100%">
           <el-table-column type="index" width="40">
           </el-table-column>
           <el-table-column v-for="(key, index) in Object.keys(detailTableHeader)" :show-overflow-tooltip="true" :key="index" :prop="key" :label="key" sortable>
@@ -60,6 +60,12 @@
       <v-chart :chartData="methodCharData" defaultType="pie" @click="handleClickMethodChart" @search="handleSearchAnotherMethod"></v-chart>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="showMethodChart = false">确 定</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog title="多图表展示" :visible.sync="showMultiMethodChart" size="large">
+      <v-chart-multi :chartData="multiChartData" :level="chartLevel" defaultType="pie" @click="handleClickMultiChart"></v-chart-multi>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="showMultiMethodChart = false">确 定</el-button>
       </span>
     </el-dialog>
     <el-dialog title="根据一级单位钻取数据" :visible.sync="showDrillTable" size="large">
@@ -99,6 +105,7 @@ import vTable from './children/resultTable'
 import vBarChart from './children/barChart'
 import vPieChart from './children/pieChart'
 import vChart from './children/vChart'
+import vChartMulti from './children/vChartMulti'
 import vDrillTable from './children/drillTable'
 import vSearchCompany from './children/searchCompany'
 import vSearchMethod from './children/searchMethod'
@@ -109,6 +116,7 @@ export default {
     vBarChart,
     vPieChart,
     vChart,
+    vChartMulti,
     vDrillTable,
     vSearchCompany,
     vSearchMethod
@@ -145,6 +153,10 @@ export default {
       chartMethodId: null,
       showSearchCompany: false,
       showSearchMethod: false,
+
+      showMultiMethodChart: false,
+      multiChartData: [],
+      chartLevel: 0,
 
       // 一级钻取二级
       drillingDataInfo: {
@@ -226,7 +238,7 @@ export default {
       }
       setTimeout(() => {
         this.$refs.resultTable.resizeFixedTableCol()
-      }, 1000)
+      }, 1200)
     },
     addMethod(data) {
       let filteredData = []
@@ -434,12 +446,7 @@ export default {
           this.detailTableData = res.body.tableData
           this.drillingDataInfo.viewCount = res.body.tableData.length
 
-          this.exportDetailInfo = {
-            level1unitCodes: data.unitCodes,
-            unitLevel: data.type,
-            methodIds: data.methodId,
-            year: data.year
-          }
+          this.exportDetailInfo = data
         }
         this.tableLoading = false
       }).catch(err => {
@@ -457,14 +464,7 @@ export default {
 
       this.detailDataLoading = true
       this.dialogVisibleDetail = true
-      this.$http.post(urlStore.viewResultData, {
-        methodId: data.methodId,
-        year: data.year,
-        unitCodes: JSON.stringify([{
-          unitCode: data.unitCodes,
-          unitLevel: 4
-        }])
-      }, {
+      this.$http.post(urlStore.viewResultData, data, {
         emulateJSON: true
       }).then(res => {
         if (res.ok && res.body.tableHeader) {
@@ -472,17 +472,9 @@ export default {
           this.detailTableData = res.body.tableData
           this.drillingDataInfo.viewCount = res.body.tableData.length
           this.drillingDataInfo.methodId = data.methodId
-          this.drillingDataInfo.unitCodes = JSON.stringify([{
-            unitCode: data.unitCodes,
-            unitLevel: 4
-          }])
+          this.drillingDataInfo.unitCodes = data.unitCodes
           this.drillingDataInfo.year = data.year
-          this.exportDetailInfo = {
-            level1unitCodes: data.unitCodes,
-            unitLevel: data.type,
-            methodIds: data.methodId,
-            year: data.year
-          }
+          this.exportDetailInfo = data
         } else if (res.ok && !res.body.tableHeader) {
           this.$message({
             message: '未查到数据',
@@ -559,6 +551,11 @@ export default {
           }
           this.drillingDataInfo.level = level
           this.drillingDataInfo.resultCount = res.body.data[0].resultCount
+
+          this.exportDetailInfo.methodId = methodId
+          this.exportDetailInfo.level = level
+          this.exportDetailInfo.year = this.$refs.resultTable.getSelectedYear()
+
           this.companyChartData = tmpData
           this.showCompanyChart = true
         }
@@ -626,6 +623,14 @@ export default {
           this.showMethodChart = true
 
           this.drillingDataInfo.level = level
+
+          this.exportDetailInfo.unitCodes = JSON.stringify(this.selectedCompany.map(item => {
+            return {
+              unitCode: item.unitCode,
+              unitLevel: level
+            }
+          }))
+          this.exportDetailInfo.year = this.$refs.resultTable.getSelectedYear()
         }
         this.tableLoading = false
       }).catch(err => {
@@ -634,6 +639,58 @@ export default {
           type: 'warning'
         })
         this.tableLoading = false
+      })
+    },
+    handleShowMethodChartMulti(level){
+      this.tableLoading = true
+      this.tableLoadingText = '正在生成图表，请稍后'
+      let unitCodes = this.selectedCompany.map(item => {
+        return {
+          unitCode: item.unitCode,
+          unitLevel: level
+        }
+      })
+      let methodIds = this.selectedMethods.map(item => item.id).join(',')
+      let year = this.$refs.resultTable.getSelectedYear()
+      this.$http.get(urlStore.statisticQuery, {
+        params: {
+          year,
+          unitCodes: JSON.stringify(unitCodes),
+          methodIds,
+          topRow: 10,
+          topType: 'unit'
+        }
+      }).then(res => {
+        console.log(res)
+        if(res.ok){
+          this.showMultiMethodChart = true
+          this.tableLoading = false
+          this.chartLevel = level
+          let tmpArr = []
+          res.body.data.forEach(item => {
+            let tmpData = {
+              columns: ['单位', '问题数'],
+              rows: [],
+              methodId: item.methodId,
+              methodName: item.methodName
+            }
+            item.units.forEach(unit => {
+              tmpData.rows.push({
+                '单位': unit.unitName,
+                '问题数': unit.resultCount
+              })
+            })
+            tmpArr.push(tmpData)
+          })
+          console.log(tmpArr)
+          this.multiChartData = tmpArr
+        }
+      }).catch(err => {
+        this.tableLoading = false
+        this.$message({
+          message: '请求出错',
+          type: 'warning'
+        })
       })
     },
     handleChangeLevel(level) {
@@ -729,6 +786,12 @@ export default {
           this.detailTableHeader = res.body.tableHeader
           this.detailTableData = res.body.tableData
           this.drillingDataInfo.viewCount = res.body.tableData.length
+
+          console.log(company)
+          this.exportDetailInfo.unitCodes = JSON.stringify([{
+            unitCode: company.unitCode,
+            unitLevel: this.exportDetailInfo.level
+          }])
         }
         this.detailDataLoading = false
       }).catch(err => {
@@ -762,6 +825,8 @@ export default {
           this.detailTableHeader = res.body.tableHeader
           this.detailTableData = res.body.tableData
           this.drillingDataInfo.viewCount = res.body.tableData.length
+
+          this.exportDetailInfo.methodId = this.drillingDataInfo.method.methodId
         } else {
           this.$message({
             message: '未查询到数据',
@@ -773,6 +838,7 @@ export default {
         this.detailDataLoading = false
       })
     },
+    handleClickMultiChart(){},
     handleCloseDrillingData() {
       this.drillingDataInfo = {
         method: null,
@@ -907,6 +973,15 @@ export default {
 
       window.open(`${urlStore.export}?methodIds=${param.methodIds}&year=${param.year}&unitCodes=${encodeURIComponent(param.unitCodes)}`)
     },
+    handleExportDataByCompany(unitCode, unitLevel, year) {
+      let methodIds = this.selectedMethods.map(item => item.id).join(',')
+      let unitCodes = JSON.stringify([{
+        unitCode: unitCode,
+        unitLevel: unitLevel
+      }])
+      console.log(`${urlStore.export}?methodIds=${methodIds}&year=${year}&unitCodes=${encodeURIComponent(unitCodes)}`)
+      window.open(`${urlStore.export}?methodIds=${methodIds}&year=${year}&unitCodes=${encodeURIComponent(unitCodes)}`)
+    },
     handleExportDataByPcode(drillLevel) {
       let methodIds
       let unitCodes
@@ -935,6 +1010,7 @@ export default {
       window.open(`${urlStore.export}?methodIds=${param.methodIds}&year=${param.year}&unitCodes=${encodeURIComponent(param.unitCodes)}`)
     },
     exportDataFromDetail() {
+      console.log(this.exportDetailInfo, this.drillingDataInfo)
       let companyInfo
       if (this.showMethodChart) {
         companyInfo = JSON.stringify(this.selectedCompany.map(item => {
@@ -943,16 +1019,10 @@ export default {
             unitLevel: this.drillingDataInfo.level
           }
         }))
-      } else if (this.showDrillTable) {
-        window.open(`${urlStore.export}?methodIds=${this.drillingDataInfo.methodId}&year=${this.drillingDataInfo.year}&unitCodes=${encodeURIComponent(this.drillingDataInfo.unitCodes)}`)
       } else {
-        companyInfo = JSON.stringify([{
-          unitCode: this.exportDetailInfo.level1unitCodes,
-          unitLevel: this.exportDetailInfo.unitLevel
-        }])
+        companyInfo = this.exportDetailInfo.unitCodes
       }
-console.log(this.drillingDataInfo)
-      window.open(`${urlStore.export}?methodIds=${this.drillingDataInfo.methodId}&year=${this.$refs.resultTable.getSelectedYear()}&unitCodes=${encodeURIComponent(companyInfo)}`)
+      window.open(`${urlStore.export}?methodIds=${this.exportDetailInfo.methodId}&year=${this.exportDetailInfo.year}&unitCodes=${encodeURIComponent(companyInfo)}`)
     },
     handleExportDoubtData() {
       let param = {
@@ -1153,6 +1223,16 @@ console.log(this.drillingDataInfo)
   .el-dialog {
     top: 6%!important;
   }
+
+  .el-dialog--full {
+    top: 0%!important;
+    .el-dialog__body {
+      height: calc(100% - 120px);
+      padding: 10px;
+      overflow: auto;
+    }
+  }
+
 }
 
 .el-dialog__header {

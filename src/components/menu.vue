@@ -90,9 +90,9 @@ export default {
   methods: {
     toggleDrawer: function(index, event) {
       this.currentIndex = index
-      if (index != 3) {
+      // if (index != 3) {
         this.$store.commit('updateCurrentDrawerIndex', index)
-      }
+      // }
       let $targetLi = $(event.target).parents('li')
       if ($targetLi.hasClass('active') && this.$store.getters.drawerIsOpened) {
         this.$store.commit('closeDrawer')

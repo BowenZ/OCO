@@ -25,7 +25,7 @@
           </el-select>
           <el-button type="primary" size="small" @click="changeYear">确定</el-button>
         </el-popover>
-        <el-button type="text" v-popover:popover>修改日期</el-button>
+        <el-button type="text" v-popover:popover>审计年度</el-button>
       </div>
       <div class="level-selector">
         <el-select v-model="selectedLevel" placeholder="各单位汇总（全）" size="small" @change="handleChangeLevel">
@@ -41,14 +41,21 @@
           </span>
           <el-dropdown-menu slot="dropdown" class="table-menu">
             <el-dropdown-item command="clearData" class="hide-trigger">清空数据</el-dropdown-item>
+            <el-dropdown-item class="dropdown-item-chart" data-multi="1">生成多方法图形报表<i class="el-icon-caret-right"></i></el-dropdown-item>
             <el-dropdown-item command="exportDoubtData" class="hide-trigger">导出当前疑点数据</el-dropdown-item>
             <el-dropdown-item command="exportStatisticData" class="hide-trigger">导出当前统计信息</el-dropdown-item>
             <el-dropdown-item class="dropdown-item-chart">生成统计方法图形报表<i class="el-icon-caret-right"></i></el-dropdown-item>
-            <ul class="el-dropdown-menu" x-placement="top-end" v-show="dropdownMenuVisible">
+            <ul class="el-dropdown-menu" v-show="dropdownMenuVisible">
               <li class="el-dropdown-menu__item" @click="showMethodChart(0)">所有单位</li>
               <li class="el-dropdown-menu__item" @click="showMethodChart(1)">一级单位</li>
               <li class="el-dropdown-menu__item" @click="showMethodChart(2)">二级单位</li>
               <li class="el-dropdown-menu__item" @click="showMethodChart(3)">三级单位</li>
+            </ul>
+            <ul class="el-dropdown-menu" v-show="dropdownMenuVisible2">
+              <li class="el-dropdown-menu__item" @click="showMethodChartMulti(0)">所有单位</li>
+              <li class="el-dropdown-menu__item" @click="showMethodChartMulti(1)">一级单位</li>
+              <li class="el-dropdown-menu__item" @click="showMethodChartMulti(2)">二级单位</li>
+              <li class="el-dropdown-menu__item" @click="showMethodChartMulti(3)">三级单位</li>
             </ul>
           </el-dropdown-menu>
         </el-dropdown>
@@ -64,10 +71,10 @@
           <li class="el-cascader-menu__item el-cascader-menu__item--extensible secondary-item">导出该单位数据</li>
         </ul>
         <ul class="el-cascader-menu" v-show="companySecondaryMenuVisible">
-          <li class="el-cascader-menu__item">导出所有单位</li>
-          <li class="el-cascader-menu__item">导出一级单位</li>
-          <li class="el-cascader-menu__item">导出二级单位</li>
-          <li class="el-cascader-menu__item">导出三级单位</li>
+          <li class="el-cascader-menu__item" @click="exportDataByCompany(0)">导出所有单位</li>
+          <li class="el-cascader-menu__item" @click="exportDataByCompany(1)">导出一级单位</li>
+          <li class="el-cascader-menu__item" @click="exportDataByCompany(2)">导出二级单位</li>
+          <li class="el-cascader-menu__item" @click="exportDataByCompany(3)">导出三级单位</li>
         </ul>
       </div>
       <div class="method-menu el-cascader-menus" v-show="methodMenuVisible">
@@ -171,6 +178,7 @@ export default {
       },
 
       dropdownMenuVisible: false,
+      dropdownMenuVisible2: false,
 
       tableLoading: false,
 
@@ -305,7 +313,7 @@ export default {
       return [2016]
       let ret = []
       let currentYear = (new Date()).getFullYear()
-      let n = 20
+      let n = 10
       while (n--) {
         ret.push(currentYear - n)
       }
@@ -439,6 +447,9 @@ export default {
     exportDataByCell() {
       this.$emit('exportDataByCell', this.currentRightMethod.methodId, this.currentRightCompanyId)
     },
+    exportDataByCompany(level){
+      this.$emit('exportDataByCompany', this.currentRightCompanyId, level, this.getSelectedYear())
+    },
 
     // 右上菜单
     handleChangeLevel(val) {
@@ -451,6 +462,15 @@ export default {
     },
     showMethodChart(level) {
       this.$emit('showMethodChart', level)
+      $(this.$el).find('.covers .menu .el-dropdown-link').trigger('click')
+      this.dropdownMenuVisible = false
+      this.dropdownMenuVisible2 = false
+    },
+    showMethodChartMulti(level){
+      this.$emit('showMethodChartMulti', level)
+      $(this.$el).find('.covers .menu .el-dropdown-link').trigger('click')
+      this.dropdownMenuVisible = false
+      this.dropdownMenuVisible2 = false
     },
     handleMenuVisible(visible) {
       if (visible) {
@@ -458,12 +478,17 @@ export default {
         $('body .table-menu').find('.hide-trigger').off()
         setTimeout(() => {
           $('.dropdown-item-chart').on('mouseenter', (event) => {
-            event.preventDefault();
-            this.dropdownMenuVisible = true
+            event.preventDefault()
+            if(event.target.dataset.multi){
+              this.dropdownMenuVisible2 = true
+            }else{
+              this.dropdownMenuVisible = true
+            }
           })
           $('body .table-menu').find('.hide-trigger').on('mouseenter', (event) => {
-            event.preventDefault();
+            event.preventDefault()
             this.dropdownMenuVisible = false
+            this.dropdownMenuVisible2 = false
           })
         }, 10)
       } else {
@@ -685,6 +710,9 @@ export default {
     left: 100%;
     top: -6px;
     min-width: 80px;
+    &:first-of-type{
+      top: 26px;
+    }
   }
 }
 
