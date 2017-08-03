@@ -103,7 +103,7 @@ export default {
       return false
     },
     showDrawer(index) {
-      return index === this.currentIndex
+      return index == this.currentIndex
     }
   },
   components: {

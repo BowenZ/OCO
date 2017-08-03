@@ -9,7 +9,7 @@
       <el-table-column v-for="(company, index) in tableData[0].companies" :key="index" :prop="'company-'+company.companyId" :label="company.companyName" :render-header="renderHeaderFunction">
         <el-table-column :prop="'company-'+company.companyId" :label="company.subCompany?company.subCompany.unitName:''" show-overflow-tooltip min-width="100" :render-header="renderHeaderFunction2">
           <template scope="scope">
-            <span>{{scope.row.companies[index].issues}}</span>
+            <span>{{scope.row.companies[index].resultCount}}</span>
           </template>
         </el-table-column>
       </el-table-column>
@@ -29,7 +29,7 @@
       </div>
       <div class="level-selector">
         <el-select v-model="selectedLevel" placeholder="各单位汇总（全）" size="small" @change="handleChangeLevel">
-          <el-option v-for="item in levelOptions" :key="item.value" :label="item.label" :value="item.value">
+          <el-option v-for="item in levelOptions" :key="item.value" :label="item.label" :value="item.value" :disabled="item.disabled">
           </el-option>
         </el-select>
       </div>
@@ -148,7 +148,8 @@ export default {
         label: '各单位汇总（三）'
       }, {
         value: 4,
-        label: '自定义'
+        label: '自定义',
+        disabled: true
       }],
       selectedLevel: 0,
 
@@ -234,6 +235,14 @@ export default {
       })
       // $('body').append('<div class="el-tooltip__popper is-dark el-fade-in-linear-enter-to table-head-tooltip"></div>')
     }, 100)
+    let timer
+    let vm = this
+    $(window).on('resize', function(event) {
+      clearTimeout(timer)
+      timer = setTimeout(() => {
+        vm.resizeFixedTableCol()
+      }, 500)
+    })
   },
   methods: {
     _getScrollbarWidth() {
@@ -252,11 +261,22 @@ export default {
     },
     resizeFixedTableCol() {
       let $el = $(this.$el)
+      let $tableBody = $el.find('.el-table__body-wrapper')
       this.$refs.resultTable && this.$refs.resultTable.doLayout()
-      let height = $el.find('.el-table__fixed .el-table__fixed-header-wrapper').height() + $el.find('.el-table__fixed .el-table__fixed-body-wrapper').height()
+      let height = $el.find('.el-table__fixed .el-table__fixed-header-wrapper').height() + $el.find('.el-table__fixed .el-table__fixed-body-wrapper').height() + 1
       $el.find('.el-table__fixed-right, .el-table__fixed').height(height)
       $el.find('.el-table__fixed-right').css('right', `${this.scrollBarWidth}px`)
+      if($tableBody[0] && $tableBody[0].scrollHeight > $tableBody[0].clientHeight){
+        $el.find('.el-table__fixed-right-patch').height($el.find('.el-table__fixed-header-wrapper').height() + 2)
+      }else{
+        $el.find('.el-table__fixed-right-patch').height(height + 2)
+      }
       $el.find('.el-table__fixed-right-patch').width(this.scrollBarWidth)
+
+      let colWidth = $el.find('.el-table__fixed-right').width()
+      if(colWidth > 0){
+        $el.find('.menu').width(colWidth + this.scrollBarWidth)
+      }
     },
     // +++++++搜索单位++++++++
     searchCompany() {
@@ -296,7 +316,7 @@ export default {
           return
         }
         const values = data.map(item => {
-          return Number(item.companies[index - 1].issues)
+          return Number(item.companies[index - 1].resultCount)
         })
         if (!values.every(value => isNaN(value))) {
           sums[index] = values.reduce((prev, curr) => {
@@ -480,8 +500,10 @@ export default {
           $('.dropdown-item-chart').on('mouseenter', (event) => {
             event.preventDefault()
             if(event.target.dataset.multi){
+              this.dropdownMenuVisible = false
               this.dropdownMenuVisible2 = true
             }else{
+              this.dropdownMenuVisible2 = false
               this.dropdownMenuVisible = true
             }
           })
@@ -643,10 +665,10 @@ export default {
   }
   .level-selector {
     position: absolute;
-    right: 24px;
+    right: 26px;
     top: 26px;
     z-index: 99;
-    width: 125px;
+    width: 130px;
     .el-input__inner {
       padding: 3px;
     }

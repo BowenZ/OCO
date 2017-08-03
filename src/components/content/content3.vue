@@ -3,8 +3,9 @@
   <div class="content content3">
     <v-step :steps="steps" :currentStep="currentStep"></v-step>
     <div class="content-block">
-      <!-- {{selectedData}} -->
+      <v-method-description v-if="selectedData" :description="selectedData.description"></v-method-description>
       <v-params ref="params" :showExecuteButton="false" :multiple="false" :disableInput="disableInput || auditing" :params="singleParams"></v-params>
+      <v-base-param></v-base-param>
       <div class="execute-button clearfix" v-if="selectedData">
         <el-button type="primary" size="large" @click="doAudint" :loading="disableInput || auditing">执行查询</el-button>
       </div>
@@ -19,6 +20,8 @@ import vStep from './widget/step'
 import vParams from './widget/params'
 import vImport from './widget/import'
 import vResult from './widget/result'
+import vMethodDescription from './widget/methodDescription'
+import vBaseParam from './widget/baseParam'
 import {
   Message
 } from 'element-ui'
@@ -30,8 +33,9 @@ export default {
     vParams,
     vResult,
     vStep,
-    vImport
-
+    vImport,
+    vMethodDescription,
+    vBaseParam
   },
   data: function() {
     return {

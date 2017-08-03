@@ -1,23 +1,31 @@
 <template>
   <div class="login">
     <div class="login-wrapper">
+      <div class="login-logo">
+        <img src="../../assets/img/login_logo.png" alt="">
+      </div>
       <div class="form" @keyup.enter="submitForm('loginForm')">
-        <el-card>
-          <div class="color-bar"></div>
-          <h2 class="login-title">智能审计分析系统</h2>
-          <el-form :model="loginForm" label-width="0" :rules="lginRules" ref="loginForm" class="demo-ruleForm">
-            <el-form-item label="" prop="username">
-              <el-input type="text" size="large" v-model="loginForm.username" placeholder="用户名" auto-complete="off"></el-input>
-            </el-form-item>
-            <el-form-item label="" prop="password">
-              <el-input type="password" size="large" v-model="loginForm.password" placeholder="密码" auto-complete="off"></el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" size="large" @click="submitForm('loginForm')" :loading="loginLoading">登录</el-button>
-              <!-- <el-button @click="resetForm('loginForm')">重置</el-button> -->
-            </el-form-item>
-          </el-form>
-        </el-card>
+        <el-row>
+          <el-col :span="11" :xs="24">
+            <div class="login-copy">
+              <img src="../../assets/img/login_copy.png" alt="">
+            </div>
+          </el-col>
+          <el-col :span="13" :xs="24">
+            <el-form :model="loginForm" label-width="0" :rules="lginRules" ref="loginForm" class="demo-ruleForm">
+              <el-form-item label="" prop="username">
+                <el-input type="text" size="large" v-model="loginForm.username" placeholder="用户名" auto-complete="off"></el-input>
+              </el-form-item>
+              <el-form-item label="" prop="password">
+                <el-input type="password" size="large" v-model="loginForm.password" placeholder="密码" auto-complete="off"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" size="large" @click="submitForm('loginForm')" :loading="loginLoading">登录</el-button>
+                <!-- <el-button @click="resetForm('loginForm')">重置</el-button> -->
+              </el-form-item>
+            </el-form>
+          </el-col>
+        </el-row>
       </div>
     </div>
   </div>
@@ -93,34 +101,17 @@ export default {
     }
   }
 }
+
 </script>
 <style lang="scss">
 .login {
   width: 100%;
   height: 100%;
   position: absolute;
-  background-color: #1E3C50;
-  .login-title {
-    font-size: 22px;
-    font-weight: 400;
-    color: #1e3c50;
-    text-align: center;
-    margin-bottom: 30px
-  }
-  .el-card {
-    border: none;
-    padding: 20px 50px;
-  }
-  .color-bar {
-    background: linear-gradient(135deg, #e74c3c 25%, #f1c40f 25%, #f1c40f 50%, #1abc9c 50%, #1abc9c 75%, #3498db 75%, #3498db 100%);
-    height: 10px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-  }
+  background: #6380df;
+  background: radial-gradient(ellipse at center, #7db9e8 1%, #6380df 66%);
   .login-wrapper {
-    width: 500px;
+    width: 100%;
     height: 360px;
     position: absolute;
     top: 0;
@@ -128,13 +119,54 @@ export default {
     left: 0;
     right: 0;
     margin: auto;
-    .form {
-      button {
-        width: 50%;
+    .login-logo {
+      img {
         margin: auto;
         display: block;
+        width: 100%;
+        max-width: 300px;
+      }
+    }
+    .form {
+      background-color: rgb(195, 219, 246);
+      .el-row {
+        max-width: 700px;
+        margin: auto;
+      }
+      .login-copy {
+        img {
+          display: block;
+          width: 100%;
+          margin-top: 50px;
+        }
+      }
+      form {
+        padding: 30px;
+      }
+      button {
+        width: 100%;
+        margin: auto;
+        display: block;
+        background: rgb(81, 115, 211);
+        border-color: rgb(81, 115, 211);
       }
     }
   }
 }
+
+@media screen and (max-width: 768px) {
+  .login .login-wrapper {
+    height: 450px;
+    .form .el-row {
+      max-width: 400px;
+      .login-copy {
+        img {
+          width: 80%;
+          margin: 20px auto 0;
+        }
+      }
+    }
+  }
+}
+
 </style>

@@ -203,10 +203,8 @@ export default {
       }
       $('body .el-select-dropdown').css('display', 'none')
       this.dialogVisible = false
-    }
-  },
-  watch: {
-    params: function(newVal) {
+    },
+    updateFormModel(){
       let formModel2 = {}
       if (this.params && this.params.length) {
         this.params.forEach(item => {
@@ -218,12 +216,19 @@ export default {
       }
       this.formModel = formModel2
     }
+  },
+  watch: {
+    params: function(newVal) {
+      this.updateFormModel()
+    }
+  },
+  mounted(){
+    this.updateFormModel()
   }
 }
 </script>
 <style lang="scss">
 .params-container {
-  margin-bottom: 10px;
   .execute-button {
     button {
       float: right;

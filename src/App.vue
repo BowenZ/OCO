@@ -448,35 +448,6 @@ body.theme-dark {
   }
 }
 
-body.bg1 {
-  .main-container {
-    background-image: url(./assets/img/bgimg1.jpg);
-  }
-}
-
-body.bg2 {
-  .main-container {
-    background-image: url(./assets/img/bgimg2.jpg);
-  }
-}
-
-body.bg3 {
-  .main-container {
-    background-image: url(./assets/img/bgimg3.jpg);
-  }
-}
-
-body.bg4 {
-  .main-container {
-    background-image: url(./assets/img/bgimg4.jpg);
-  }
-}
-
-body.bg5 {
-  .main-container {
-    background-image: url(./assets/img/bgimg5.jpg);
-  }
-}
 
 .ie .el-textarea__inner {
   min-height: 80px;

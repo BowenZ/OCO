@@ -102,8 +102,6 @@ import _ from 'lodash'
 import urlStore from '@/api/urlStore.js'
 import vTree from './children/tree'
 import vTable from './children/resultTable'
-import vBarChart from './children/barChart'
-import vPieChart from './children/pieChart'
 import vChart from './children/vChart'
 import vChartMulti from './children/vChartMulti'
 import vDrillTable from './children/drillTable'
@@ -113,8 +111,6 @@ export default {
   components: {
     vTree,
     vTable,
-    vBarChart,
-    vPieChart,
     vChart,
     vChartMulti,
     vDrillTable,
@@ -181,9 +177,6 @@ export default {
       // 从明细数据导出文件
       exportDetailInfo: {}
     }
-  },
-  created() {
-    this.$store.commit('updateCurrentDrawerIndex', 6)
   },
   mounted() {
     this.loadMethodTree()
@@ -307,23 +300,44 @@ export default {
       this.tableLoading = true
       this.tableLoadingText = '正在请求数据...'
       let ret = []
-      let level = this.$refs.resultTable.selectedLevel
-      let unitCodes = this.selectedCompany.map(item => {
-        if (item.subCompany && level == 4) {
-          return {
-            unitCode: item.subCompany.unitCode,
-            unitLevel: 4
+      let level = this.publicLevel
+      // let level = this.$refs.resultTable.selectedLevel
+      // let unitCodes = this.selectedCompany.map(item => {
+      //   if (item.subCompany && level == 4) {
+      //     return {
+      //       unitCode: item.subCompany.unitCode,
+      //       unitLevel: 4
+      //     }
+      //   }
+      //   return {
+      //     unitCode: item.unitCode,
+      //     unitLevel: this.publicLevel
+      //   }
+      // })
+      let unitCodes
+      if(this.selectedCompany.every(item => item.subCompany && item.subCompany.unitCode) && this.$refs.resultTable.selectedLevel == 4){
+        level = 0
+        unitCodes = this.selectedCompany.map(item => {
+          return item.unitCode + ':' + item.subCompany.unitCode
+        }).join(',')
+      }else{
+        if(level == 0){
+          level = 4
+        }
+        unitCodes = this.selectedCompany.map(item => {
+          if(item.subCompany && item.subCompany.unitCode){
+            return item.unitCode + ':' + item.subCompany.unitCode
           }
-        }
-        return {
-          unitCode: item.unitCode,
-          unitLevel: this.publicLevel
-        }
-      })
+          return item.unitCode
+        }).join(',')
+      }
+
       this.$http.get(urlStore.statisticQuery, {
         params: {
           year: this.$refs.resultTable.getSelectedYear(),
-          unitCodes: JSON.stringify(unitCodes),
+          // unitCodes: JSON.stringify(unitCodes),
+          unitCodes: unitCodes,
+          level: level,
           methodIds: this.selectedMethods.map(item => item.id).join(',')
         }
       }).then(res => {
@@ -335,7 +349,7 @@ export default {
               tmpCompany.push({
                 companyId: company.unitCode,
                 companyName: company.unitName,
-                issues: 0,
+                resultCount: 0,
                 subCompany: company.subCompany
               })
             })
@@ -345,7 +359,7 @@ export default {
                 tmpCompany.push({
                   companyId: item.unitCode,
                   companyName: item.unitName,
-                  issues: 0,
+                  resultCount: 0,
                   subCompany: null
                 })
               } else {
@@ -355,7 +369,7 @@ export default {
                 tmpCompany.push({
                   companyId: targetCompany.unitCode,
                   companyName: targetCompany.unitName,
-                  issues: null,
+                  resultCount: null,
                   subCompany: targetCompany.subCompany
                 })
               }
@@ -370,7 +384,7 @@ export default {
             }
             obj.companies = JSON.parse(JSON.stringify(tmpCompany))
             item.units.length && item.units.forEach((unit, index) => {
-              obj.companies[index].issues = unit.resultCount
+              obj.companies[index].resultCount = unit.resultCount
             })
             obj.sum = item.resultCount
             ret.push(obj)
@@ -393,39 +407,66 @@ export default {
     handleRemoveCompany(companyId, companyIndex, param) {
       this.tableLoading = true
       this.tableLoadingText = '正在加载中...'
-      let index = this.selectedCompany.findIndex(item => item.unitCode == companyId)
-      if (param == 'this') {
-        this.selectedCompany.splice(index, 1)
-      } else if (param == 'left') {
-        this.selectedCompany = this.selectedCompany.slice(index)
-      } else if (param == 'right') {
-        this.selectedCompany = this.selectedCompany.slice(0, index + 1)
-      } else if (param == 'others') {
-        this.selectedCompany = [this.selectedCompany[index]]
-      }
+      let index = this.tableData[0].companies.findIndex(item => item.companyId == companyId)
+      this.tableData.forEach(item => {
+        if (param == 'this') {
+          item.companies.splice(index, 1)
+        } else if (param == 'left') {
+          item.companies = item.companies.slice(index)
+        } else if (param == 'right') {
+          item.companies = item.companies.slice(0, index + 1)
+        } else if (param == 'others') {
+          item.companies = [item.companies[index]]
+        }
+      })
+      // if (param == 'this') {
+      //   this.selectedCompany.splice(index, 1)
+      // } else if (param == 'left') {
+      //   this.selectedCompany = this.selectedCompany.slice(index)
+      // } else if (param == 'right') {
+      //   this.selectedCompany = this.selectedCompany.slice(0, index + 1)
+      // } else if (param == 'others') {
+      //   this.selectedCompany = [this.selectedCompany[index]]
+      // }
+
+      let tmpArr = []
+      this.tableData[0].companies.forEach(item => {
+        let tmpData = this.selectedCompany.find(com => com.unitCode == item.companyId)
+        if(tmpData){
+          tmpArr.push(tmpData)
+        }
+      })
+      this.selectedCompany = tmpArr
+
+      let tmpData = this.tableData
       this.tableData = []
       setTimeout(() => {
-        this.getResult()
+        // this.getResult()
+        this.tableData = tmpData
         this.tableLoading = false
         // this.$refs.resultTable.$forceUpdate()
       }, 300)
     },
     handleRemoveMethod(methodId, param) {
       this.tableLoading = true
-      let index = this.selectedMethods.findIndex(item => item.id == methodId)
+      let index = this.tableData.findIndex(item => item.method.methodId == methodId)
       if (param == 'this') {
-        this.selectedMethods.splice(index, 1)
         this.tableData.splice(index, 1)
       } else if (param == 'top') {
-        this.selectedMethods = this.selectedMethods.slice(index)
         this.tableData = this.tableData.slice(index)
       } else if (param == 'bottom') {
-        this.selectedMethods = this.selectedMethods.slice(0, index + 1)
         this.tableData = this.tableData.slice(0, index + 1)
       } else if (param == 'others') {
-        this.selectedMethods = [this.selectedMethods[index]]
         this.tableData = [this.tableData[index]]
       }
+      let tmpMethods = []
+      this.tableData.forEach((item, index) => {
+        let tmpData = this.selectedMethods.find(method => method.id == item.method.methodId)
+        if(tmpData){
+          tmpMethods.push(tmpData)
+        }
+      })
+      this.selectedMethods = tmpMethods
       this.tableLoading = false
     },
     handleShowDetail(data, resultCount) {
@@ -516,16 +557,23 @@ export default {
     handleShowCompanyChart(level, methodId, methodName) {
       this.tableLoading = true
       this.tableLoadingText = '正在生成图表，请稍后'
+      // let unitCodes = this.selectedCompany.map(item => {
+      //   return {
+      //     unitCode: item.unitCode,
+      //     unitLevel: level
+      //   }
+      // })
       let unitCodes = this.selectedCompany.map(item => {
-        return {
-          unitCode: item.unitCode,
-          unitLevel: level
+        if(item.subCompany && item.subCompany.unitCode){
+          return item.unitCode + ':' + item.subCompany.unitCode
         }
-      })
+        return item.unitCode
+      }).join(',')
       this.$http.get(urlStore.statisticQuery, {
         params: {
           year: this.$refs.resultTable.getSelectedYear(),
-          unitCodes: JSON.stringify(unitCodes),
+          unitCodes: unitCodes,
+          level: level == 0?4:level,
           methodIds: methodId,
           topRow: 10,
           topType: 'unit'
@@ -590,16 +638,23 @@ export default {
     handleShowMethodChart(level) {
       this.tableLoading = true
       this.tableLoadingText = '正在生成图表，请稍后'
+      // let unitCodes = this.selectedCompany.map(item => {
+      //   return {
+      //     unitCode: item.unitCode,
+      //     unitLevel: level
+      //   }
+      // })
       let unitCodes = this.selectedCompany.map(item => {
-        return {
-          unitCode: item.unitCode,
-          unitLevel: level
+        if(item.subCompany && item.subCompany.unitCode){
+          return item.unitCode + ':' + item.subCompany.unitCode
         }
-      })
+        return item.unitCode
+      }).join(',')
       this.$http.get(urlStore.statisticQuery, {
         params: {
           year: this.$refs.resultTable.getSelectedYear(),
-          unitCodes: JSON.stringify(unitCodes),
+          unitCodes: unitCodes,
+          level: level == 0?4:level,
           methodIds: this.selectedMethods.map(item => item.id).join(','),
           topRow: 10,
           topType: 'method'
@@ -644,24 +699,32 @@ export default {
     handleShowMethodChartMulti(level){
       this.tableLoading = true
       this.tableLoadingText = '正在生成图表，请稍后'
+      // let unitCodes = this.selectedCompany.map(item => {
+      //   return {
+      //     unitCode: item.unitCode,
+      //     unitLevel: level
+      //   }
+      // })
+
       let unitCodes = this.selectedCompany.map(item => {
-        return {
-          unitCode: item.unitCode,
-          unitLevel: level
+        if(item.subCompany && item.subCompany.unitCode){
+          return item.unitCode + ':' + item.subCompany.unitCode
         }
-      })
+        return item.unitCode
+      }).join(',')
       let methodIds = this.selectedMethods.map(item => item.id).join(',')
       let year = this.$refs.resultTable.getSelectedYear()
       this.$http.get(urlStore.statisticQuery, {
         params: {
           year,
-          unitCodes: JSON.stringify(unitCodes),
+          // unitCodes: JSON.stringify(unitCodes),
+          level: level == 0?4:level,
+          unitCodes: unitCodes,
           methodIds,
           topRow: 10,
           topType: 'unit'
         }
       }).then(res => {
-        console.log(res)
         if(res.ok){
           this.showMultiMethodChart = true
           this.tableLoading = false
@@ -677,12 +740,13 @@ export default {
             item.units.forEach(unit => {
               tmpData.rows.push({
                 '单位': unit.unitName,
-                '问题数': unit.resultCount
+                '问题数': unit.resultCount,
+                methodId: item.methodId,
+                unitCode: unit.unitCode
               })
             })
             tmpArr.push(tmpData)
           })
-          console.log(tmpArr)
           this.multiChartData = tmpArr
         }
       }).catch(err => {
@@ -787,7 +851,6 @@ export default {
           this.detailTableData = res.body.tableData
           this.drillingDataInfo.viewCount = res.body.tableData.length
 
-          console.log(company)
           this.exportDetailInfo.unitCodes = JSON.stringify([{
             unitCode: company.unitCode,
             unitLevel: this.exportDetailInfo.level
@@ -838,7 +901,45 @@ export default {
         this.detailDataLoading = false
       })
     },
-    handleClickMultiChart(){},
+    handleClickMultiChart(data){
+      this.drillingDataInfo.company = null
+      this.detailTableHeader = null
+      this.detailTableData = null
+
+      this.drillingDataInfo.method = {
+        methodId: data.methodId,
+        methodName: data.methodName
+      }
+      this.drillingDataInfo.company = {
+        companyName: data.unitName
+      }
+      this.drillingDataInfo.resultCount = data.resultCount
+      this.detailDataLoading = true
+      this.dialogVisibleDetail = true
+      this.$http.post(urlStore.viewResultData, {
+        unitCodes: data.unitCodes,
+        methodId: data.methodId,
+        year: this.$refs.resultTable.getSelectedYear()
+      }, {
+        emulateJSON: true
+      }).then(res => {
+        if (res.ok) {
+          this.detailTableHeader = res.body.tableHeader
+          this.detailTableData = res.body.tableData
+          this.drillingDataInfo.viewCount = res.body.tableData.length
+
+          this.exportDetailInfo.methodId = this.drillingDataInfo.method.methodId
+        } else {
+          this.$message({
+            message: '未查询到数据',
+            type: 'info'
+          })
+        }
+        this.detailDataLoading = false
+      }).catch(err => {
+        this.detailDataLoading = false
+      })
+    },
     handleCloseDrillingData() {
       this.drillingDataInfo = {
         method: null,
@@ -979,7 +1080,6 @@ export default {
         unitCode: unitCode,
         unitLevel: unitLevel
       }])
-      console.log(`${urlStore.export}?methodIds=${methodIds}&year=${year}&unitCodes=${encodeURIComponent(unitCodes)}`)
       window.open(`${urlStore.export}?methodIds=${methodIds}&year=${year}&unitCodes=${encodeURIComponent(unitCodes)}`)
     },
     handleExportDataByPcode(drillLevel) {
@@ -1010,7 +1110,6 @@ export default {
       window.open(`${urlStore.export}?methodIds=${param.methodIds}&year=${param.year}&unitCodes=${encodeURIComponent(param.unitCodes)}`)
     },
     exportDataFromDetail() {
-      console.log(this.exportDetailInfo, this.drillingDataInfo)
       let companyInfo
       if (this.showMethodChart) {
         companyInfo = JSON.stringify(this.selectedCompany.map(item => {

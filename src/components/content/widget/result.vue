@@ -136,6 +136,7 @@ export default {
 </script>
 <style lang="scss">
 .result-container{
+  margin-top: 10px;
   margin-bottom: 50px;
 }
 .box-card {

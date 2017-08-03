@@ -8,12 +8,12 @@
 <script>
 import vMenu from './menu.vue'
 import vMain from './main.vue'
-import vLogo from './logo.vue'
+// import vLogo from './logo.vue'
 export default {
   components: {
     vMenu,
     vMain,
-    vLogo
+    // vLogo
   },
   data: function() {
     return {

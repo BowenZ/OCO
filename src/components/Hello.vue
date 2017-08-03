@@ -36,7 +36,7 @@ export default {
     height: 100%;
     box-sizing: border-box;
     overflow: hidden;
-    background-image: linear-gradient(180deg, rgba(46, 46, 46, 0) 60%, #2e2e2e 90%), url(../assets/img/bg.jpg);
+    // background-image: linear-gradient(180deg, rgba(46, 46, 46, 0) 60%, #2e2e2e 90%), url(../assets/img/bg.jpg);
     min-height: 380px;
     padding-top: 235px;
     background-position: center;

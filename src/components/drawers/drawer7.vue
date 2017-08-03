@@ -11,9 +11,9 @@
               <el-button type="text">统计分析</el-button>
             <!-- </router-link> -->
           </li>
-          <li>
+          <!-- <li>
             <el-button type="text">数据仓库</el-button>
-          </li>
+          </li> -->
         </ul>
       </div>
     </section>

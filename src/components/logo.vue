@@ -9,7 +9,7 @@
 .top-logo {
   width: 100%;
   height: 60px;
-  background-image: url(../assets/img/logobg.jpg);
+  // background-image: url(../assets/img/logobg.jpg);
   background-size: cover;
   background-position-x: 100%;
   background-position-y: center;
