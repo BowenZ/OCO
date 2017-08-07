@@ -12,7 +12,7 @@
       <el-form :model="formModel" ref="form" label-position="left" label-width="80px" v-if="params && params.length && formModel">
         <el-row :gutter="50">
           <el-col :xs="24" :md="12" v-for="(item, index) in params" :key="index">
-            <div class="input-box">
+            <div class="input-box" @keydown.enter="testEnter($event)">
               <span class="required-param" v-if="!(item.isNull-0)"><i>*</i></span>
               <el-form-item v-if="item.style=='pop'" :prop="item.name" :label="item.name" :rules="[{ required: !(item.isNull-0), message: '请输入参数信息', trigger: 'blur' }]" :data-id="item.id" :data-rid="item.releventMethodsId && item.releventMethodsId.join(',')">
                 <el-input v-model="formModel[item.name]" :disabled="disableInput">
@@ -103,6 +103,10 @@ export default {
     }
   },
   methods: {
+    testEnter: function(event){
+      event.preventDefault()
+      return false
+    },
     execute: function() {
       let formData = []
       if (this.$refs.form) {

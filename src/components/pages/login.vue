@@ -112,7 +112,7 @@ export default {
   background: radial-gradient(ellipse at center, #7db9e8 1%, #6380df 66%);
   .login-wrapper {
     width: 100%;
-    height: 360px;
+    height: 450px;
     position: absolute;
     top: 0;
     bottom: 0;
@@ -121,10 +121,11 @@ export default {
     margin: auto;
     .login-logo {
       img {
-        margin: auto;
+        margin: 0 auto 20px;
         display: block;
         width: 100%;
-        max-width: 300px;
+        max-width: 500px;
+        transform: translateX(-30px);
       }
     }
     .form {

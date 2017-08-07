@@ -183,11 +183,36 @@ export default {
 
       tableLoading: false,
 
-      scrollBarWidth: 0
+      scrollBarWidth: 0,
+
+      summary: []
+    }
+  },
+  computed: {
+    currentDrawerIndex: function() {
+      return this.$store.state.currentDrawerIndex
+    },
+    drawerIsOpened: function(){
+      return this.$store.state.drawerIsOpened
     }
   },
   watch: {
     tableData: function(newVal) {
+      if(!newVal || !newVal[0]){
+        return
+      }
+      let summary = new Array(newVal[0].companies.length + 2)
+      summary[0] = ''
+      summary[summary.length - 1] = ''
+      newVal[0].companies.forEach((item, index) => {
+        summary[index + 1] = newVal.reduce((prev, curr) => {
+          if(prev.companies){
+            return prev.companies[index].resultCount + curr.companies[index].resultCount
+          }
+          return prev + curr.companies[index].resultCount
+        })
+      })
+      this.summary = summary
       setTimeout(() => {
         this.addEventListener()
         this.resizeFixedTableCol()
@@ -213,6 +238,11 @@ export default {
       }).then(err => {
         this.searchCompanyLoading = false
       })
+    },
+    drawerIsOpened: function(newVal){
+      setTimeout(() => {
+        this.resizeFixedTableCol()
+      }, 1000)
     }
   },
   mounted() {
@@ -260,6 +290,9 @@ export default {
       return scrollbarWidth;
     },
     resizeFixedTableCol() {
+      if(this.currentDrawerIndex != 6){
+        return
+      }
       let $el = $(this.$el)
       let $tableBody = $el.find('.el-table__body-wrapper')
       this.$refs.resultTable && this.$refs.resultTable.doLayout()
@@ -300,11 +333,12 @@ export default {
     },
     // ++++++++++++++++++++++
     getSummaries(param) {
+      return this.summary
       const {
         columns,
         data
       } = param;
-      const sums = [];
+      const sums = new Array(columns.length)
 
       columns.forEach((column, index) => {
         if (index === 0) {
@@ -315,18 +349,14 @@ export default {
           sums[index] = ''
           return
         }
-        const values = data.map(item => {
-          return Number(item.companies[index - 1].resultCount)
-        })
-        if (!values.every(value => isNaN(value))) {
-          sums[index] = values.reduce((prev, curr) => {
-            return prev + curr
-          })
-        } else {
-          sums[index] = 'N/A'
-        }
-      })
 
+        sums[index] = data.reduce((prev, curr) => {
+          if(prev.companies){
+            return prev.companies[index - 1].resultCount + curr.companies[index - 1].resultCount
+          }
+          return prev + curr.companies[index - 1].resultCount
+        })
+      })
       return sums;
     },
     getYearArr() {

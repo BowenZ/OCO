@@ -13,8 +13,11 @@
       <div class="content-container" v-show="currentIndex == 5">
         <v-content4></v-content4>
       </div>
-      <div class="content-container" v-show="currentIndex == 6">
+      <div class="content-container" v-show="currentIndex == 6 && currentDrawerPage == 0">
         <v-content5></v-content5>
+      </div>
+      <div class="content-container" v-show="currentIndex == 6 && currentDrawerPage == 1">
+        <v-user-statistic></v-user-statistic>
       </div>
     </div>
     <transition name="view-fade">
@@ -28,13 +31,15 @@ import vContent2 from './content/content2'
 import vContent3 from './content/content3'
 import vContent4 from './content/content4'
 import vContent5 from './pages/statisticAnalysis/statisticAnalysis'
+import vUserStatistic from './pages/userStatistic/userStatistic'
 export default {
   components: {
     vContent1,
     vContent2,
     vContent3,
     vContent4,
-    vContent5
+    vContent5,
+    vUserStatistic
   },
   data: function() {
     return {
@@ -44,9 +49,13 @@ export default {
   computed: {
     currentIndex: function() {
       return this.$store.state.currentDrawerIndex
+    },
+    currentDrawerPage: function() {
+      return this.$store.getters.currentDrawerPage
     }
   }
 }
+
 </script>
 <style lang="scss">
 div {
@@ -62,14 +71,20 @@ div {
   opacity: 0;
 }
 
+.box-card {
+  margin-bottom: 15px;
+  .el-card__header {
+    padding: 8px 20px;
+  }
+}
+
 .main-container {
   position: absolute;
-  padding: 20px;
+  padding: 8px;
   top: 0;
   bottom: 0;
   left: 80px;
-  right: 0;
-  // z-index: 10;
+  right: 0; // z-index: 10;
   overflow: auto;
   background-color: #d2d5da;
   transition: all .4s;
@@ -85,8 +100,7 @@ div {
   .inner-container {
     width: 100%;
     height: 100%;
-    position: relative;
-    // max-width: 1000px;
+    position: relative; // max-width: 1000px;
     margin: 0 auto;
     .content-container {
       position: absolute;
@@ -126,4 +140,5 @@ div {
     }
   }
 }
+
 </style>

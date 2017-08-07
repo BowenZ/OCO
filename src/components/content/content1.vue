@@ -4,7 +4,7 @@
     <div class="content-block" element-loading-text="正在查询执行摘要，请稍后..." v-loading="locked">
       <v-params @doAudit="doAudit" ref="params" :showExecuteButton="true" :multiple="true" :disableInput="disableInput || auditing" :params="selectedParams"></v-params>
       <div class="execute-button clearfix" v-if="selectedMethods">
-        <el-button type="primary" size="large" v-if="!(auditing && currentJobId == selectedJobId)" @click="doAudint" :loading="disableInput || auditing">执行审计</el-button>
+        <el-button type="primary" size="large" v-if="!(auditing && currentJobId == selectedJobId)" @click="handleClickAuditBtn" :loading="disableInput || auditing">执行审计</el-button>
         <el-button type="danger" size="large" v-if="((auditing && continueAudit == 'multi') || multiAuditing) && currentJobId == selectedJobId" @click="stopAudit" :loading="stoping">停止执行</el-button>
       </div>
       <v-result :single="false" :executeStatus="multipleExecuteStatus" :finished="finished" :showProgress="showProgress" :progress="progress" :progressMsg="progressMsg"></v-result>
@@ -62,7 +62,7 @@ export default {
         // }
       })
     },
-    doAudint: function() {
+    handleClickAuditBtn: function() {
       this.$refs.params.execute()
     },
     updateExeStatus: function(jobId, isCheck, callback) {
@@ -232,6 +232,7 @@ export default {
           })
         })
       }, 100)
+      this.$store.commit('addLog', 1)
     },
     doContinueAudit: function() {
       let self = this

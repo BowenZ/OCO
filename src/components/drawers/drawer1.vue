@@ -203,7 +203,7 @@ export default {
         let self = this
         self.loadMethodTree(index, function() {
           setTimeout(function() {
-            let ref = self.$refs['tree' + index][0]
+            let ref = self.$refs['tree' + index]?self.$refs['tree' + index][0]:null
               // return
             self.selectedNodes = []
             if (ref) {

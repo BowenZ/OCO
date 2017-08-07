@@ -17,7 +17,7 @@
                 </span>
                 {{method.methodName}}
                 <span class="row-info" v-if="method.data && (isNaN(method.data.rowCount) || method.data.rowCount==0)"> | ({{method.data.rowCount}})</span><!-- 返回中文提示 -->
-                <span class="row-count" v-if="method.data && !isNaN(method.data.rowCount) && method.data.rowCount!=0" @click="shwoMoreData($event)"> | ({{method.data.rowCount}})</span><!-- 数据量 -->
+                <span class="row-count" v-if="method.data && !isNaN(method.data.rowCount) && method.data.rowCount!=0" @click="shwoMoreData($event, null, 'showDoubt')"> | ({{method.data.rowCount}})</span><!-- 数据量 -->
                 <span class="row-count" v-if="method.status == 'error'" @click="shwoMoreData($event)"> | (查看错误详情)</span>
                 <!-- <span class="accord" v-if="method.accord"  @click="shwoMoreData($event, 1)">| (定性依据)</span> -->
                 <span @click="showDocuementManagement(index)">| 资料管理</span>
@@ -32,7 +32,7 @@
             </div>
             <div class="item-data">
               <el-table v-if="method.data" :data="method.data.tableData" height="250" border style="width: 100%">
-                <el-table-column v-for="(key, index) in Object.keys(method.data.tableHeader)" :key="index" :prop="key" :label="method.data.tableHeader[key]" sortable>
+                <el-table-column v-for="(key, index) in Object.keys(method.data.tableHeader)" :key="index" :prop="key" :label="method.data.tableHeader[key]" sortable show-overflow-tooltip>
                 </el-table-column>
               </el-table>
               <div class="info-error" v-if="method.status == 'error'">
@@ -65,7 +65,7 @@ export default {
     }
   },
   methods: {
-    shwoMoreData: function(event, flag) {
+    shwoMoreData: function(event, flag, type) {
       let $target
       if (flag) {
         $target = $(event.target).parents('.method-item').find('.accord-data')
@@ -78,6 +78,9 @@ export default {
         setTimeout(function() {
           $target.css('max-height', targetHeight + 'px')
         }, 0)
+        if(type == 'showDoubt'){
+          this.$store.commit('addLog', 2)
+        }
       } else {
         $target.css('max-height', 0)
         setTimeout(function() {

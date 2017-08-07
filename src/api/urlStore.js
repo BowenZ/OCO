@@ -3,7 +3,7 @@ if(process.env.NODE_ENV === 'production'){
   devMode = false
 }
 devMode = false
-const ip = devMode ? 'http://localhost:3000/' : 'http://192.168.101.101:9898/IAAS/'
+const ip = devMode ? 'http://localhost:3000/' : 'http://192.168.101.105:9898/IAAS/'
 
 const urls = {
   // 多方法执行
@@ -65,7 +65,14 @@ const urls = {
   viewResultData: ip + 'auditResult/viewResultData.do',
   export: ip + 'auditResultStore/export.do',
   findLevel3ByLevel2: ip + 'auditResult/findLevel3ByLevel2.do',
-  exportStatisticData: ip + 'auditResultStore/exportStatisticData.do'
+  exportStatisticData: ip + 'auditResultStore/exportStatisticData.do',
+
+  findParamList: ip + 'basicDataStructure/findList.do',
+
+  loginStatistics: ip + 'sysUser/loginStatistics.do',
+  executeStatistics: ip + 'auditMethodModel/executeStatistics.do',
+  addLog: ip + 'sysLog/add.do',
+  findBehaviorList: ip + 'sysStatistics/findList.do'
 }
 
 

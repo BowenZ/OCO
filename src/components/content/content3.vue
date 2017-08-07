@@ -5,9 +5,9 @@
     <div class="content-block">
       <v-method-description v-if="selectedData" :description="selectedData.description"></v-method-description>
       <v-params ref="params" :showExecuteButton="false" :multiple="false" :disableInput="disableInput || auditing" :params="singleParams"></v-params>
-      <v-base-param></v-base-param>
+      <!-- <v-base-param :baseParamData="baseParamData" ref="baseParam"></v-base-param> -->
       <div class="execute-button clearfix" v-if="selectedData">
-        <el-button type="primary" size="large" @click="doAudint" :loading="disableInput || auditing">执行查询</el-button>
+        <el-button type="primary" size="large" @click="doAudit" :loading="disableInput || auditing">执行查询</el-button>
       </div>
       <!-- <v-result-item></v-result-item> -->
       <v-result :single="true" :data="1" :executeStatus="baseDataExecuteStatus" :showProgress="showProgress" :progress="progress" :progressMsg="progressMsg"></v-result>
@@ -21,7 +21,7 @@ import vParams from './widget/params'
 import vImport from './widget/import'
 import vResult from './widget/result'
 import vMethodDescription from './widget/methodDescription'
-import vBaseParam from './widget/baseParam'
+// import vBaseParam from './widget/baseParam'
 import {
   Message
 } from 'element-ui'
@@ -35,7 +35,7 @@ export default {
     vStep,
     vImport,
     vMethodDescription,
-    vBaseParam
+    // vBaseParam
   },
   data: function() {
     return {
@@ -49,9 +49,24 @@ export default {
       showProgress: false,
       progress: 0,
       progressMsg: null,
+      // baseParamData: null
     }
   },
   methods: {
+    // loadParamList(modelID){
+    //   this.$http.get(urlStore.findParamList, {
+    //     params: {
+    //       modelID: modelID
+    //     }
+    //   }).then(res => {
+    //     if(res.ok){
+    //       this.baseParamData = {
+    //         paramList: res.body.paramList,
+    //         symbolList: res.body.symbolList
+    //       }
+    //     }
+    //   })
+    // },
     updateExeStatus: function(jobId, methodId) {
       if (!jobId) {
         let currentBaseJobId = this.currentBaseJobId
@@ -97,7 +112,7 @@ export default {
         })
       })
     },
-    doAudint: function() {
+    doAudit: function() {
       if (!this.selectedData) {
         Message({
           message: '请选择基础数据',
@@ -152,6 +167,10 @@ export default {
       let auditParams = {}
       auditParams.methodId = this.selectedData.id
       auditParams.params = formData
+      // let baseParamData = this.$refs.baseParam.getParams()
+      // if(baseParamData.columnConditionVos.length){
+      //   auditParams.basicDataColumnParams = baseParamData
+      // }
       this.$http.post(urlStore.saveSingleMehtodJob, {
         methodInstanceJson: JSON.stringify(auditParams),
         userId: this.$store.getters.user.userId
@@ -186,6 +205,7 @@ export default {
           })
         }
       })
+      this.$store.commit('addLog', 1)
     },
     doContinueAudit: function() {
       let self = this
@@ -245,9 +265,12 @@ export default {
         this.doContinueAudit()
       }
     },
-    selectedData: function(newVal){
-      // newVal && this.updateExeStatus(null, newVal.id)
-    }
+    // selectedData: function(newVal){
+    //   console.log(newVal)
+    //   this.$refs.baseParam.clearParam()
+    //   this.loadParamList(newVal.id)
+    //   // newVal && this.updateExeStatus(null, newVal.id)
+    // }
   }
 }
 </script>

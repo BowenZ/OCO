@@ -4,6 +4,7 @@ import multipleMethod from './modules/multipleMethod'
 import singleMethod from './modules/singleMethod'
 import baseDataStore from './modules/baseDataStore'
 import modelMaintenance from './modules/modelMaintenance'
+import urlStore from '@/api/urlStore.js'
 
 Vue.use(Vuex)
 
@@ -13,14 +14,16 @@ export default new Vuex.Store({
     continueAudit: null,
     drawerIsOpened: true,
     currentDrawerIndex: sessionStorage.getItem('currentDrawerIndex') || 0,
-    user: null
+    user: null,
+    currentDrawerPage: sessionStorage.getItem('currentDrawerPage') || 0
   },
   getters: {
     auditing: state => state.auditing,
     drawerIsOpened: state => state.drawerIsOpened,
     continueAudit: state => state.continueAudit,
     currentDrawerIndex: state => state.currentDrawerIndex,
-    user: state => state.user
+    user: state => state.user,
+    currentDrawerPage: state => state.currentDrawerPage
   },
   mutations: {
     setContinueAudit(state, val) {
@@ -52,6 +55,19 @@ export default new Vuex.Store({
     logout(state, user) {
       sessionStorage && sessionStorage.removeItem('user')
       state.user = null
+    },
+    setCurrentDrawerPage(state, index){
+      state.currentDrawerPage = index
+      sessionStorage.setItem('currentDrawerPage', index)
+    },
+    addLog(state, type){
+      Vue.http.post(urlStore.addLog, {
+        uID: state.user.userId,
+        uName: state.user.username,
+        type: type
+      }, {
+        emulateJSON: true
+      })
     }
   },
   modules: {

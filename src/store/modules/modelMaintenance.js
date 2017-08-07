@@ -16,16 +16,24 @@ const getters = {
     if(!state.currentNode){
       return 'model'
     }
-    if (state.currentNode.data.methodCode !== undefined) {
-      if (state.currentNode.parent.data.title == '基础数据') {
-        return 'basic'
-      } else {
-        return 'model'
+    // if (state.currentNode.data.methodCode !== undefined) {
+    //   if (state.currentNode.parent.data.title == '基础数据') {
+    //     return 'basic'
+    //   } else {
+    //     return 'model'
+    //   }
+    // } else if (state.currentNode.data.title == '基础数据') {
+    //   return 'basic'
+    // }
+    let ret = 'model'
+    try{
+      if(state.currentNode.parent.parent.data.title == '基础数据'){
+        ret = 'basic'
       }
-    } else if (state.currentNode.data.title == '基础数据') {
-      return 'basic'
+    }catch(err){
+      console.log('error:' ,err)
     }
-    return 'model'
+    return ret
   },
   currentId: state => {
     if(state.currentNode){
@@ -49,7 +57,6 @@ const mutations = {
     state.currentLevel = val
   },
   setCurrentModel(state, val) {
-    console.log('+++++', val)
     state.currentModel = val
   },
   setCurrentState(state, val) {
@@ -71,7 +78,6 @@ const mutations = {
     state.currentNode.data.description = category.description
   },
   deleteTreeNode(state, id) {
-    console.log(state.currentNode)
     if (state.currentNode.level == 1) {
       state.currentNode.parent.data.every((item, index) => {
         if (item.id == id) {

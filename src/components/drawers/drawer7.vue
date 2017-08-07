@@ -8,12 +8,12 @@
         <ul class="menu">
           <li>
             <!-- <router-link tag="span" :to="{path: 'statisticAnalysis'}"> -->
-              <el-button type="text">统计分析</el-button>
+              <el-button type="text" @click="goToPage(0)">统计分析</el-button>
             <!-- </router-link> -->
           </li>
-          <!-- <li>
-            <el-button type="text">数据仓库</el-button>
-          </li> -->
+          <li>
+            <el-button type="text" @click="goToPage(1)">用户行为统计</el-button>
+          </li>
         </ul>
       </div>
     </section>
@@ -32,7 +32,9 @@ export default {
     }
   },
   methods: {
-
+    goToPage(index){
+      this.$store.commit('setCurrentDrawerPage', index)
+    }
   }
 }
 </script>

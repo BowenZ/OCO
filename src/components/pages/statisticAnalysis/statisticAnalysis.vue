@@ -175,12 +175,22 @@ export default {
       drillLevel2Loading: false,
 
       // 从明细数据导出文件
-      exportDetailInfo: {}
+      exportDetailInfo: {},
+
+      dataLoaded: false
+    }
+  },
+  computed: {
+    currentDrawerIndex: function() {
+      return this.$store.state.currentDrawerIndex
     }
   },
   mounted() {
-    this.loadMethodTree()
-    this.loadCompanyList()
+    if (this.currentDrawerIndex == 6) {
+      this.loadMethodTree()
+      this.loadCompanyList()
+      this.dataLoaded = true
+    }
   },
   methods: {
     // 加载方法树
@@ -297,6 +307,7 @@ export default {
       }
     },
     getResult() {
+      this.$store.commit('addLog', 5)
       this.tableLoading = true
       this.tableLoadingText = '正在请求数据...'
       let ret = []
@@ -315,17 +326,17 @@ export default {
       //   }
       // })
       let unitCodes
-      if(this.selectedCompany.every(item => item.subCompany && item.subCompany.unitCode) && this.$refs.resultTable.selectedLevel == 4){
+      if (this.selectedCompany.every(item => item.subCompany && item.subCompany.unitCode) && this.$refs.resultTable.selectedLevel == 4) {
         level = 0
         unitCodes = this.selectedCompany.map(item => {
           return item.unitCode + ':' + item.subCompany.unitCode
         }).join(',')
-      }else{
-        if(level == 0){
+      } else {
+        if (level == 0) {
           level = 4
         }
         unitCodes = this.selectedCompany.map(item => {
-          if(item.subCompany && item.subCompany.unitCode){
+          if (item.subCompany && item.subCompany.unitCode) {
             return item.unitCode + ':' + item.subCompany.unitCode
           }
           return item.unitCode
@@ -341,7 +352,7 @@ export default {
           methodIds: this.selectedMethods.map(item => item.id).join(',')
         }
       }).then(res => {
-        if (res.ok && res.body.success) {
+        if (res.ok) {
           let tmpCompany = []
           let tmpData = res.body.data.find(item => item.units.length > 0)
           if (!tmpData) {
@@ -390,13 +401,21 @@ export default {
             ret.push(obj)
           })
           this.tableData = ret
-
-          setTimeout(() => {
-            this.$refs.resultTable.resizeFixedTableCol()
-            this.tableLoading = false
-          }, 100)
+          this.$nextTick(() => {
+            setTimeout(() => {
+              this.$refs.resultTable.resizeFixedTableCol()
+              this.tableLoading = false
+            }, 100)
+          })
+        } else {
+          this.$message({
+            message: '查询数据失败',
+            type: 'warning'
+          })
+          this.tableLoading = false
         }
       }).catch(err => {
+        console.log(err)
         this.$message({
           message: '查询数据失败',
           type: 'warning'
@@ -432,7 +451,7 @@ export default {
       let tmpArr = []
       this.tableData[0].companies.forEach(item => {
         let tmpData = this.selectedCompany.find(com => com.unitCode == item.companyId)
-        if(tmpData){
+        if (tmpData) {
           tmpArr.push(tmpData)
         }
       })
@@ -462,7 +481,7 @@ export default {
       let tmpMethods = []
       this.tableData.forEach((item, index) => {
         let tmpData = this.selectedMethods.find(method => method.id == item.method.methodId)
-        if(tmpData){
+        if (tmpData) {
           tmpMethods.push(tmpData)
         }
       })
@@ -494,6 +513,7 @@ export default {
         this.drillingDataInfo.viewCount = 0
         this.tableLoading = false
       })
+      this.$store.commit('addLog', 2)
     },
     handleShowDrillDataDetail(data, resultCount) {
       this.drillingDataInfo.resultCount = resultCount
@@ -527,6 +547,7 @@ export default {
         this.drillingDataInfo.viewCount = 0
         this.detailDataLoading = false
       })
+      this.$store.commit('addLog', 2)
     },
     handleChangeCompany(parentCompanyId, childCompany) {
       this.selectedCompany.every((item, index) => {
@@ -564,7 +585,7 @@ export default {
       //   }
       // })
       let unitCodes = this.selectedCompany.map(item => {
-        if(item.subCompany && item.subCompany.unitCode){
+        if (item.subCompany && item.subCompany.unitCode) {
           return item.unitCode + ':' + item.subCompany.unitCode
         }
         return item.unitCode
@@ -573,19 +594,29 @@ export default {
         params: {
           year: this.$refs.resultTable.getSelectedYear(),
           unitCodes: unitCodes,
-          level: level == 0?4:level,
+          level: level == 0 ? 4 : level,
           methodIds: methodId,
           topRow: 10,
           topType: 'unit'
         }
       }).then(res => {
         if (res.ok) {
+          if(!res.body.data.length){
+            setTimeout(() => {
+              this.$message({
+                message: '无数据',
+                type: 'info'
+              })
+            }, 10)
+            this.tableLoading = false
+            return
+          }
           let tmpData = {
             columns: ['单位', '问题数'],
             rows: []
           }
 
-          res.body.data[0].units.forEach(item => {
+          res.body.data[0] && res.body.data[0].units.forEach(item => {
             tmpData.rows.push({
               '单位': item.unitName,
               '问题数': item.resultCount,
@@ -608,13 +639,8 @@ export default {
           this.showCompanyChart = true
         }
         this.tableLoading = false
-      }).catch(err => {
-        this.$message({
-          message: '请求出错',
-          type: 'warning'
-        })
-        this.tableLoading = false
       })
+      this.$store.commit('addLog', 4)
     },
     handleClearData() {
       this.$confirm('是否清空当前表格?', '提示', {
@@ -645,7 +671,7 @@ export default {
       //   }
       // })
       let unitCodes = this.selectedCompany.map(item => {
-        if(item.subCompany && item.subCompany.unitCode){
+        if (item.subCompany && item.subCompany.unitCode) {
           return item.unitCode + ':' + item.subCompany.unitCode
         }
         return item.unitCode
@@ -654,13 +680,24 @@ export default {
         params: {
           year: this.$refs.resultTable.getSelectedYear(),
           unitCodes: unitCodes,
-          level: level == 0?4:level,
+          level: level == 0 ? 4 : level,
           methodIds: this.selectedMethods.map(item => item.id).join(','),
           topRow: 10,
           topType: 'method'
         }
       }).then(res => {
         if (res.ok) {
+          if(!res.body.data.length){
+            setTimeout(() => {
+              this.$message({
+                message: '无数据',
+                type: 'info'
+              })
+            }, 10)
+            this.tableLoading = false
+            return 
+          }
+
           let tmpData = {
             columns: ['审计方法', '问题数'],
             rows: []
@@ -695,8 +732,9 @@ export default {
         })
         this.tableLoading = false
       })
+      this.$store.commit('addLog', 4)
     },
-    handleShowMethodChartMulti(level){
+    handleShowMethodChartMulti(level) {
       this.tableLoading = true
       this.tableLoadingText = '正在生成图表，请稍后'
       // let unitCodes = this.selectedCompany.map(item => {
@@ -707,7 +745,7 @@ export default {
       // })
 
       let unitCodes = this.selectedCompany.map(item => {
-        if(item.subCompany && item.subCompany.unitCode){
+        if (item.subCompany && item.subCompany.unitCode) {
           return item.unitCode + ':' + item.subCompany.unitCode
         }
         return item.unitCode
@@ -718,14 +756,14 @@ export default {
         params: {
           year,
           // unitCodes: JSON.stringify(unitCodes),
-          level: level == 0?4:level,
+          level: level == 0 ? 4 : level,
           unitCodes: unitCodes,
           methodIds,
           topRow: 10,
           topType: 'unit'
         }
       }).then(res => {
-        if(res.ok){
+        if (res.ok) {
           this.showMultiMethodChart = true
           this.tableLoading = false
           this.chartLevel = level
@@ -756,6 +794,7 @@ export default {
           type: 'warning'
         })
       })
+      this.$store.commit('addLog', 4)
     },
     handleChangeLevel(level) {
       if (level == 4) {
@@ -860,6 +899,7 @@ export default {
       }).catch(err => {
         this.detailDataLoading = false
       })
+      this.$store.commit('addLog', 2)
     },
     handleClickMethodChart(data, index) {
       this.drillingDataInfo.method = {
@@ -900,8 +940,9 @@ export default {
       }).catch(err => {
         this.detailDataLoading = false
       })
+      this.$store.commit('addLog', 2)
     },
-    handleClickMultiChart(data){
+    handleClickMultiChart(data) {
       this.drillingDataInfo.company = null
       this.detailTableHeader = null
       this.detailTableData = null
@@ -939,6 +980,7 @@ export default {
       }).catch(err => {
         this.detailDataLoading = false
       })
+      this.$store.commit('addLog', 2)
     },
     handleCloseDrillingData() {
       this.drillingDataInfo = {
@@ -950,8 +992,10 @@ export default {
     // 钻取数据
     handleDrillData(companyId, level) {
       if (level == 1) {
+        this.$store.commit('addLog', 5)
         this.handleDrillLevel1(companyId)
       } else if (level == 2) {
+        this.$store.commit('addLog', 5)
         this.handleDrillLevel2(companyId)
       } else if (level == 3) {
         this.$message({
@@ -1045,7 +1089,7 @@ export default {
         year: this.$refs.resultTable.getSelectedYear(),
         unitCodes: JSON.stringify(unitCodes)
       }
-
+      this.$store.commit('addLog', 3)
       window.open(`${urlStore.export}?methodIds=${param.methodIds}&year=${param.year}&unitCodes=${encodeURIComponent(param.unitCodes)}`)
     },
     handleExportDataByCell(methodId, companyId) {
@@ -1072,6 +1116,7 @@ export default {
       }
       param.unitCodes = JSON.stringify(param.unitCodes)
 
+      this.$store.commit('addLog', 3)
       window.open(`${urlStore.export}?methodIds=${param.methodIds}&year=${param.year}&unitCodes=${encodeURIComponent(param.unitCodes)}`)
     },
     handleExportDataByCompany(unitCode, unitLevel, year) {
@@ -1080,6 +1125,8 @@ export default {
         unitCode: unitCode,
         unitLevel: unitLevel
       }])
+
+      this.$store.commit('addLog', 3)
       window.open(`${urlStore.export}?methodIds=${methodIds}&year=${year}&unitCodes=${encodeURIComponent(unitCodes)}`)
     },
     handleExportDataByPcode(drillLevel) {
@@ -1107,6 +1154,8 @@ export default {
         year: this.$refs.resultTable.getSelectedYear(),
         unitCodes: JSON.stringify(unitCodes)
       }
+
+      this.$store.commit('addLog', 3)
       window.open(`${urlStore.export}?methodIds=${param.methodIds}&year=${param.year}&unitCodes=${encodeURIComponent(param.unitCodes)}`)
     },
     exportDataFromDetail() {
@@ -1121,6 +1170,8 @@ export default {
       } else {
         companyInfo = this.exportDetailInfo.unitCodes
       }
+
+      this.$store.commit('addLog', 3)
       window.open(`${urlStore.export}?methodIds=${this.exportDetailInfo.methodId}&year=${this.exportDetailInfo.year}&unitCodes=${encodeURIComponent(companyInfo)}`)
     },
     handleExportDoubtData() {
@@ -1151,6 +1202,8 @@ export default {
           }
         })
       }
+
+      this.$store.commit('addLog', 3)
       window.open(`${urlStore.export}?methodIds=${param.methodIds}&year=${param.year}&unitCodes=${encodeURIComponent(JSON.stringify(units))}`)
     },
     handleExportStatisticData() {
@@ -1181,6 +1234,8 @@ export default {
           }
         })
       }
+
+      this.$store.commit('addLog', 3)
       window.open(`${urlStore.exportStatisticData}?methodIds=${param.methodIds}&year=${param.year}&unitCodes=${encodeURIComponent(JSON.stringify(units))}`)
     },
     handleSearchAnotherCompany() {
@@ -1217,6 +1272,15 @@ export default {
         unitCodes: JSON.stringify(codes),
         year: this.$refs.resultTable.getSelectedYear()
       })
+    }
+  },
+  watch: {
+    currentDrawerIndex: function(newVal) {
+      if (newVal == 6 && !this.dataLoaded) {
+        this.loadMethodTree()
+        this.loadCompanyList()
+        this.dataLoaded = true
+      }
     }
   }
 }
@@ -1331,7 +1395,6 @@ export default {
       overflow: auto;
     }
   }
-
 }
 
 .el-dialog__header {

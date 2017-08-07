@@ -262,7 +262,6 @@ export default {
   },
   watch: {
     currentModel: function() {
-      console.log('=====change model====')
       if (this.currentLevel == 1) {
         if (this.currentState == 'create') {
           this.categoryForm = {

@@ -7,7 +7,7 @@
       <v-params ref="params" :showExecuteButton="false" :multiple="false" :disableInput="disableInput || auditing" :params="singleParams"></v-params>
       <v-import v-if="selectedMethod" @fileChange="handleFileChange" @importFile="handleImportFile" @uploadFinished="handleUploadFinished" :disableInput="disableInput || auditing"></v-import>
       <div class="execute-button clearfix" v-if="selectedMethod">
-        <el-button type="primary" size="large" @click="doAudint" :loading="disableInput || auditing">执行审计</el-button>
+        <el-button type="primary" size="large" @click="doAudit" :loading="disableInput || auditing">执行审计</el-button>
       </div>
       <!-- <v-result-item></v-result-item> -->
       <v-result :single="true" :data="1" :executeStatus="singleExecuteStatus" :showProgress="showProgress" :progress="progress" :progressMsg="progressMsg"></v-result>
@@ -94,7 +94,7 @@ export default {
         })
       })
     },
-    doAudint: function() {
+    doAudit: function() {
       let self = this
       if (!this.selectedMethod) {
         Message({
@@ -196,6 +196,7 @@ export default {
           })
         }
       })
+      this.$store.commit('addLog', 1)
     },
     doContinueAudit: function() {
       let self = this
