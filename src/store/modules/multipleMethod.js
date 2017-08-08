@@ -73,7 +73,10 @@ const mutations = {
           if (params[item.name] == undefined) {
             item.releventMethods = []
             item.releventMethodsId = []
-            params[item.name] = item
+            params[item.name] = JSON.parse(JSON.stringify(item))
+          }
+          if(item.isNull == 0){
+            params[item.name].isNull = 0
           }
           if (params[item.name].releventMethods === undefined) {
             params[item.name].releventMethods = []
@@ -84,6 +87,7 @@ const mutations = {
         })
       }
     })
+    console.log(params)
     let arr = []
     Object.keys(params).forEach(item => {
       arr.push(params[item])

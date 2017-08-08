@@ -137,7 +137,7 @@
               </el-row>
               <el-row :gutter="20">
                 <el-col :span="8" :offset="1">
-                  <el-form-item label="类型">&nbsp;&nbsp;
+                  <el-form-item label="类型">
                     <el-select v-model="methodForm.params[index].type" placeholder="请选择活动区域">
                       <el-option label="整数" value="int"></el-option>
                       <el-option label="小数" value="float"></el-option>

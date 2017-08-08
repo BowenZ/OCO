@@ -17,13 +17,13 @@
           <p>选择审计方法和单位后将自动开始执行审计</p>
           <p>已选择方法：</p>
           <ul>
-            <li v-for="method in this.selectedMethods">{{method.title}}</li>
+            <li v-for="(method, index) in this.selectedMethods" :key="index">{{method.title}}</li>
           </ul>
         </div>
         <div v-if="this.selectedCompany.length && !this.selectedMethods.length" style="height:100%;overflow:auto;">
           <p>已选择单位</p>
           <ul>
-            <li v-for="company in this.selectedCompany">
+            <li v-for="(company, index) in this.selectedCompany" :key="index">
               <span v-if="company.subCompany">{{company.subCompany.unitName}}</span>
               <span v-else>{{company.unitName}}</span>
             </li>
@@ -414,14 +414,15 @@ export default {
           })
           this.tableLoading = false
         }
-      }).catch(err => {
-        console.log(err)
-        this.$message({
-          message: '查询数据失败',
-          type: 'warning'
-        })
-        this.tableLoading = false
       })
+      //.catch(err => {
+      //   console.log(err)
+      //   this.$message({
+      //     message: '查询数据失败',
+      //     type: 'warning'
+      //   })
+      //   this.tableLoading = false
+      // })
     },
     handleRemoveCompany(companyId, companyIndex, param) {
       this.tableLoading = true
@@ -436,6 +437,16 @@ export default {
           item.companies = item.companies.slice(0, index + 1)
         } else if (param == 'others') {
           item.companies = [item.companies[index]]
+        }
+        if(item.companies.length > 1){
+          item.sum = item.companies.reduce((prev, curr) => {
+            if(prev.resultCount){
+              return prev.resultCount + curr.resultCount
+            }
+            return prev + curr.resultCount
+          })
+        }else if(item.companies.length == 1){
+          item.sum = item.companies[0].resultCount
         }
       })
       // if (param == 'this') {

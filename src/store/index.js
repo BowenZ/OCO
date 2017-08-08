@@ -15,7 +15,8 @@ export default new Vuex.Store({
     drawerIsOpened: true,
     currentDrawerIndex: sessionStorage.getItem('currentDrawerIndex') || 0,
     user: null,
-    currentDrawerPage: sessionStorage.getItem('currentDrawerPage') || 0
+    currentDrawerPage: sessionStorage.getItem('currentDrawerPage') || 0,
+    showBaseExport: false
   },
   getters: {
     auditing: state => state.auditing,
@@ -23,7 +24,8 @@ export default new Vuex.Store({
     continueAudit: state => state.continueAudit,
     currentDrawerIndex: state => state.currentDrawerIndex,
     user: state => state.user,
-    currentDrawerPage: state => state.currentDrawerPage
+    currentDrawerPage: state => state.currentDrawerPage,
+    showBaseExport: state => state.showBaseExport
   },
   mutations: {
     setContinueAudit(state, val) {
@@ -68,6 +70,9 @@ export default new Vuex.Store({
       }, {
         emulateJSON: true
       })
+    },
+    toggleBaseExport(state, val){
+      state.showBaseExport = val
     }
   },
   modules: {

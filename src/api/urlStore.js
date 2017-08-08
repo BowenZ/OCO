@@ -2,8 +2,8 @@ let devMode = true
 if(process.env.NODE_ENV === 'production'){
   devMode = false
 }
-devMode = false
-const ip = devMode ? 'http://localhost:3000/' : 'http://192.168.101.105:9898/IAAS/'
+// devMode = false
+const ip = '/IAAS/'
 
 const urls = {
   // 多方法执行
@@ -72,7 +72,9 @@ const urls = {
   loginStatistics: ip + 'sysUser/loginStatistics.do',
   executeStatistics: ip + 'auditMethodModel/executeStatistics.do',
   addLog: ip + 'sysLog/add.do',
-  findBehaviorList: ip + 'sysStatistics/findList.do'
+  findBehaviorList: ip + 'sysStatistics/findList.do',
+
+  exportBasicData: ip + 'auditJob/exportBasicData.do'
 }
 
 

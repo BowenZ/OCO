@@ -208,16 +208,17 @@ export default {
             self.selectedNodes = []
             if (ref) {
               self.selectedNodes = []
-              let currentCategory = null
+              let currentCategory = ref.children[0].sort
               let currentIssue = null
               ref.getCheckedNodes().forEach((item) => {
                 if(item.type == 'category'){
                   currentCategory = item.sort
                 }
-                if(item.type == 'issues'){
-                  currentIssue = item.sort
-                }
+                // if(item.type == 'issues'){
+                //   currentIssue = item.sort
+                // }
                 if (item.type == 'method') {
+                  currentIssue = ref.children[0].children.find(issue => issue.children.some(method => method.id == item.id)).sort
                   item.rName = `${currentCategory}_${currentIssue}_${item.title}`
                   self.selectedNodes.push(item)
                 }
@@ -234,16 +235,17 @@ export default {
       this.selectedNodes = []
       if (ref) {
         this.selectedNodes = []
-        let currentCategory = null
+        let currentCategory = ref.children[0].sort
         let currentIssue = null
         ref.getCheckedNodes().forEach((item) => {
           if(item.type == 'category'){
             currentCategory = item.sort
           }
-          if(item.type == 'issues'){
-            currentIssue = item.sort
-          }
+          // if(item.type == 'issues'){
+          //   currentIssue = item.sort
+          // }
           if (item.type == 'method') {
+            currentIssue = ref.children[0].children.find(issue => issue.children.some(method => method.id == item.id)).sort
             item.rName = `${currentCategory}_${currentIssue}_${item.title}`
             this.selectedNodes.push(item)
           }
@@ -403,7 +405,7 @@ export default {
             width="600"
             trigger="hover">
             <span slot="reference">{node.label}</span>
-            <p domPropsInnerHTML={data.description}></p>
+            <p domPropsInnerHTML={data.description} style="font-size:14px"></p>
           </el-popover>)
       } else {
         return (<span>{node.label}</span>)

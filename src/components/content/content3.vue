@@ -1,16 +1,19 @@
 <!-- 基础数据 -->
 <template>
   <div class="content content3">
-    <v-step :steps="steps" :currentStep="currentStep"></v-step>
-    <div class="content-block">
-      <v-method-description v-if="selectedData" :description="selectedData.description"></v-method-description>
+    <v-step v-show="!showBaseExport" :steps="steps" :currentStep="currentStep"></v-step>
+    <div class="content-block" :class="{'go-top': showBaseExport}">
+      <v-method-description v-if="selectedData && !showBaseExport" :description="selectedData.description"></v-method-description>
       <v-params ref="params" :showExecuteButton="false" :multiple="false" :disableInput="disableInput || auditing" :params="singleParams"></v-params>
       <!-- <v-base-param :baseParamData="baseParamData" ref="baseParam"></v-base-param> -->
-      <div class="execute-button clearfix" v-if="selectedData">
+      <div class="execute-button clearfix" v-if="selectedData && !showBaseExport">
         <el-button type="primary" size="large" @click="doAudit" :loading="disableInput || auditing">执行查询</el-button>
       </div>
+      <div class="execute-button clearfix" v-if="selectedData && showBaseExport">
+        <el-button type="primary" size="large" @click="exportData">导出数据</el-button>
+      </div>
       <!-- <v-result-item></v-result-item> -->
-      <v-result :single="true" :data="1" :executeStatus="baseDataExecuteStatus" :showProgress="showProgress" :progress="progress" :progressMsg="progressMsg"></v-result>
+      <v-result v-show="!showBaseExport" :single="true" :data="1" :executeStatus="baseDataExecuteStatus" :showProgress="showProgress" :progress="progress" :progressMsg="progressMsg"></v-result>
     </div>
   </div>
 </template>
@@ -243,6 +246,46 @@ export default {
           }
         }
       })
+    },
+    exportData: function(){
+      // 判断表单输入合法性
+      let valid = true
+      if (this.$refs.params.$refs.form) {
+        this.$refs.params.$refs.form.validate(val => {
+          valid = val
+        })
+      }
+      if (!valid) {
+        Message({
+          message: '请正确填写参数',
+          type: 'warning',
+          duration: 1500,
+          showClose: true
+        })
+        return
+      }
+
+      let formData = []
+
+      $(this.$el).find('form .el-form-item').each(function(index, el) {
+        let id = $(el).data('id')
+        let val
+        let $input = $(el).find('input')
+        if ($input[0].type == 'radio') {
+          val = $input[0].checked ? $input.eq(0).val() : $input.eq(1).val()
+        } else if ($input[0].type == 'text') {
+          val = $input.val()
+        }
+        formData.push({
+          id: id,
+          value: val
+        })
+      })
+      let auditParams = {}
+      auditParams.methodId = this.selectedData.id
+      auditParams.params = formData
+     console.log(`${urlStore.exportBasicData}?methodInstanceJson=${encodeURIComponent(JSON.stringify(auditParams))}&userId=${this.$store.getters.user.userId}`)
+     window.open(`${urlStore.exportBasicData}?methodInstanceJson=${encodeURIComponent(JSON.stringify(auditParams))}&userId=${this.$store.getters.user.userId}`)
     }
   },
   computed: {
@@ -257,6 +300,9 @@ export default {
     },
     continueAudit: function() {
       return this.$store.getters.continueAudit
+    },
+    showBaseExport: function(){
+      return this.$store.getters.showBaseExport
     }
   },
   watch: {
@@ -265,15 +311,17 @@ export default {
         this.doContinueAudit()
       }
     },
-    // selectedData: function(newVal){
-    //   console.log(newVal)
-    //   this.$refs.baseParam.clearParam()
-    //   this.loadParamList(newVal.id)
-    //   // newVal && this.updateExeStatus(null, newVal.id)
-    // }
+    selectedData: function(newVal){
+      this.$store.commit('toggleBaseExport', false)
+      // this.$refs.baseParam.clearParam()
+      // this.loadParamList(newVal.id)
+      // newVal && this.updateExeStatus(null, newVal.id)
+    }
   }
 }
 </script>
 <style lang="scss">
-
+  .content-block.go-top{
+    top: 0!important;
+  }
 </style>

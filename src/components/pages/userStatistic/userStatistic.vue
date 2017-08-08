@@ -2,32 +2,6 @@
   <div class="user-statistic">
     <el-card class="box-card">
       <div slot="header" class="">
-        <h2 class="card-title">审计方法执行统计</h2>
-      </div>
-      <el-table :data="methodData" border max-height="500">
-        <el-table-column prop="methodName" label="审计名称">
-        </el-table-column>
-        <el-table-column prop="executionTotalCount" label="执行次数" width="100">
-        </el-table-column>
-        <el-table-column prop="resultCount" label="疑点数" width="100">
-        </el-table-column>
-      </el-table>
-    </el-card>
-    <el-card class="box-card">
-      <div slot="header" class="">
-        <h2 class="card-title">登录统计</h2>
-      </div>
-      <el-table :data="loginData" border max-height="500">
-        <el-table-column prop="username" label="用户名">
-        </el-table-column>
-        <el-table-column prop="logins" label="登录次数">
-        </el-table-column>
-        <el-table-column prop="lastLogin" label="最后登录时间">
-        </el-table-column>
-      </el-table>
-    </el-card>
-    <el-card class="box-card">
-      <div slot="header" class="">
         <h2 class="card-title">行为统计</h2>
       </div>
       <el-table :data="behaviorData" border max-height="500">
@@ -40,6 +14,32 @@
         <el-table-column prop="viewReport" label="查看报表">
         </el-table-column>
         <el-table-column prop="dimontionAnalysis" label="维度分析">
+        </el-table-column>
+      </el-table>
+    </el-card>
+    <el-card class="box-card">
+      <div slot="header" class="">
+        <h2 class="card-title">审计方法执行统计</h2>
+      </div>
+      <el-table :data="methodData" border max-height="500">
+        <el-table-column prop="methodName" label="审计名称" sortable>
+        </el-table-column>
+        <el-table-column prop="executionTotalCount" label="执行次数" width="100" sortable>
+        </el-table-column>
+        <el-table-column prop="resultCount" label="疑点数" width="100" sortable>
+        </el-table-column>
+      </el-table>
+    </el-card>
+    <el-card class="box-card">
+      <div slot="header" class="">
+        <h2 class="card-title">登录统计</h2>
+      </div>
+      <el-table :data="loginData" border max-height="500">
+        <el-table-column prop="username" label="用户名" sortable>
+        </el-table-column>
+        <el-table-column prop="logins" label="登录次数" sortable>
+        </el-table-column>
+        <el-table-column prop="lastLogin" label="最后登录时间" sortable>
         </el-table-column>
       </el-table>
     </el-card>

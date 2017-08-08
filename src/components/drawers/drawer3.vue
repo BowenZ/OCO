@@ -31,6 +31,11 @@ export default {
   },
   mounted() {
     this.loadMethod()
+    this.$nextTick(() => {
+      $(this.$el).find('.search-title').on('click', (event) => {
+        this.$store.commit('toggleBaseExport', true)
+      })
+    })
   },
   methods: {
     loadMethod: function(){
@@ -79,7 +84,7 @@ export default {
             width="600"
             trigger="hover">
             <span slot="reference">{node.label}</span>
-            <p domPropsInnerHTML={data.description}></p>
+            <p domPropsInnerHTML={data.description} style="font-size:14px"></p>
           </el-popover>)
       } else {
         return (<span>{node.label}</span>)

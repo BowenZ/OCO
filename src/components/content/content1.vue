@@ -1,7 +1,8 @@
 <template>
   <div class="content content1">
     <v-step :steps="steps" :currentStep="currentStep"></v-step>
-    <div class="content-block" element-loading-text="正在查询执行摘要，请稍后..." v-loading="locked">
+    <div class="content-block" element-loading-text="正在查询执行摘要，请稍候.." v-loading="locked">
+      <v-method-description v-if="selectedMethods && selectedMethods.length" :descriptions="selectedMethods"></v-method-description>
       <v-params @doAudit="doAudit" ref="params" :showExecuteButton="true" :multiple="true" :disableInput="disableInput || auditing" :params="selectedParams"></v-params>
       <div class="execute-button clearfix" v-if="selectedMethods">
         <el-button type="primary" size="large" v-if="!(auditing && currentJobId == selectedJobId)" @click="handleClickAuditBtn" :loading="disableInput || auditing">执行审计</el-button>
@@ -20,6 +21,7 @@ import vStep from './widget/step'
 import vParams from './widget/params'
 import vResult from './widget/result'
 import urlStore from '../../api/urlStore.js'
+import vMethodDescription from './widget/methodDescription'
 
 function getLast(arr) {
   if (!arr || arr.length == 0) {
@@ -32,7 +34,8 @@ export default {
   components: {
     vStep,
     vParams,
-    vResult
+    vResult,
+    vMethodDescription
   },
   data: function() {
     return {
