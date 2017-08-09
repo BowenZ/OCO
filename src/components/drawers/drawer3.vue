@@ -84,7 +84,7 @@ export default {
             width="600"
             trigger="hover">
             <span slot="reference">{node.label}</span>
-            <p domPropsInnerHTML={data.description} style="font-size:14px"></p>
+            <p domPropsInnerHTML={data.description.replace(/\n/ig, '<br>')} style="font-size:14px"></p>
           </el-popover>)
       } else {
         return (<span>{node.label}</span>)

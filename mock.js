@@ -19875,6 +19875,374 @@ const viewResultData = {
   "topRows": 60
 }
 
+const executeStatistics = {
+  "methods": [{
+    "methodName": "测试预算年度",
+    "executionTotalCount": 2,
+    "resultCount": 0
+  }, {
+    "methodName": "01 部门预算执行总体情况和执行率",
+    "executionTotalCount": 1191,
+    "resultCount": 1562
+  }, {
+    "methodName": "02 支出预算编制情况分析",
+    "executionTotalCount": 1199,
+    "resultCount": 46704
+  }, {
+    "methodName": "03 违规调整预算",
+    "executionTotalCount": 1197,
+    "resultCount": 2639
+  }, {
+    "methodName": "04 预算单位人员情况分析",
+    "executionTotalCount": 1197,
+    "resultCount": 1481
+  }, {
+    "methodName": "05 预算单位资产情况分析",
+    "executionTotalCount": 1197,
+    "resultCount": 24364
+  }, {
+    "methodName": "06 预算单位基本情况异常分析",
+    "executionTotalCount": 1197,
+    "resultCount": 1502
+  }, {
+    "methodName": "07 年度部门间预算调整占比分析",
+    "executionTotalCount": 1195,
+    "resultCount": 1493
+  }, {
+    "methodName": "08 预算指标未执行_支付金额为0",
+    "executionTotalCount": 1196,
+    "resultCount": 1208
+  }, {
+    "methodName": "09 年度部门追加预算指标执行率分析",
+    "executionTotalCount": 1195,
+    "resultCount": 1469
+  }, {
+    "methodName": "01 基本支出明细查询",
+    "executionTotalCount": 1193,
+    "resultCount": 621295
+  }, {
+    "methodName": "02 基本支出人均执行情况分析",
+    "executionTotalCount": 1191,
+    "resultCount": 1491
+  }, {
+    "methodName": "03 人均工资福利支出预算编制情况分析",
+    "executionTotalCount": 1190,
+    "resultCount": 7131
+  }, {
+    "methodName": "04 财务账载工资福利支出人均支出情况",
+    "executionTotalCount": 1188,
+    "resultCount": 0
+  }, {
+    "methodName": "05 “吃空饷”问题",
+    "executionTotalCount": 1,
+    "resultCount": 0
+  }, {
+    "methodName": "06 虚列支出",
+    "executionTotalCount": 1,
+    "resultCount": 0
+  }, {
+    "methodName": "07 自定项目发放津补贴或者擅自提高标准发放津补贴",
+    "executionTotalCount": 1,
+    "resultCount": 0
+  }, {
+    "methodName": "08 人员经费支出挤占公用经费支出",
+    "executionTotalCount": 1187,
+    "resultCount": 6678
+  }, {
+    "methodName": "09 福利费支出超预算",
+    "executionTotalCount": 1187,
+    "resultCount": 338
+  }, {
+    "methodName": "10 事业单位绩效工资发放超过规定总额",
+    "executionTotalCount": 1,
+    "resultCount": 0
+  }, {
+    "methodName": "01 项目支出明细查询",
+    "executionTotalCount": 1180,
+    "resultCount": 449691
+  }, {
+    "methodName": "02 项目支出经济科目构成分析",
+    "executionTotalCount": 1180,
+    "resultCount": 18581
+  }, {
+    "methodName": "03 部门项目支出预算与执行差异分析",
+    "executionTotalCount": 1169,
+    "resultCount": 30328
+  }, {
+    "methodName": "04 基本支出挤占项目支出",
+    "executionTotalCount": 1180,
+    "resultCount": 15583
+  }, {
+    "methodName": "05 年初预算项目支出执行进度分析",
+    "executionTotalCount": 1180,
+    "resultCount": 1391
+  }, {
+    "methodName": "06 项目竣工后未及时办理财务竣工决算",
+    "executionTotalCount": 1,
+    "resultCount": 0
+  }, {
+    "methodName": "07 自行改变项目实际用途",
+    "executionTotalCount": 1,
+    "resultCount": 0
+  }, {
+    "methodName": "08 虚列支出",
+    "executionTotalCount": 1,
+    "resultCount": 0
+  }, {
+    "methodName": "01 资金支付凭证明细查询",
+    "executionTotalCount": 1180,
+    "resultCount": 1070986
+  }, {
+    "methodName": "02 直接拨付下属单位",
+    "executionTotalCount": 1180,
+    "resultCount": 41
+  }, {
+    "methodName": "03 同一主管部门的二级预算单位之间由零余额账户向对方实拨资金账户转移资金",
+    "executionTotalCount": 1180,
+    "resultCount": 0
+  }, {
+    "methodName": "04 零余额账户与基本账户之间转拨款的合规合法性审查",
+    "executionTotalCount": 1180,
+    "resultCount": 2525
+  }, {
+    "methodName": "05 零余额账户与基本账户之间转拨款的合规合法性审查_财务",
+    "executionTotalCount": 1180,
+    "resultCount": 3248
+  }, {
+    "methodName": "06 违反账户管理规定",
+    "executionTotalCount": 1181,
+    "resultCount": 5453
+  }, {
+    "methodName": "07 单位基本户存量资金情况",
+    "executionTotalCount": 1180,
+    "resultCount": 370
+  }, {
+    "methodName": "08 年终支出真实性审查_12月份支付",
+    "executionTotalCount": 1179,
+    "resultCount": 168887
+  }, {
+    "methodName": "09 项目集中在年底支出",
+    "executionTotalCount": 1179,
+    "resultCount": 12698
+  }, {
+    "methodName": "10 工会经费实际支出超预算",
+    "executionTotalCount": 1179,
+    "resultCount": 280
+  }, {
+    "methodName": "11 非工会资金拨入工会账户",
+    "executionTotalCount": 1179,
+    "resultCount": 153
+  }, {
+    "methodName": "12 违规向个人账户转拨资金",
+    "executionTotalCount": 1179,
+    "resultCount": 832
+  }, {
+    "methodName": "14 向社团拨付资金",
+    "executionTotalCount": 1179,
+    "resultCount": 950
+  }, {
+    "methodName": "15 向本部门实拨资金账户转款",
+    "executionTotalCount": 1179,
+    "resultCount": 0
+  }, {
+    "methodName": "16 未通过转移支付直接向下级财政专户拨付经费",
+    "executionTotalCount": 1179,
+    "resultCount": 1651
+  }, {
+    "methodName": "01 三公经费和会议费数据分析",
+    "executionTotalCount": 1178,
+    "resultCount": 1299
+  }, {
+    "methodName": "02 三公经费凭证分录明细",
+    "executionTotalCount": 1237,
+    "resultCount": 0
+  }, {
+    "methodName": "03 三公经费多年趋势分析",
+    "executionTotalCount": 1237,
+    "resultCount": 0
+  }, {
+    "methodName": "04 三公经费占全年支出比例",
+    "executionTotalCount": 1237,
+    "resultCount": 0
+  }, {
+    "methodName": "05 三公经费支出超预算",
+    "executionTotalCount": 1179,
+    "resultCount": 265
+  }, {
+    "methodName": "06 公务接待费支出不规范",
+    "executionTotalCount": 1237,
+    "resultCount": 0
+  }, {
+    "methodName": "07 车辆运行费列入差旅费",
+    "executionTotalCount": 1237,
+    "resultCount": 0
+  }, {
+    "methodName": "01 部门非税收入增长情况分析",
+    "executionTotalCount": 1180,
+    "resultCount": 1205
+  }, {
+    "methodName": "02 违反规定设立非税收入项目",
+    "executionTotalCount": 1,
+    "resultCount": 0
+  }, {
+    "methodName": "03 预算单位有收费项目没有实际收入",
+    "executionTotalCount": 1179,
+    "resultCount": 5010
+  }, {
+    "methodName": "04 预算单位有票据领用没有实际收入",
+    "executionTotalCount": 1179,
+    "resultCount": 4
+  }, {
+    "methodName": "01 化整为零规避政府采购",
+    "executionTotalCount": 1179,
+    "resultCount": 1740
+  }, {
+    "methodName": "02 政府采购程序不合规",
+    "executionTotalCount": 1,
+    "resultCount": 0
+  }, {
+    "methodName": "03 政府采购涉嫌围标、串标",
+    "executionTotalCount": 1,
+    "resultCount": 0
+  }, {
+    "methodName": "04 擅自变更中标结果、随意追加合同",
+    "executionTotalCount": 1,
+    "resultCount": 0
+  }, {
+    "methodName": "01 部门决算收支编报的完整性",
+    "executionTotalCount": 1,
+    "resultCount": 0
+  }, {
+    "methodName": "02 部门决算收支编报的真实性",
+    "executionTotalCount": 1,
+    "resultCount": 0
+  }, {
+    "methodName": "03 部门预决算公开情况",
+    "executionTotalCount": 1,
+    "resultCount": 0
+  }, {
+    "methodName": "01 部门反方向发生额凭证分录查询",
+    "executionTotalCount": 1181,
+    "resultCount": 0
+  }, {
+    "methodName": "02 部门凭证分录负值查询",
+    "executionTotalCount": 1181,
+    "resultCount": 0
+  }, {
+    "methodName": "03 大额购买支出未入固定资产",
+    "executionTotalCount": 1181,
+    "resultCount": 0
+  }, {
+    "methodName": "04 应收款项账龄分析",
+    "executionTotalCount": 1164,
+    "resultCount": 0
+  }, {
+    "methodName": "05 财政改革制度推进情况",
+    "executionTotalCount": 1,
+    "resultCount": 0
+  }, {
+    "methodName": "06 应付款项账龄分析 ",
+    "executionTotalCount": 1187,
+    "resultCount": 0
+  }, {
+    "methodName": "07 套取、转移财政资金",
+    "executionTotalCount": 8,
+    "resultCount": 0
+  }, {
+    "methodName": "01 部门违规收取协会、学会的“赞助费”或“管理费”",
+    "executionTotalCount": 1190,
+    "resultCount": 52448
+  }, {
+    "methodName": "02 部门在协会、学会私设“小金库”和报销各类费用",
+    "executionTotalCount": 1181,
+    "resultCount": 1781
+  }, {
+    "methodName": "03 部门工作人员违规兼职取酬",
+    "executionTotalCount": 1,
+    "resultCount": 0
+  }, {
+    "methodName": "04 协会、学会等中介机构利用部门的影响力违规收费",
+    "executionTotalCount": 1183,
+    "resultCount": 2060
+  }],
+  "status": "success"
+}
+
+const loginStatistics = {
+  "users": [{
+    "username": "test1",
+    "logins": 14,
+    "lastLogin": "2017-08-09 09:07:17"
+  }, {
+    "username": "test2",
+    "logins": 1,
+    "lastLogin": "2017-08-07 00:00:00"
+  }, {
+    "username": "test3",
+    "logins": 1,
+    "lastLogin": "2017-08-07 00:00:00"
+  }, {
+    "username": "test4",
+    "logins": 2,
+    "lastLogin": "2017-08-09 09:12:29"
+  }, {
+    "username": "test5",
+    "logins": 1,
+    "lastLogin": "2017-08-07 00:00:00"
+  }, {
+    "username": "test6",
+    "logins": 1,
+    "lastLogin": "2017-08-07 00:00:00"
+  }, {
+    "username": "test7",
+    "logins": 1,
+    "lastLogin": "2017-08-07 00:00:00"
+  }, {
+    "username": "test8",
+    "logins": 1,
+    "lastLogin": "2017-08-07 00:00:00"
+  }, {
+    "username": "test9",
+    "logins": 1,
+    "lastLogin": "2017-08-07 00:00:00"
+  }, {
+    "username": "admin",
+    "logins": 6,
+    "lastLogin": "2017-08-09 09:00:40"
+  }],
+  "status": "success"
+}
+
+const findBehaviorList = {
+  "status": true,
+  "rows": [{
+    "id": 1,
+    "typeID": 1,
+    "typeName": "执行审计",
+    "counts": 11
+  }, {
+    "id": 2,
+    "typeID": 2,
+    "typeName": "查看疑点",
+    "counts": 13
+  }, {
+    "id": 3,
+    "typeID": 3,
+    "typeName": "数据导出",
+    "counts": 1
+  }, {
+    "id": 4,
+    "typeID": 4,
+    "typeName": "查看报表",
+    "counts": 15
+  }, {
+    "id": 5,
+    "typeID": 5,
+    "typeName": "维度分析",
+    "counts": 67
+  }]
+}
+
 module.exports = {
   findList,
   getDetail,
@@ -19915,5 +20283,8 @@ module.exports = {
   findUnitTreeByPcode,
   statisticQuery,
   dataDrillByPcode,
-  viewResultData
+  viewResultData,
+  loginStatistics,
+  executeStatistics,
+  findBehaviorList
 }

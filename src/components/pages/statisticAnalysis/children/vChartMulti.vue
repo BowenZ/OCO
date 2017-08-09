@@ -1,19 +1,19 @@
 <template>
-  <div class="chart-multi">
-    <el-radio-group v-model="chartType" @change="handleChangeType">
-      <el-radio-button label="bar">条形图</el-radio-button>
-      <el-radio-button label="histogram">柱状图</el-radio-button>
-      <el-radio-button label="pie">饼图</el-radio-button>
-      <el-radio-button label="line">折线图</el-radio-button>
-    </el-radio-group>
-    <p>{{levelTable[level]}}</p>
-    <el-row :gutter="10" class="chart-container">
-      <el-col v-for="(data, index) in chartData" :key="index" :xs="24" :sm="24" :md="12" :lg="8">
-        <p>方法名：{{data.methodName}}</p>
-        <ve-chart :data="data" :data-index="index" :settings="chartSettings" :legend-visible="false" :events="chartEvents" tooltip-visible></ve-chart>
-      </el-col>
-    </el-row>
-  </div>
+<div class="chart-multi">
+  <el-radio-group v-model="chartType" @change="handleChangeType">
+    <el-radio-button label="bar">条形图</el-radio-button>
+    <el-radio-button label="histogram">柱状图</el-radio-button>
+    <el-radio-button label="pie">饼图</el-radio-button>
+    <el-radio-button label="line">折线图</el-radio-button>
+  </el-radio-group>
+  <p>{{levelTable[level]}}</p>
+  <el-row :gutter="10" class="chart-container">
+    <el-col v-for="(data, index) in chartData" :key="index" :xs="24" :sm="24" :md="12" :lg="8">
+      <p>方法名：{{data.methodName}}</p>
+      <ve-chart :ref="'chart' + index" :data="data" :data-index="index" :settings="chartSettings" :legend-visible="legendVisible && chartSettings.type != 'pie'" :events="chartEvents" tooltip-visible></ve-chart>
+    </el-col>
+  </el-row>
+</div>
 </template>
 <script>
 import VeChart from 'v-charts/lib/chart'
@@ -31,6 +31,10 @@ export default {
     },
     level: {
       type: Number
+    },
+    legendVisible: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
@@ -58,12 +62,42 @@ export default {
       }
     }
   },
+  created(){
+    this.changeSettings()
+  },
   methods: {
-    handleChangeType(val) {
-      this.chartSettings.type = val
+    changeSettings(){
+      if ((this.chartType == 'bar' || this.chartType == 'histogram') && this.level == 0 && this.chartData[0].type == 'company') {
+        this.chartSettings = {
+          type: this.chartType,
+          metrics: ['一级单位', '二级单位', '三级单位'],
+          area: true,
+          stack: {
+            '总问题数': ['一级单位', '二级单位', '三级单位']
+          }
+        }
+      } else {
+        this.chartSettings = {
+          type: this.chartType,
+          metrics: ['总问题数'],
+        }
+      }
+    },
+  	handleChangeType(val){
+      this.chartType = val
+      this.changeSettings()
+  	}
+  },
+  watch: {
+    level(val){
+      this.changeSettings()
+    },
+    chartData(){
+      this.chartData.forEach((item, index) => {
+        this.$refs['chart' + index][0].echarts.resize()
+      })
     }
   }
 }
-
 </script>
 <style lang="scss"></style>

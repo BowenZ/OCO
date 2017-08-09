@@ -2,8 +2,7 @@ let devMode = true
 if(process.env.NODE_ENV === 'production'){
   devMode = false
 }
-// devMode = false
-const ip = '/IAAS/'
+const ip = devMode?'http://192.168.101.100:9898/IAAS/':'/IAAS/'
 
 const urls = {
   // 多方法执行

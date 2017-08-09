@@ -22,11 +22,11 @@
         <h2 class="card-title">审计方法执行统计</h2>
       </div>
       <el-table :data="methodData" border max-height="500">
-        <el-table-column prop="methodName" label="审计名称" sortable>
+        <el-table-column prop="methodName" label="审计名称" min-width="200" sortable>
         </el-table-column>
-        <el-table-column prop="executionTotalCount" label="执行次数" width="100" sortable>
+        <el-table-column prop="executionTotalCount" label="执行次数" sortable>
         </el-table-column>
-        <el-table-column prop="resultCount" label="疑点数" width="100" sortable>
+        <el-table-column prop="resultCount" label="疑点数" sortable>
         </el-table-column>
       </el-table>
     </el-card>

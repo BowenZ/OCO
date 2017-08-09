@@ -12,7 +12,8 @@ const state = {
   auditParams: [],
   selectedJobId: null,
   currentJobId: null,
-  locked: false
+  locked: false,
+  currentSelectedMethod: null
 }
 
 const getters = {
@@ -43,7 +44,8 @@ const getters = {
   auditParams: state => state.auditParams,
   selectedJobId: state => state.selectedJobId,
   currentJobId: state => state.currentJobId,
-  locked: state => state.locked
+  locked: state => state.locked,
+  currentSelectedMethod: state => state.currentSelectedMethod
 }
 
 const actions = {
@@ -87,7 +89,6 @@ const mutations = {
         })
       }
     })
-    console.log(params)
     let arr = []
     Object.keys(params).forEach(item => {
       arr.push(params[item])
@@ -123,6 +124,9 @@ const mutations = {
   },
   unlockOperation(state){
     state.locked = false
+  },
+  setCurrentSelectedMethod(state, val){
+    state.currentSelectedMethod = val
   }
 }
 

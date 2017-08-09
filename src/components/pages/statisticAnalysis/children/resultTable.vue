@@ -13,7 +13,8 @@
           </template>
         </el-table-column>
       </el-table-column>
-      <el-table-column prop="sum" fixed="right" label="" show-overflow-tooltip width="150">
+      </article>
+      <el-table-column prop="sum" fixed="right" label="汇总" show-overflow-tooltip width="150">
       </el-table-column>
     </el-table>
     <div class="covers" v-if="tableData && tableData.length && tableData[0].companies.length">

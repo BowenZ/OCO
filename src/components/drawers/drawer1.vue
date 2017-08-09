@@ -34,7 +34,7 @@
               </el-dropdown>
             </h5>
             <div class="tree-content" v-loading="!project.methodTree">
-              <el-tree v-if="project.methodTree && project.methodTree.length" :data="project.methodTree" :render-content="renderContent" :ref="'tree'+index" @check-change="checkChange(index)" show-checkbox node-key="id" :default-expand-all="false" :default-checked-keys="project.selectedId" :props="defaultProps">
+              <el-tree v-if="project.methodTree && project.methodTree.length" :data="project.methodTree" highlight-current :render-content="renderContent" :ref="'tree'+index" @check-change="checkChange(index)" show-checkbox node-key="id" :default-expand-all="false" :default-checked-keys="project.selectedId" :props="defaultProps" @current-change="handleCurrentChange">
               </el-tree>
               <p class="no-tree" v-else-if="project.methodTree && !project.methodTree.length">无内容</p>
             </div>
@@ -154,6 +154,13 @@ export default {
     }
   },
   methods: {
+    handleCurrentChange(data, node){
+      if(data.type == 'method'){
+        this.$store.commit('setCurrentSelectedMethod', data)
+      }else{
+        this.$store.commit('setCurrentSelectedMethod', null)
+      }
+    },
     loadMethodTree: function(index, cb) {
       if (this.projectList[index]) {
         this.$http.get(urlStore.getDetail, {
@@ -212,14 +219,15 @@ export default {
               let currentIssue = null
               ref.getCheckedNodes().forEach((item) => {
                 if(item.type == 'category'){
-                  currentCategory = item.sort
+                  currentCategory = item.sort || ''
                 }
-                // if(item.type == 'issues'){
-                //   currentIssue = item.sort
-                // }
+                if(item.type == 'issues'){
+                  currentIssue = item.sort
+                }
                 if (item.type == 'method') {
-                  currentIssue = ref.children[0].children.find(issue => issue.children.some(method => method.id == item.id)).sort
-                  item.rName = `${currentCategory}_${currentIssue}_${item.title}`
+                  let targetIssue = ref.children[0].children.find(issue => issue.children.some(method => method.id == item.id))
+                  currentIssue = (targetIssue && targetIssue.sort)?targetIssue.sort:''
+                  item.rName = `${currentCategory}${currentCategory?'_':''}${currentIssue}${currentIssue?'_':''}${item.title}`
                   self.selectedNodes.push(item)
                 }
               })
@@ -235,18 +243,19 @@ export default {
       this.selectedNodes = []
       if (ref) {
         this.selectedNodes = []
-        let currentCategory = ref.children[0].sort
+        let currentCategory = ref.children[0].sort || ''
         let currentIssue = null
         ref.getCheckedNodes().forEach((item) => {
           if(item.type == 'category'){
-            currentCategory = item.sort
+            currentCategory = item.sort || ''
           }
-          // if(item.type == 'issues'){
-          //   currentIssue = item.sort
-          // }
+          if(item.type == 'issues'){
+            currentIssue = item.sort
+          }
           if (item.type == 'method') {
-            currentIssue = ref.children[0].children.find(issue => issue.children.some(method => method.id == item.id)).sort
-            item.rName = `${currentCategory}_${currentIssue}_${item.title}`
+            let targetIssue = ref.children[0].children.find(issue => issue.children.some(method => method.id == item.id))
+            currentIssue = (targetIssue && targetIssue.sort)?targetIssue.sort:''
+            item.rName = `${currentCategory}${currentCategory?'_':''}${currentIssue}${currentIssue?'_':''}${item.title}`
             this.selectedNodes.push(item)
           }
         })
