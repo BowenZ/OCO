@@ -79,7 +79,13 @@
   </div>
 </template>
 <script>
-// import drawer1 from "./drawer1"
+import vDrawer1 from "./drawers/drawer1.vue"
+import vDrawer2 from "./drawers/drawer2.vue"
+import vDrawer3 from "./drawers/drawer3.vue"
+import vDrawer4 from "./drawers/drawer4.vue"
+import vDrawer5 from "./drawers/drawer5.vue"
+import vDrawer6 from "./drawers/drawer6.vue"
+import vDrawer7 from "./drawers/drawer7.vue"
 import $ from 'webpack-zepto'
 export default {
   computed: {
@@ -89,7 +95,6 @@ export default {
   },
   methods: {
     toggleDrawer: function(index, event) {
-      this.currentIndex = index
       // if (index != 3) {
         this.$store.commit('updateCurrentDrawerIndex', index)
       // }
@@ -107,13 +112,13 @@ export default {
     }
   },
   components: {
-    vDrawer1: require('./drawers/drawer1.vue'),
-    vDrawer2: require('./drawers/drawer2.vue'),
-    vDrawer3: require('./drawers/drawer3.vue'),
-    vDrawer4: require('./drawers/drawer4.vue'),
-    vDrawer5: require('./drawers/drawer5.vue'),
-    vDrawer6: require('./drawers/drawer6.vue'),
-    vDrawer7: require('./drawers/drawer7.vue')
+    vDrawer1,
+    vDrawer2,
+    vDrawer3,
+    vDrawer4,
+    vDrawer5,
+    vDrawer6,
+    vDrawer7,
   }
 }
 </script>

@@ -85,7 +85,7 @@ export default {
     },
     loadBehaviorData() {
       this.$http.get(urlStore.findBehaviorList).then(res => {
-        if (res.ok) {
+        if (res.ok && res.body.rows) {
           let tmpData = {}
           res.body.rows.forEach(item => {
             if (item.typeID == 1) {

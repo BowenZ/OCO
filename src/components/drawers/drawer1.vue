@@ -71,7 +71,11 @@ export default {
   },
   mounted() {
     // this.$store.dispatch('getMethodTree')
-    this.$http.get(urlStore.isCanExecute).then(res => {
+    this.$http.get(urlStore.isCanExecute, {
+      params: {
+        userId: this.$store.getters.user.userId || ''
+      }
+    }).then(res => {
       if(res.ok && res.body.status == 'success'){
         let data = res.body.data
         if(!data.isCanExecute){
