@@ -6,12 +6,12 @@
       </div>
       <div class="form" @keyup.enter="submitForm('loginForm')">
         <el-row>
-          <el-col :span="11" :xs="24">
+          <el-col :span="13" :xs="24">
             <div class="login-copy">
               <img src="../../assets/img/login_copy.png" alt="">
             </div>
           </el-col>
-          <el-col :span="13" :xs="24">
+          <el-col :span="11" :xs="24">
             <el-form :model="loginForm" label-width="0" :rules="lginRules" ref="loginForm" class="demo-ruleForm">
               <el-form-item label="" prop="username">
                 <el-input type="text" size="large" v-model="loginForm.username" placeholder="用户名" auto-complete="off"></el-input>
@@ -131,7 +131,7 @@ export default {
     .form {
       background-color: rgb(195, 219, 246);
       .el-row {
-        max-width: 700px;
+        max-width: 900px;
         margin: auto;
       }
       .login-copy {
