@@ -26,7 +26,7 @@
           </el-select>
           <el-button type="primary" size="small" @click="changeYear">确定</el-button>
         </el-popover>
-        <el-button type="text" v-popover:popover>审计年度</el-button>
+        <el-button type="text" v-popover:popover>{{selectedYear.join(',')}}</el-button>
       </div>
       <div class="level-selector">
         <el-select v-model="selectedLevel" placeholder="各单位汇总（全）" size="small" @change="handleChangeLevel">

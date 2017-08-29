@@ -18,7 +18,7 @@
       </div>
     </section>
     <ul class="el-dropdown-menu right-menu category-menu" x-placement="bottom-end">
-      <li class="el-dropdown-menu__item" @click="createAudit(2)" :class="{'is-disabled': !isAdmin || (currentData && currentData.title == '基础数据')}">新增审计事项</li>
+      <li class="el-dropdown-menu__item" @click="createAudit(2)" :class="{'is-disabled': !isAdmin}">新增审计事项</li>
       <li class="el-dropdown-menu__item" @click="editAudit(1)" :class="{'is-disabled': !isAdmin || (currentData && currentData.title == '基础数据')}">编辑审计类别</li>
       <li class="el-dropdown-menu__item" @click="deleteAudit(1)" :class="{'is-disabled': !isAdmin || (currentData && currentData.title == '基础数据')}">删除审计类别</li>
     </ul>
@@ -116,7 +116,7 @@ export default {
             })
             return false
           })
-          $(document).click(function(event) {
+          $(window).click(function(event) {
             self.$menus.hide()
           })
           this.$categoryMenu = $('.category-menu')
@@ -160,6 +160,7 @@ export default {
       this.$store.commit('setCurrentLevel', level)
       this.$store.commit('setCurrentState', 'create')
       this.$store.commit('setCurrentModel', null)
+      this.$menus.hide()
     },
     copyAudit: function(level) {
       if (this.currentData) {
@@ -182,6 +183,7 @@ export default {
             this.$store.commit('setCurrentModel', this.currentData)
           }, 10);
         })
+        this.$menus.hide()
       }
     },
     editAudit: function(level) {
@@ -190,6 +192,7 @@ export default {
         this.$store.commit('setCurrentLevel', level)
         this.$store.commit('setCurrentState', 'update')
         this.$store.commit('setCurrentModel', this.currentData)
+        this.$menus.hide()
       }
     },
     deleteAudit: function(level) {
@@ -241,6 +244,7 @@ export default {
             }
           })
         }).catch(() => {})
+        this.$menus.hide()
       }
     },
     renderContent: function(h, { node, data, store }){

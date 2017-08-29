@@ -27,7 +27,7 @@ const getters = {
     // }
     let ret = 'model'
     try{
-      if(state.currentNode.parent.parent.data.title == '基础数据'){
+      if((state.currentNode.level == 2 && state.currentNode.parent.data.title == '基础数据') || (state.currentNode.parent.parent.data.title == '基础数据')){
         ret = 'basic'
       }
     }catch(err){
